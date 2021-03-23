@@ -19,6 +19,8 @@ import android.widget.Toast;
 
 import com.example.xposedemo.Utis.SharedPref;
 
+import java.util.Locale;
+
 public class MainActivity extends AppCompatActivity {
 
     private String TAG = "MainActivity";
@@ -31,10 +33,13 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+            Log.d(TAG, "onCreate: " + getResources().getConfiguration().getLocales().get(0).getLanguage() ) ;
+        }
         tm = (TelephonyManager) this
                 .getSystemService(Context.TELEPHONY_SERVICE);
 
-        saveImsi();
+        //saveImsi();
         Log.d(TAG, "onCreate: run finish");
 
         //ALPermissionManager.RootCommand("777");
@@ -42,10 +47,10 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 Toast.makeText(MainActivity.this, toastMessage(), Toast.LENGTH_SHORT).show();
-                Log.d(TAG, "onClick: "+tm.getSimOperator() );
             }
         });
         //saveImsi();
+
 
     }
 

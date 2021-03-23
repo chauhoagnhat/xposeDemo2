@@ -25,21 +25,13 @@ public class HookMain implements IXposedHookLoadPackage {
      */
     @Override
     public void handleLoadPackage(XC_LoadPackage.LoadPackageParam loadPackageParam)  throws Throwable {
+
         Log.d(TAG, "handleLoadPackage: hook run");
-        //Thread.sleep(10000);
-//      if( loadPackageParam.packageName.equals("jp.naver.line.android") ){
-//           Log.d(TAG, "handleLoadPackage: line is run");
-        //  new Hook().HookTest(loadPackageParam);
-//            new RootCloak().handleLoadPackage(loadPackageParam);
-//            new XBuild(loadPackageParam);
+        if (loadPackageParam.packageName.equals( "jp.naver.line.android" )|loadPackageParam.packageName.equals( BuildConfig.APPLICATION_ID  ) ){
+            new Phone( loadPackageParam ) ;
+        }
 
-          new Phone( loadPackageParam ) ;
-
-     // }
-
-
-            if (loadPackageParam.packageName.equals( BuildConfig.APPLICATION_ID )) {
-
+/*        if (loadPackageParam.packageName.equals( BuildConfig.APPLICATION_ID )) {
             Class clazz = loadPackageParam.classLoader.loadClass("com.example.xposedemo.MainActivity");
             XposedHelpers.findAndHookMethod(clazz, "toastMessage", new XC_MethodHook() {
                 protected void beforeHookedMethod( MethodHookParam param ) throws Throwable {
@@ -50,9 +42,8 @@ public class HookMain implements IXposedHookLoadPackage {
                 protected void afterHookedMethod( MethodHookParam param ) throws Throwable {
                     param.setResult("按钮已被劫持");
                 }
-
             });
-        }
+        }*/
 
     }
 

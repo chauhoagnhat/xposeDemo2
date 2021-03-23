@@ -5,6 +5,8 @@ import android.util.Log;
 
 import com.example.xposedemo.Utis.SharedPref;
 
+import java.util.ArrayList;
+
 import de.robv.android.xposed.XC_MethodHook;
 import de.robv.android.xposed.XC_MethodReplacement;
 import de.robv.android.xposed.XposedBridge;
@@ -16,9 +18,11 @@ import de.robv.android.xposed.callbacks.XC_LoadPackage;
  */
 
 public class Phone {
-    private String TAG="Phone";
 
+    private String TAG="Phone";
+    private ArrayList<String> methodNamelist;
     public Phone(XC_LoadPackage.LoadPackageParam sharePkgParam) {
+        methodNamelist=new ArrayList<>();
 //          getType(sharePkgParam);
 //         Bluetooth(sharePkgParam);
 //        Wifi(sharePkgParam);
@@ -33,14 +37,12 @@ public class Phone {
                     protected void afterHookedMethod(MethodHookParam param) throws Throwable {
                         super.afterHookedMethod(param);
                         param.setResult(SharedPref.getintXValue("getType"));
-
                     }
 
                     ;
 
 
                 });
-
 
     }
 
@@ -157,6 +159,7 @@ public class Phone {
 
 
     }
+
     public void Telephony(XC_LoadPackage.LoadPackageParam loadPkgParam) {
 
         String TelePhone = "android.telephony.TelephonyManager";
@@ -240,26 +243,44 @@ public class Phone {
 //    mySP.setSharedPref("CountryCode","cn" );// 手机卡国家
 
 
-//        HookTelephony(TelePhone, loadPkgParam, "getSubscriberId",
-//           "460017932859596"  );
-//        HookTelephony(TelePhone, loadPkgParam, "getLine1Number",
-//              "13117511178" );
-//        HookTelephony(TelePhone, loadPkgParam, "getSimSerialNumber",
-//               "89860179328595969501"  );
+        HookTelephony(TelePhone, loadPkgParam, "getSubscriberId",
+           "460017932859596"  );
+        HookTelephony(TelePhone, loadPkgParam, "getLine1Number",
+              "13117511178" );
+        HookTelephony(TelePhone, loadPkgParam, "getSimSerialNumber",
+               "89860179328595969501"  );
         HookTelephony(TelePhone, loadPkgParam, "getNetworkOperator",
-               "25012" ); // 网络运营商类型
+               "45413" ); // 网络运营商类型
         HookTelephony(TelePhone, loadPkgParam, "getNetworkOperatorName",
                "Baykal Westcom" ); // 网络类型名
         HookTelephony(TelePhone, loadPkgParam, "getSimOperator",
-                "25012");
-//                //SharedPref.getXValue("CarrierCode")); // 运营商
-//        HookTelephony(TelePhone, loadPkgParam, "getSimOperatorName",
-//              "中国联通"  ); // 运营商名字
+                "45413");
+                //SharedPref.getXValue("CarrierCode")); // 运营商
+        HookTelephony(TelePhone, loadPkgParam, "getSimOperatorName",
+              "中国联通"  ); // 运营商名字
         HookTelephony(TelePhone, loadPkgParam, "getNetworkCountryIso",
               "ru"  ); // 国家iso代码
-      HookTelephony(TelePhone, loadPkgParam, "getSimCountryIso",
-              "ru"  ); // 手机卡国家
-//        Log.d(TAG, "Telephony: ok"+ SharedPref.getXValue("CarrierCode") );
+        HookTelephony(TelePhone, loadPkgParam, "getSimCountryIso",
+              "hk"  ); // 手机卡国家
+        HookTelephony(TelePhone, loadPkgParam, "getSimCountryIso",
+                "hk"  ); // 手机卡国家
+
+        HookTelephony( TelePhone, loadPkgParam, "getNetworkType",
+                ""  ); // 网络类型
+        HookTelephony( TelePhone, loadPkgParam, "getPhoneType",
+                ""  ); //
+        HookTelephony( TelePhone, loadPkgParam, "GetNeighboringCellInfo",
+                ""  ); // 获取邻近的基站信息，返回的是List<NeighboringCellInfo>基站列表信息
+
+        HookTelephony( TelePhone, loadPkgParam, "getCellLocation",
+                ""  ); // 获取当前基站信息
+        HookTelephony( TelePhone, loadPkgParam, "getAllCellInfo",
+                ""  ); // List<CellInfo>基站列表信息
+        HookTelephony( TelePhone, loadPkgParam, "getSimState",
+                ""  ); // 获取邻近的基站信息，返回的是List<NeighboringCellInfo>基站列表信息
+        HookTelephony( "java.util.Locale", loadPkgParam, "getLanguage",
+                ""  ); // 获取语言
+
 /*
 
         XposedHelpers.findAndHookMethod("android.telephony.TelephonyManager", loadPkgParam.classLoader, "getNetworkType", new XC_MethodHook() {
@@ -300,26 +321,31 @@ public class Phone {
                         param.setResult(SharedPref.getintXValue("SimState"));
                     }
                 });
-
-
 */
-
-
 
     }
 
     private void HookTelephony(String hookClass, XC_LoadPackage.LoadPackageParam loadPkgParam,
-                               String funcName, final String value) {
+                               final String funcName, final String value) {
         try {
-            XposedHelpers.findAndHookMethod(hookClass,
-                    loadPkgParam.classLoader, funcName, new XC_MethodHook() {
 
-                        @Override
+                    XposedHelpers.findAndHookMethod(hookClass,
+                    loadPkgParam.classLoader, funcName, new XC_MethodHook() {
+                                @Override
+                                protected void beforeHookedMethod(MethodHookParam param) throws Throwable {
+                                    super.beforeHookedMethod(param);
+                                    if(!methodNamelist.contains(funcName))
+                                        methodNamelist.add(funcName);
+                                    Log.d(TAG, "HookTelephony="+methodNamelist.toString());
+                                }
+
+                                @Override
                         protected void afterHookedMethod(MethodHookParam param)
                                 throws Throwable {
                             // TODO Auto-generated method stub
                             super.afterHookedMethod(param);
-                            param.setResult(value);
+                            Log.d(TAG, "afterHookedMethod:"+funcName+"-result="+param.getResult().toString() );
+                            //param.setResult(value);
                         }
 
                     });
@@ -327,6 +353,7 @@ public class Phone {
         } catch (Exception e) {
 
         }
+
     }
 
 }

@@ -3,7 +3,6 @@ package com.example.xposedemo.Hook;
 import android.content.Context;
 import android.content.res.AssetManager;
 
-
 import androidx.core.view.accessibility.AccessibilityNodeInfoCompat;
 
 import java.io.DataOutputStream;
@@ -194,6 +193,8 @@ public class Cpuinfo {
 		} catch (Exception e) {
 
 		}
+
+
 
 		try {
 			XposedBridge.hookMethod(XposedHelpers.findConstructorExact(
