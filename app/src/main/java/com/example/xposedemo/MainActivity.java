@@ -9,6 +9,7 @@ import android.content.Context;
 import android.content.pm.PackageManager;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.Environment;
 import android.provider.Telephony;
 import android.telecom.TelecomManager;
 import android.telephony.TelephonyManager;
@@ -17,9 +18,14 @@ import android.view.View;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.alibaba.fastjson.JSONObject;
+import com.alibaba.fastjson.TypeReference;
 import com.example.xposedemo.Utis.SharedPref;
+import com.example.xposedemo.Utis.Utils;
 
+import java.io.File;
 import java.util.Locale;
+import java.util.Map;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -27,21 +33,40 @@ public class MainActivity extends AppCompatActivity {
     TelephonyManager tm;
     TelecomManager tm2;
 
-    @RequiresApi(api = Build.VERSION_CODES.M)
+    private TextView viewById;
+    private String string;
+
+
     @Override
-    protected void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_main);
+        protected void onCreate(Bundle savedInstanceState) {
 
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
-            Log.d(TAG, "onCreate: " + getResources().getConfiguration().getLocales().get(0).getLanguage() ) ;
+            super.onCreate( savedInstanceState );
+            setContentView(R.layout.activity_main);
+            String path=Environment.getExternalStorageDirectory().toString();
+            Log.d(TAG, "onCreate: path="+path);
+            Log.d(TAG, "onCreate: read="+ Utils.readFileToString( path+"/1.txt" )   );
+//
+//        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+//            Log.d(TAG, "onCreate: " + getResources().getConfiguration().getLocales().get(0).getLanguage() ) ;
+//        }
+
+        String jsonStr= Utils.readFileToString(Environment.getExternalStorageDirectory ()+"/device.txt");
+        if (jsonStr!=""){
+            JSONObject jsonObjectPara;
+           // jsonObjectPara=JSONObject.parseObject( jsonStr );
+            Log.d(TAG, "onCreate: jsonStr1="+jsonStr );
+            Map<String,String> map=JSONObject.parseObject(jsonStr,
+                    new TypeReference<Map<String, String>>(){});
+            viewById=findViewById(R.id.textView);
+            string=Utils.join_map2str( map,"\r\n");
+            Log.d(TAG, "onCreate: mapStr="+string );
+            viewById.setText(string);
         }
-        tm = (TelephonyManager) this
-                .getSystemService(Context.TELEPHONY_SERVICE);
 
+//        tm = (TelephonyManager) this
+//                .getSystemService( Context.TELEPHONY_SERVICE );
         //saveImsi();
         Log.d(TAG, "onCreate: run finish");
-
         //ALPermissionManager.RootCommand("777");
         findViewById(R.id.button).setOnClickListener(new View.OnClickListener() {
             @Override
@@ -50,7 +75,6 @@ public class MainActivity extends AppCompatActivity {
             }
         });
         //saveImsi();
-
 
     }
 
@@ -81,8 +105,10 @@ public class MainActivity extends AppCompatActivity {
         mySP.setSharedPref("simopename","Baykal Westcom" );// 运营商名字
         mySP.setSharedPref("gjISO", "ru");// 国家iso代码
         mySP.setSharedPref("CountryCode","ru" );// 手机卡国家
-
         System.out.println( "run-ok" );
+
+
+
     }
 
 

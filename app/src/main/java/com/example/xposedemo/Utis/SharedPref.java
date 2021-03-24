@@ -4,6 +4,7 @@ import android.content.Context;
 import android.content.SharedPreferences;
 import android.util.Log;
 
+
 import de.robv.android.xposed.XSharedPreferences;
 
 public class SharedPref {
@@ -14,7 +15,6 @@ public class SharedPref {
     private static XSharedPreferences myXsharedPref;
 
     public SharedPref(Context appContext) {
-
         shareContext = appContext;
         Log.d( TAG, "SharedPref: run");
         mySharedPref = shareContext.getSharedPreferences( Common.PREFS_FILE, Context.MODE_PRIVATE );
@@ -85,4 +85,7 @@ public class SharedPref {
         }
         return value;
     }
+
+
+
 }

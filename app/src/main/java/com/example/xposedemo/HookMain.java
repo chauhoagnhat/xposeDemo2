@@ -2,13 +2,11 @@ package com.example.xposedemo;
 
 import android.telephony.PhoneNumberFormattingTextWatcher;
 import android.util.Log;
-
 import com.example.xposedemo.Hook.Hook;
 import com.example.xposedemo.Hook.Phone;
 import com.example.xposedemo.Hook.XBuild;
 import com.example.xposedemo.Utis.RootCloak;
 import com.example.xposedemo.Utis.SharedPref;
-
 import java.security.PublicKey;
 
 import de.robv.android.xposed.IXposedHookLoadPackage;

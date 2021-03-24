@@ -1,11 +1,17 @@
 package com.example.xposedemo.Hook;
 
 import android.os.Build;
+import android.os.Environment;
 import android.util.Log;
 
+import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.JSONObject;
 import com.example.xposedemo.Utis.SharedPref;
+import com.example.xposedemo.Utis.Utils;
 
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
 
 import de.robv.android.xposed.XC_MethodHook;
 import de.robv.android.xposed.XC_MethodReplacement;
@@ -23,9 +29,6 @@ public class Phone {
     private ArrayList<String> methodNamelist;
     public Phone(XC_LoadPackage.LoadPackageParam sharePkgParam) {
         methodNamelist=new ArrayList<>();
-//          getType(sharePkgParam);
-//         Bluetooth(sharePkgParam);
-//        Wifi(sharePkgParam);
         Telephony(sharePkgParam);
     }
 
@@ -199,129 +202,92 @@ public class Phone {
 //        mySP.setSharedPref("gjISO", "ru");// 国家iso代码
 //        mySP.setSharedPref("CountryCode","ru" );// 手机卡国家
 
+
  /*
 		HookTelephony(TelePhone, loadPkgParam, "getDeviceSoftwareVersion",
 				SharedPref.getXValue("deviceversion"));// 返系统版本
-      HookTelephony(TelePhone, loadPkgParam, "getSubscriberId",
-                SharedPref.getXValue("IMSI"));
-        HookTelephony(TelePhone, loadPkgParam, "getLine1Number",
-                SharedPref.getXValue("PhoneNumber"));
-        HookTelephony(TelePhone, loadPkgParam, "getSimSerialNumber",
-                SharedPref.getXValue("SimSerial"));
-        HookTelephony(TelePhone, loadPkgParam, "getNetworkOperator",
-                SharedPref.getXValue("networktor")); // 网络运营商类型
-        HookTelephony(TelePhone, loadPkgParam, "getNetworkOperatorName",
-                SharedPref.getXValue("Carrier")); // 网络类型名
-        HookTelephony(TelePhone, loadPkgParam, "getSimOperator",
-                "25012");
-                //SharedPref.getXValue("CarrierCode")); // 运营商
-        HookTelephony(TelePhone, loadPkgParam, "getSimOperatorName",
-                SharedPref.getXValue("simopename")); // 运营商名字
-        HookTelephony(TelePhone, loadPkgParam, "getNetworkCountryIso",
-                SharedPref.getXValue("gjISO")); // 国家iso代码
-        HookTelephony(TelePhone, loadPkgParam, "getSimCountryIso",
-                SharedPref.getXValue("CountryCode")); // 手机卡国家*/
-
-        //        mySP.setSharedPref("IMSI","250127932859596");
-//        mySP.setSharedPref("PhoneNumber","13117511178"); // 手机号码
-//        mySP.setSharedPref("SimSerial", "89860179328595969501"); // 手机卡序列号
-//        mySP.setSharedPref("networktor","25012" ); // 网络运营商类型
-//        mySP.setSharedPref("Carrier","China Mobile/Peoples" );// 网络类型名
-//        mySP.setSharedPref("CarrierCode","25012" ); // 运营商
-//        mySP.setSharedPref("simopename","Baykal Westcom" );// 运营商名字
-//        mySP.setSharedPref("gjISO", "ru");// 国家iso代码
-//        mySP.setSharedPref("CountryCode","ru" );// 手机卡国家
-
-        //    mySP.setSharedPref("IMSI","460017932859596");
-//    mySP.setSharedPref("PhoneNumber","13117511178"); // 手机号码
-//    mySP.setSharedPref("SimSerial", "89860179328595969501"); // 手机卡序列号
-//    mySP.setSharedPref("networktor","46001" ); // 网络运营商类型
-//    mySP.setSharedPref("Carrier","中国联通" );// 网络类型名
-//    mySP.setSharedPref("CarrierCode","46001" ); // 运营商
-//    mySP.setSharedPref("simopename","中国联通" );// 运营商名字
-//    mySP.setSharedPref("gjISO", "cn");// 国家iso代码
-//    mySP.setSharedPref("CountryCode","cn" );// 手机卡国家
+      */
 
 
-        HookTelephony(TelePhone, loadPkgParam, "getSubscriberId",
-           "460017932859596"  );
-        HookTelephony(TelePhone, loadPkgParam, "getLine1Number",
-              "13117511178" );
-        HookTelephony(TelePhone, loadPkgParam, "getSimSerialNumber",
-               "89860179328595969501"  );
-        HookTelephony(TelePhone, loadPkgParam, "getNetworkOperator",
-               "45413" ); // 网络运营商类型
-        HookTelephony(TelePhone, loadPkgParam, "getNetworkOperatorName",
-               "Baykal Westcom" ); // 网络类型名
-        HookTelephony(TelePhone, loadPkgParam, "getSimOperator",
-                "45413");
-                //SharedPref.getXValue("CarrierCode")); // 运营商
-        HookTelephony(TelePhone, loadPkgParam, "getSimOperatorName",
-              "中国联通"  ); // 运营商名字
-        HookTelephony(TelePhone, loadPkgParam, "getNetworkCountryIso",
-              "ru"  ); // 国家iso代码
-        HookTelephony(TelePhone, loadPkgParam, "getSimCountryIso",
-              "hk"  ); // 手机卡国家
-        HookTelephony(TelePhone, loadPkgParam, "getSimCountryIso",
-                "hk"  ); // 手机卡国家
+        Log.d(TAG, "Telephony: run 1");
+        String jsonStr= Utils.readFileToString(Environment.getExternalStorageDirectory()+"/device.txt");
+        JSONObject jsonObjectPara;
+        if (jsonStr==null|jsonStr==""){
+            Map<String,String> mapJson=new HashMap<>();
+            mapJson.put("getDeviceSoftwareVersion","");
+            mapJson.put("getSubscriberId","");
+            mapJson.put("getLine1Number","");
+            mapJson.put("getSimSerialNumber","");
+            mapJson.put("getNetworkOperator","");
+            mapJson.put("getNetworkOperatorName","");
+            mapJson.put("getSimOperator","");
+            mapJson.put("getSimOperatorName","");
+            mapJson.put("getNetworkCountryIso","");
+            mapJson.put("getNetworkType","");
+            mapJson.put("getPhoneType","");
+            mapJson.put("GetNeighboringCellInfo","");
+            mapJson.put("getCellLocation","");
+            mapJson.put("getAllCellInfo","");
+            mapJson.put("GetNeighboringCellInfo","");
+            jsonStr= JSON.toJSONString(mapJson) ;
+            jsonObjectPara=JSONObject.parseObject( jsonStr );
+        }
+            jsonObjectPara=JSONObject.parseObject( jsonStr );
 
-        HookTelephony( TelePhone, loadPkgParam, "getNetworkType",
-                ""  ); // 网络类型
-        HookTelephony( TelePhone, loadPkgParam, "getPhoneType",
-                ""  ); //
-        HookTelephony( TelePhone, loadPkgParam, "GetNeighboringCellInfo",
-                ""  ); // 获取邻近的基站信息，返回的是List<NeighboringCellInfo>基站列表信息
+        Log.d(TAG, "Telephony: json"+jsonObjectPara.getString("getSimCountryIso") );
 
-        HookTelephony( TelePhone, loadPkgParam, "getCellLocation",
-                ""  ); // 获取当前基站信息
-        HookTelephony( TelePhone, loadPkgParam, "getAllCellInfo",
-                ""  ); // List<CellInfo>基站列表信息
-        HookTelephony( TelePhone, loadPkgParam, "getSimState",
-                ""  ); // 获取邻近的基站信息，返回的是List<NeighboringCellInfo>基站列表信息
-        HookTelephony( "java.util.Locale", loadPkgParam, "getLanguage",
-                ""  ); // 获取语言
+        String fucName="getDeviceSoftwareVersion";
+        fucName="getDeviceSoftwareVersion";
+        HookTelephony(TelePhone, loadPkgParam, fucName,
+                jsonObjectPara.getString( fucName )  );  //返系统版本
+        fucName="getSubscriberId";          //460017932859596 imsi
+        HookTelephony(TelePhone, loadPkgParam, fucName,
+                jsonObjectPara.getString( fucName )  );
+        fucName="getLine1Number";          //13117511178 返系统版本
+        HookTelephony(TelePhone, loadPkgParam, fucName,
+                jsonObjectPara.getString( fucName )  );
+        fucName="getSimSerialNumber";          //89860179328595969501 序列号
+        HookTelephony( TelePhone, loadPkgParam, fucName,
+                jsonObjectPara.getString( fucName )  );
+        fucName="getNetworkOperator";          //45413 运营商网络类型
+        HookTelephony( TelePhone, loadPkgParam, fucName,
+                jsonObjectPara.getString( fucName )  );
+        fucName="getNetworkOperatorName";       //45413 网络类型名
+        HookTelephony( TelePhone, loadPkgParam, fucName,
+                jsonObjectPara.getString( fucName )  );
+        fucName="getSimOperator";       //45413 运营商
+        HookTelephony( TelePhone, loadPkgParam, fucName,
+                jsonObjectPara.getString( fucName )  );
+        fucName="getSimOperatorName";       //中国联通 运营商名字
+        HookTelephony( TelePhone, loadPkgParam, fucName,
+                jsonObjectPara.getString( fucName )  );
+        fucName="getNetworkCountryIso";       //中国联通 国家iso代码
+        HookTelephony( TelePhone, loadPkgParam, fucName,
+                jsonObjectPara.getString( fucName )  );
+        fucName="getSimCountryIso";       //hk 手机卡国家
+        HookTelephony( TelePhone, loadPkgParam, fucName,
+                jsonObjectPara.getString( fucName )  );
+        fucName="getNetworkType";       //hk 网络类型
+        HookTelephony( TelePhone, loadPkgParam, fucName,
+                jsonObjectPara.getString( fucName )  );
+        fucName="getPhoneType";       //
+        HookTelephony( TelePhone, loadPkgParam, fucName,
+                jsonObjectPara.getString( fucName )  );
+        fucName="GetNeighboringCellInfo";       //
+        HookTelephony( TelePhone, loadPkgParam, fucName,
+                jsonObjectPara.getString( fucName )  ); // 获取邻近的基站信息，返回的是List<NeighboringCellInfo>基站列表信息
+        fucName="getCellLocation";       //
+        HookTelephony( TelePhone, loadPkgParam, fucName,
+                jsonObjectPara.getString( fucName )  ); // 获取当前基站信息
+        fucName="getAllCellInfo";       //
+        HookTelephony( TelePhone, loadPkgParam, fucName,
+                jsonObjectPara.getString( fucName )  ); // List<CellInfo>基站列表信息
+//        fucName="GetNeighboringCellInfo";       //
+//        HookTelephony( TelePhone, loadPkgParam, fucName,
+//                jsonObjectPara.getString( fucName )  ); //获取邻近的基站信息，返回的是List<NeighboringCellInfo>基站列表信息
 
-/*
-
-        XposedHelpers.findAndHookMethod("android.telephony.TelephonyManager", loadPkgParam.classLoader, "getNetworkType", new XC_MethodHook() {
-
-            @Override
-            protected void afterHookedMethod(MethodHookParam param)
-                    throws Throwable {
-                // TODO Auto-generated method stub
-                super.afterHookedMethod(param);
-                //      网络类型
-                param.setResult( SharedPref.getintXValue("networkType"));
-
-            }
-
-        });
-
-
-        XposedHelpers.findAndHookMethod("android.telephony.TelephonyManager",
-                loadPkgParam.classLoader, "getPhoneType", new XC_MethodHook() {
-
-                    @Override
-                    protected void afterHookedMethod(MethodHookParam param)
-                            throws Throwable {
-                        // TODO Auto-generated method stub
-                        super.afterHookedMethod(param);
-                        param.setResult(SharedPref.getintXValue("phonetype"));
-                    }
-                });
-
-        XposedHelpers.findAndHookMethod("android.telephony.TelephonyManager",
-                loadPkgParam.classLoader, "getSimState", new XC_MethodHook() {
-
-                    @Override
-                    protected void afterHookedMethod(MethodHookParam param)
-                            throws Throwable {
-                        // TODO Auto-generated method stub
-                        super.afterHookedMethod(param);
-                        param.setResult(SharedPref.getintXValue("SimState"));
-                    }
-                });
-*/
+//        HookTelephony( "java.util.Locale", loadPkgParam, "getLanguage",
+//                ""  ); // 获取语言
 
     }
 
@@ -344,8 +310,12 @@ public class Phone {
                                 throws Throwable {
                             // TODO Auto-generated method stub
                             super.afterHookedMethod(param);
+                            if(null!=value&&""!=value){
+                                param.setResult(value);
+                            }
+
                             Log.d(TAG, "afterHookedMethod:"+funcName+"-result="+param.getResult().toString() );
-                            //param.setResult(value);
+
                         }
 
                     });

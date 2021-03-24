@@ -2,6 +2,9 @@
 
 buildscript {
     repositories {
+        maven { url 'https://maven.aliyun.com/repository/google' }
+        maven { url 'https://maven.aliyun.com/repository/jcenter'}
+
         google()
         jcenter()
         
@@ -11,7 +14,6 @@ buildscript {
         // NOTE: Do not place your application dependencies here; they belong
         // in the individual module build.gradle files
     }
-
 
 }
 
