@@ -6,6 +6,7 @@ import androidx.appcompat.app.AppCompatActivity;
 import android.Manifest;
 import android.app.Activity;
 import android.content.Context;
+import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.os.Build;
 import android.os.Bundle;
@@ -20,6 +21,7 @@ import android.widget.Toast;
 
 import com.alibaba.fastjson.JSONObject;
 import com.alibaba.fastjson.TypeReference;
+import com.example.xposedemo.Utis.Date;
 import com.example.xposedemo.Utis.SharedPref;
 import com.example.xposedemo.Utis.Utils;
 
@@ -45,22 +47,30 @@ public class MainActivity extends AppCompatActivity {
             String path=Environment.getExternalStorageDirectory().toString();
             Log.d(TAG, "onCreate: path="+path);
             Log.d(TAG, "onCreate: read="+ Utils.readFileToString( path+"/1.txt" )   );
+
+
+
 //
 //        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
 //            Log.d(TAG, "onCreate: " + getResources().getConfiguration().getLocales().get(0).getLanguage() ) ;
 //        }
 
+        viewById=findViewById(R.id.textView);
+        viewById.setText("no data");
+
         String jsonStr= Utils.readFileToString(Environment.getExternalStorageDirectory ()+"/device.txt");
         if (jsonStr!=""){
+            Date.shareJson=jsonStr;
             JSONObject jsonObjectPara;
            // jsonObjectPara=JSONObject.parseObject( jsonStr );
             Log.d(TAG, "onCreate: jsonStr1="+jsonStr );
             Map<String,String> map=JSONObject.parseObject(jsonStr,
                     new TypeReference<Map<String, String>>(){});
-            viewById=findViewById(R.id.textView);
+
             string=Utils.join_map2str( map,"\r\n");
             Log.d(TAG, "onCreate: mapStr="+string );
             viewById.setText(string);
+
         }
 
 //        tm = (TelephonyManager) this

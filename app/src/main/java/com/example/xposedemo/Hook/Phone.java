@@ -6,6 +6,7 @@ import android.util.Log;
 
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
+import com.example.xposedemo.Utis.Date;
 import com.example.xposedemo.Utis.SharedPref;
 import com.example.xposedemo.Utis.Utils;
 
@@ -191,26 +192,10 @@ public class Phone {
         }
         Log.d(TAG, "Telephony: classname="+TelePhone );
 
-
-//        mySP.setSharedPref("IMSI","250127932859596");
-//        mySP.setSharedPref("PhoneNumber","13117511178"); // 手机号码
-//        mySP.setSharedPref("SimSerial", "89860179328595969501"); // 手机卡序列号
-//        mySP.setSharedPref("networktor","25012" ); // 网络运营商类型
-//        mySP.setSharedPref("Carrier","China Mobile/Peoples" );// 网络类型名
-//        mySP.setSharedPref("CarrierCode","25012" ); // 运营商
-//        mySP.setSharedPref("simopename","Baykal Westcom" );// 运营商名字
-//        mySP.setSharedPref("gjISO", "ru");// 国家iso代码
-//        mySP.setSharedPref("CountryCode","ru" );// 手机卡国家
-
-
- /*
-		HookTelephony(TelePhone, loadPkgParam, "getDeviceSoftwareVersion",
-				SharedPref.getXValue("deviceversion"));// 返系统版本
-      */
-
-
         Log.d(TAG, "Telephony: run 1");
-        String jsonStr= Utils.readFileToString(Environment.getExternalStorageDirectory()+"/device.txt");
+        String jsonStr= Utils.txt2String("/mnt/sdcard/device.txt" );
+        //String jsonStr= Date.shareJson;
+        Log.d(TAG, "Telephony:read jsonstr="+jsonStr );
         JSONObject jsonObjectPara;
         if (jsonStr==null|jsonStr==""){
             Map<String,String> mapJson=new HashMap<>();
@@ -273,15 +258,17 @@ public class Phone {
         fucName="getPhoneType";       //
         HookTelephony( TelePhone, loadPkgParam, fucName,
                 jsonObjectPara.getString( fucName )  );
-        fucName="GetNeighboringCellInfo";       //
-        HookTelephony( TelePhone, loadPkgParam, fucName,
-                jsonObjectPara.getString( fucName )  ); // 获取邻近的基站信息，返回的是List<NeighboringCellInfo>基站列表信息
+//        fucName="GetNeighboringCellInfo";       //
+//        HookTelephony( TelePhone, loadPkgParam, fucName,
+//                jsonObjectPara.getString( fucName )  ); // 获取邻近的基站信息，返回的是List<NeighboringCellInfo>基站列表信息
         fucName="getCellLocation";       //
         HookTelephony( TelePhone, loadPkgParam, fucName,
                 jsonObjectPara.getString( fucName )  ); // 获取当前基站信息
         fucName="getAllCellInfo";       //
         HookTelephony( TelePhone, loadPkgParam, fucName,
                 jsonObjectPara.getString( fucName )  ); // List<CellInfo>基站列表信息
+
+
 //        fucName="GetNeighboringCellInfo";       //
 //        HookTelephony( TelePhone, loadPkgParam, fucName,
 //                jsonObjectPara.getString( fucName )  ); //获取邻近的基站信息，返回的是List<NeighboringCellInfo>基站列表信息
@@ -314,7 +301,7 @@ public class Phone {
                                 param.setResult(value);
                             }
 
-                            Log.d(TAG, "afterHookedMethod:"+funcName+"-result="+param.getResult().toString() );
+                            Log.d(TAG, "afterHookedMethod:"+funcName+"-result="+param.getResult().toString()+"set-value="+value   );
 
                         }
 
