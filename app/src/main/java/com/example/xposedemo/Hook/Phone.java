@@ -1,13 +1,24 @@
 package com.example.xposedemo.Hook;
 
+import android.app.Application;
+import android.content.ContentResolver;
+import android.content.Context;
+import android.database.Cursor;
+import android.net.Uri;
 import android.os.Build;
 import android.os.Environment;
 import android.util.Log;
 
+import androidx.appcompat.app.AppCompatActivity;
+
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
+import com.example.xposedemo.MainActivity;
+import com.example.xposedemo.Utis.BaseContext;
+import com.example.xposedemo.Utis.Common;
 import com.example.xposedemo.Utis.Date;
 import com.example.xposedemo.Utis.SharedPref;
+import com.example.xposedemo.Utis.SharedPreferencesHelper;
 import com.example.xposedemo.Utis.Utils;
 
 import java.util.ArrayList;
@@ -24,15 +35,18 @@ import de.robv.android.xposed.callbacks.XC_LoadPackage;
  * Created by Administrator on 2017/4/17 0017.
  */
 
-public class Phone {
+public class Phone  {
 
     private String TAG="Phone";
     private ArrayList<String> methodNamelist;
-    public Phone(XC_LoadPackage.LoadPackageParam sharePkgParam) {
+    public String jsonStr;
+    JSONObject jsonObjectPara;
+
+
+    public Phone(XC_LoadPackage.LoadPackageParam sharePkgParam ) {
         methodNamelist=new ArrayList<>();
         Telephony(sharePkgParam);
     }
-
 
     // 联网方式
     public void getType(XC_LoadPackage.LoadPackageParam loadPackageParam) {
@@ -45,8 +59,23 @@ public class Phone {
 
                     ;
 
-
                 });
+
+    }
+
+    public void query(){
+        //获取内容解析者
+        Log.d(TAG, "query: query");
+
+//        ContentResolver contentResolver =   getContentResolver();
+//        Uri uri =Uri.parse("content://com.example.xposedemo.MyProvider/query");
+//        Cursor cursor = contentResolver.query(uri, null, null, null, null);
+//        //	Cursor cursor = database.rawQuery("select * from info", null);
+//        while(cursor.moveToNext()){
+//            String name = cursor.getString(cursor.getColumnIndex("device"));
+//            String phone = cursor.getString(cursor.getColumnIndex("json"));
+//            System.out.println("name="+name+"phone"+phone);
+//        }
 
     }
 
@@ -160,8 +189,6 @@ public class Phone {
                     }
 
                 });
-
-
     }
 
     public void Telephony(XC_LoadPackage.LoadPackageParam loadPkgParam) {
@@ -190,36 +217,13 @@ public class Phone {
         } catch (Exception ex) {
             XposedBridge.log(" IMEI 错误: " + ex.getMessage());
         }
-        Log.d(TAG, "Telephony: classname="+TelePhone );
 
-        Log.d(TAG, "Telephony: run 1");
-        String jsonStr= Utils.txt2String("/mnt/sdcard/device.txt" );
-        //String jsonStr= Date.shareJson;
-        Log.d(TAG, "Telephony:read jsonstr="+jsonStr );
-        JSONObject jsonObjectPara;
-        if (jsonStr==null|jsonStr==""){
-            Map<String,String> mapJson=new HashMap<>();
-            mapJson.put("getDeviceSoftwareVersion","");
-            mapJson.put("getSubscriberId","");
-            mapJson.put("getLine1Number","");
-            mapJson.put("getSimSerialNumber","");
-            mapJson.put("getNetworkOperator","");
-            mapJson.put("getNetworkOperatorName","");
-            mapJson.put("getSimOperator","");
-            mapJson.put("getSimOperatorName","");
-            mapJson.put("getNetworkCountryIso","");
-            mapJson.put("getNetworkType","");
-            mapJson.put("getPhoneType","");
-            mapJson.put("GetNeighboringCellInfo","");
-            mapJson.put("getCellLocation","");
-            mapJson.put("getAllCellInfo","");
-            mapJson.put("GetNeighboringCellInfo","");
-            jsonStr= JSON.toJSONString(mapJson) ;
-            jsonObjectPara=JSONObject.parseObject( jsonStr );
-        }
-            jsonObjectPara=JSONObject.parseObject( jsonStr );
+       // jsonStr=SharedPref.getXValue("json");
 
-        Log.d(TAG, "Telephony: json"+jsonObjectPara.getString("getSimCountryIso") );
+        jsonStr=Utils.readFileToString(Common.DEVICE_PATH);
+        jsonObjectPara=JSONObject.parseObject( jsonStr );
+        Log.d(TAG, "Telephony: json="+jsonStr );
+
 
         String fucName="getDeviceSoftwareVersion";
         fucName="getDeviceSoftwareVersion";
@@ -268,11 +272,9 @@ public class Phone {
         HookTelephony( TelePhone, loadPkgParam, fucName,
                 jsonObjectPara.getString( fucName )  ); // List<CellInfo>基站列表信息
 
-
 //        fucName="GetNeighboringCellInfo";       //
 //        HookTelephony( TelePhone, loadPkgParam, fucName,
 //                jsonObjectPara.getString( fucName )  ); //获取邻近的基站信息，返回的是List<NeighboringCellInfo>基站列表信息
-
 //        HookTelephony( "java.util.Locale", loadPkgParam, "getLanguage",
 //                ""  ); // 获取语言
 
@@ -287,20 +289,21 @@ public class Phone {
                                 @Override
                                 protected void beforeHookedMethod(MethodHookParam param) throws Throwable {
                                     super.beforeHookedMethod(param);
-                                    if(!methodNamelist.contains(funcName))
-                                        methodNamelist.add(funcName);
-                                    Log.d(TAG, "HookTelephony="+methodNamelist.toString());
+                                    if(!methodNamelist.contains( funcName ))
+                                        methodNamelist.add( funcName );
+                                    Log.d(TAG, "HookTelephony="+methodNamelist.toString() );
                                 }
 
                                 @Override
                         protected void afterHookedMethod(MethodHookParam param)
                                 throws Throwable {
+
+
                             // TODO Auto-generated method stub
                             super.afterHookedMethod(param);
                             if(null!=value&&""!=value){
                                 param.setResult(value);
                             }
-
                             Log.d(TAG, "afterHookedMethod:"+funcName+"-result="+param.getResult().toString()+"set-value="+value   );
 
                         }

@@ -53,7 +53,7 @@ public class SharedPref {
         	myXsharedPref.reload();
             return myXsharedPref;
         }
-        myXsharedPref = new XSharedPreferences(Common.PACKAGE_NAME, Common.PREFS_FILE);
+        myXsharedPref = new XSharedPreferences( Common.PACKAGE_NAME, Common.PREFS_FILE);
         return myXsharedPref;
     }
     

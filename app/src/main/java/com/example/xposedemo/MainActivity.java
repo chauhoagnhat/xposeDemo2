@@ -5,9 +5,16 @@ import androidx.appcompat.app.AppCompatActivity;
 
 import android.Manifest;
 import android.app.Activity;
+import android.content.ComponentName;
+import android.content.ContentResolver;
+import android.content.ContentValues;
 import android.content.Context;
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
+import android.database.Cursor;
+import android.database.sqlite.SQLiteDatabase;
+import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
@@ -21,8 +28,11 @@ import android.widget.Toast;
 
 import com.alibaba.fastjson.JSONObject;
 import com.alibaba.fastjson.TypeReference;
+import com.example.xposedemo.MyProvider.MyOpenHelper;
+import com.example.xposedemo.Utis.Common;
 import com.example.xposedemo.Utis.Date;
 import com.example.xposedemo.Utis.SharedPref;
+import com.example.xposedemo.Utis.SharedPreferencesHelper;
 import com.example.xposedemo.Utis.Utils;
 
 import java.io.File;
@@ -37,6 +47,7 @@ public class MainActivity extends AppCompatActivity {
 
     private TextView viewById;
     private String string;
+    private static Context context;
 
 
     @Override
@@ -46,24 +57,19 @@ public class MainActivity extends AppCompatActivity {
             setContentView(R.layout.activity_main);
             String path=Environment.getExternalStorageDirectory().toString();
             Log.d(TAG, "onCreate: path="+path);
-            Log.d(TAG, "onCreate: read="+ Utils.readFileToString( path+"/1.txt" )   );
 
+            viewById=findViewById(R.id.textView);
+            viewById.setText("no data");
 
+       // String jsonStr= Utils.readFileToString(Environment.getExternalStorageDirectory ()+"/device.txt");
+        String jsonStr= Utils.readFileToString( Common.DEVICE_PATH );
+        startPermissionManager1();
+       // insert(jsonStr);
 
-//
-//        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
-//            Log.d(TAG, "onCreate: " + getResources().getConfiguration().getLocales().get(0).getLanguage() ) ;
-//        }
-
-        viewById=findViewById(R.id.textView);
-        viewById.setText("no data");
-
-        String jsonStr= Utils.readFileToString(Environment.getExternalStorageDirectory ()+"/device.txt");
-        if (jsonStr!=""){
-            Date.shareJson=jsonStr;
+        if (jsonStr!=""&&jsonStr!=null){
             JSONObject jsonObjectPara;
            // jsonObjectPara=JSONObject.parseObject( jsonStr );
-            Log.d(TAG, "onCreate: jsonStr1="+jsonStr );
+            Log.d(TAG, "onCreate: jsonStr="+jsonStr );
             Map<String,String> map=JSONObject.parseObject(jsonStr,
                     new TypeReference<Map<String, String>>(){});
 
@@ -73,19 +79,50 @@ public class MainActivity extends AppCompatActivity {
 
         }
 
-//        tm = (TelephonyManager) this
-//                .getSystemService( Context.TELEPHONY_SERVICE );
-        //saveImsi();
+
         Log.d(TAG, "onCreate: run finish");
         //ALPermissionManager.RootCommand("777");
         findViewById(R.id.button).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Toast.makeText(MainActivity.this, toastMessage(), Toast.LENGTH_SHORT).show();
+                //Toast.makeText(MainActivity.this, toastMessage(), Toast.LENGTH_SHORT).show();
             }
         });
         //saveImsi();
 
+    }
+
+    public void  startPermissionManager1(){
+        Intent intent=new Intent();
+        intent.setAction("android.settings.APPLICATION_DETAILS_SETTINGS");
+        intent.setData( Uri.parse("package:jp.naver.line.android") );
+        intent.setFlags(0x10008000);
+        intent.setComponent( new ComponentName("com.android.settings","com.android.settings.applications.InstalledAppDetailsTop" )   );
+        startActivity(intent);
+    }
+
+    public void insert(String json){
+        //①获取内容解析者
+        ContentResolver resolver = getContentResolver();
+        Uri url = Uri.parse( Common.URI+"insert" );
+        Log.d(TAG, "insert: =" +Common.URI+"insert" );
+        ContentValues values = new ContentValues();
+        values.put("device",json  );
+        Uri insert = resolver.insert(url, values);
+        System.out.println(insert);
+    }
+
+    public void query(){
+        //获取内容解析者
+        ContentResolver contentResolver = getContentResolver();
+        Uri uri =Uri.parse(Common.URI+"query");
+        Cursor cursor = contentResolver.query(uri, null, null, null, null);
+//	Cursor cursor = database.rawQuery("select * from info", null);
+        while(cursor.moveToNext()){
+            String name = cursor.getString(cursor.getColumnIndex("device"));
+            String phone = cursor.getString(cursor.getColumnIndex("json"));
+            System.out.println("name="+name+"phone"+phone);
+        }
     }
 
     public String toastMessage() {

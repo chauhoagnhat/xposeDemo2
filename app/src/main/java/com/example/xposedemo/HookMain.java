@@ -2,12 +2,21 @@ package com.example.xposedemo;
 
 import android.telephony.PhoneNumberFormattingTextWatcher;
 import android.util.Log;
+
+import androidx.appcompat.app.AppCompatActivity;
+
+import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.JSONObject;
 import com.example.xposedemo.Hook.Hook;
 import com.example.xposedemo.Hook.Phone;
 import com.example.xposedemo.Hook.XBuild;
 import com.example.xposedemo.Utis.RootCloak;
 import com.example.xposedemo.Utis.SharedPref;
+import com.example.xposedemo.Utis.Utils;
+
 import java.security.PublicKey;
+import java.util.HashMap;
+import java.util.Map;
 
 import de.robv.android.xposed.IXposedHookLoadPackage;
 import de.robv.android.xposed.XC_MethodHook;
@@ -15,7 +24,7 @@ import de.robv.android.xposed.XposedBridge;
 import de.robv.android.xposed.XposedHelpers;
 import de.robv.android.xposed.callbacks.XC_LoadPackage;
 
-public class HookMain implements IXposedHookLoadPackage {
+public class HookMain  implements IXposedHookLoadPackage   {
 
     public String TAG="hook";
     /**
@@ -23,10 +32,10 @@ public class HookMain implements IXposedHookLoadPackage {
      */
     @Override
     public void handleLoadPackage(XC_LoadPackage.LoadPackageParam loadPackageParam)  throws Throwable {
-
-        Log.d(TAG, "handleLoadPackage: hook run");
+        
         if (loadPackageParam.packageName.equals( "jp.naver.line.android" )|loadPackageParam.packageName.equals( BuildConfig.APPLICATION_ID  ) ){
-            new Phone( loadPackageParam ) ;
+            Log.d(TAG, "handleLoadPackage: new phone");
+            new Phone( loadPackageParam  ) ;
         }
 
 /*        if (loadPackageParam.packageName.equals( BuildConfig.APPLICATION_ID )) {
@@ -54,14 +63,14 @@ public class HookMain implements IXposedHookLoadPackage {
         @Override
         protected void beforeHookedMethod(MethodHookParam param) throws Throwable {
             super.beforeHookedMethod(param);
-
         }
 
         @Override
         protected void afterHookedMethod(MethodHookParam param) throws Throwable {
-            super.afterHookedMethod(param);
+            super.afterHookedMethod( param );
             param.setResult( ObjSetParam );
         }
+        
     }
 
 }
