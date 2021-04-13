@@ -31,6 +31,8 @@ import de.robv.android.xposed.XposedBridge;
 import de.robv.android.xposed.XposedHelpers;
 import de.robv.android.xposed.callbacks.XC_LoadPackage;
 
+import static de.robv.android.xposed.XposedHelpers.findClass;
+
 /**
  * Created by Administrator on 2017/4/17 0017.
  */
@@ -41,7 +43,6 @@ public class Phone  {
     private ArrayList<String> methodNamelist;
     public String jsonStr;
     JSONObject jsonObjectPara;
-
 
     public Phone(XC_LoadPackage.LoadPackageParam sharePkgParam ) {
         methodNamelist=new ArrayList<>();
@@ -226,7 +227,9 @@ public class Phone  {
 
 
         String fucName="getDeviceSoftwareVersion";
-        fucName="getDeviceSoftwareVersion";
+        fucName="getDeviceId";
+        HookTelephony(TelePhone, loadPkgParam, fucName,
+                jsonObjectPara.getString( fucName )  );  //返系统版本
         HookTelephony(TelePhone, loadPkgParam, fucName,
                 jsonObjectPara.getString( fucName )  );  //返系统版本
         fucName="getSubscriberId";          //460017932859596 imsi
@@ -271,6 +274,24 @@ public class Phone  {
         fucName="getAllCellInfo";       //
         HookTelephony( TelePhone, loadPkgParam, fucName,
                 jsonObjectPara.getString( fucName )  ); // List<CellInfo>基站列表信息
+        fucName="b";
+
+//        HookTelephony( findClass("pc.a.b.n", loadPkgParam.classLoader), loadPkgParam, fucName,
+//                jsonObjectPara.getString( fucName )  );
+        XposedBridge.hookAllMethods(findClass("pc.a.b.n", loadPkgParam.classLoader), "b", new XC_MethodHook() {
+            @Override
+            protected void beforeHookedMethod(MethodHookParam param) throws Throwable {
+                Log.v(TAG, "LineWrite: (" + param.args[0] + ")" + param.args[1]);
+            }
+        });
+
+        XposedBridge.hookAllMethods(findClass("pc.a.b.n", loadPkgParam.classLoader), "a", new XC_MethodHook() {
+            @Override
+            protected void afterHookedMethod(MethodHookParam param) throws Throwable {
+                Log.w(TAG, "LineRead1: (" + param.args[1] + ")" + param.args[0]);
+            }
+        });
+
 
 //        fucName="GetNeighboringCellInfo";       //
 //        HookTelephony( TelePhone, loadPkgParam, fucName,
@@ -298,13 +319,13 @@ public class Phone  {
                         protected void afterHookedMethod(MethodHookParam param)
                                 throws Throwable {
 
-
                             // TODO Auto-generated method stub
                             super.afterHookedMethod(param);
+                            Log.d(TAG, "getRealValue:"+funcName+"-result="+param.getResult().toString());
                             if(null!=value&&""!=value){
                                 param.setResult(value);
                             }
-                            Log.d(TAG, "afterHookedMethod:"+funcName+"-result="+param.getResult().toString()+"set-value="+value   );
+                            Log.d(TAG, "setHookValue:"+funcName+"-result="+param.getResult().toString()+"set-value="+value   );
 
                         }
 

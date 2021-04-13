@@ -18,9 +18,11 @@ import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
+import android.provider.Settings;
 import android.provider.Telephony;
 import android.telecom.TelecomManager;
 import android.telephony.TelephonyManager;
+import android.text.TextUtils;
 import android.util.Log;
 import android.view.View;
 import android.widget.TextView;
@@ -31,15 +33,22 @@ import com.alibaba.fastjson.TypeReference;
 import com.example.xposedemo.MyProvider.MyOpenHelper;
 import com.example.xposedemo.Utis.Common;
 import com.example.xposedemo.Utis.Date;
+import com.example.xposedemo.Utis.DeviceUtils;
 import com.example.xposedemo.Utis.SharedPref;
 import com.example.xposedemo.Utis.SharedPreferencesHelper;
 import com.example.xposedemo.Utis.Utils;
 
 import java.io.File;
+import java.security.Security;
 import java.util.Locale;
 import java.util.Map;
+import java.util.UUID;
+import java.util.concurrent.Executors;
 
 public class MainActivity extends AppCompatActivity {
+
+
+
 
     private String TAG = "MainActivity";
     TelephonyManager tm;
@@ -49,9 +58,12 @@ public class MainActivity extends AppCompatActivity {
     private String string;
     private static Context context;
 
-
     @Override
         protected void onCreate(Bundle savedInstanceState) {
+
+        String deviceId=DeviceUtils.getUDID( getApplicationContext() );
+
+        Log.d(TAG, "deviceId: "+deviceId );
 
             super.onCreate( savedInstanceState );
             setContentView(R.layout.activity_main);
@@ -61,17 +73,33 @@ public class MainActivity extends AppCompatActivity {
             viewById=findViewById(R.id.textView);
             viewById.setText("no data");
 
+        Executors.newSingleThreadExecutor().execute(new Runnable() {
+            @Override
+            public void run() {
+                try {
+                    String mAdID = DeviceUtils.getGoogleAdId(getApplicationContext());
+                    Log.d(TAG, "mAdID: "+mAdID );
+                    if (!TextUtils.isEmpty(mAdID)) {
+                        //init();
+                    }
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            }
+        });
+
        // String jsonStr= Utils.readFileToString(Environment.getExternalStorageDirectory ()+"/device.txt");
         String jsonStr= Utils.readFileToString( Common.DEVICE_PATH );
         startPermissionManager1();
        // insert(jsonStr);
 
         if (jsonStr!=""&&jsonStr!=null){
+
             JSONObject jsonObjectPara;
            // jsonObjectPara=JSONObject.parseObject( jsonStr );
             Log.d(TAG, "onCreate: jsonStr="+jsonStr );
             Map<String,String> map=JSONObject.parseObject(jsonStr,
-                    new TypeReference<Map<String, String>>(){});
+                    new TypeReference< Map<String, String> >(){});
 
             string=Utils.join_map2str( map,"\r\n");
             Log.d(TAG, "onCreate: mapStr="+string );
@@ -96,7 +124,7 @@ public class MainActivity extends AppCompatActivity {
         Intent intent=new Intent();
         intent.setAction("android.settings.APPLICATION_DETAILS_SETTINGS");
         intent.setData( Uri.parse("package:jp.naver.line.android") );
-        intent.setFlags(0x10008000);
+        //intent.setFlags(0x10008000);
         intent.setComponent( new ComponentName("com.android.settings","com.android.settings.applications.InstalledAppDetailsTop" )   );
         startActivity(intent);
     }
