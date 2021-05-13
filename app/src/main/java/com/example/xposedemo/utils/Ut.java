@@ -1,4 +1,4 @@
-package com.example.xposedemo.Utis;
+package com.example.xposedemo.utils;
 
 import android.content.ComponentName;
 import android.content.Context;
@@ -17,17 +17,31 @@ import android.util.Log;
 
 import com.example.xposedemo.MainActivity;
 
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.FileReader;
+import java.io.IOException;
+import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.LinkedBlockingQueue;
 
-public class DeviceUtils {
+public class Ut {
     protected static final String PREFS_FILE = "gank_device_id.xml";
     protected static final String PREFS_DEVICE_ID = "gank_device_id";
     private static final String TAG = "DeviceUtils";
     protected static String uuid;
 
-
+    /**
+     * 获取uuid
+     * @param context
+     * @return
+     */
     static public String getUDID( Context context )
     {
         if( uuid ==null ) {
@@ -71,6 +85,46 @@ public class DeviceUtils {
             }
         }
         return uuid;
+    }
+
+    public static String readAssetsTxt( Context context,String fileName ){
+        String text=null;
+        try {
+            InputStream is = context.getAssets().open(fileName);
+            int size = is.available();
+            // Read the entire asset into a local byte buffer.
+            byte[] buffer = new byte[size];
+            is.read(buffer);
+            is.close();
+
+            // Convert the buffer into a string.
+            text = new String(buffer, "GB2312");
+        } catch (IOException e) {
+            // Should never happen!
+            throw new RuntimeException(e);
+        }
+        return text;
+
+    }
+
+    public static boolean copyAssetsFile(Context context, String assetsPath, String savePath)  {
+        // assetsPath 为空时即 /assets
+        try{
+            InputStream is = context.getAssets().open(assetsPath);
+            FileOutputStream fos = new FileOutputStream(new File(savePath));
+            byte[] buffer = new byte[1024];
+            int byteCount = 0;
+            while ((byteCount = is.read(buffer)) != -1) {// 循环从输入流读取
+                // buffer字节
+                fos.write(buffer, 0, byteCount);// 将读取的输入流写入到输出流
+            }
+            fos.flush();// 刷新缓冲区
+            is.close();
+            fos.close();
+        }catch (Exception e){
+            return false;
+        }
+        return true;
     }
 
     /**
@@ -165,6 +219,79 @@ public class DeviceUtils {
             }
             return limitAdTracking;
         }
+    }
+
+    /**
+     * 读txt文件内容
+     * @param FILE_IN txt路径
+     * @return  读出的string
+     */
+    public static String readFileToString ( String FILE_IN ) {
+        String str="";
+        File file=new File( FILE_IN );
+        try {
+            FileInputStream in=new FileInputStream(file);
+            // size 为字串的长度 ，这里一次性读完
+            int size=in.available();
+            byte[] buffer=new byte[size];
+            in.read(buffer);
+            in.close();
+            str=new String(buffer,"UTF-8");
+        } catch (IOException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+            //return null;
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return str;
+    }
+
+
+    public static String txt2String(String path){
+
+        File file=new File(path);
+        StringBuilder result = new StringBuilder();
+        try{
+            BufferedReader br = new BufferedReader(new FileReader(file));//构造一个BufferedReader类来读取文件
+            String s = null;
+            while((s = br.readLine())!=null){//使用readLine方法，一次读一行
+                result.append(System.lineSeparator()+s);
+            }
+            br.close();
+        }catch(Exception e){
+            e.printStackTrace();
+        }
+        return result.toString();
+    }
+
+    /**
+     * 拼接map
+     * @param params
+     * @param Delimiter 分隔符
+     * @return
+     */
+    public static String  join_map2str (Map<String, String> params, String Delimiter ) {
+        List<String> keys = new ArrayList<String>(params.keySet());
+        // Collections.sort(keys);//不按首字母排序, 需要按首字母排序请打开
+        StringBuilder prestrSB = new StringBuilder();
+        for (int i = 0; i < keys.size(); i++) {
+            String key = keys.get(i);
+            String value = params.get(key);
+//            if (encode) {
+//                try {
+//                    value = URLEncoder.encode(value, "GBK");
+//                } catch (UnsupportedEncodingException e) {
+//                    e.printStackTrace();
+//                }
+//            }
+            if (i == keys.size() - 1) {// 拼接时，不包括最后一个&字符
+                prestrSB.append(key).append("=").append(value);
+            } else {
+                prestrSB.append(key).append("=").append(value).append(Delimiter);
+            }
+        }
+        return prestrSB.toString();
     }
 
 }

@@ -4,7 +4,7 @@ import android.content.ContentResolver;
 import android.os.Build;
 import android.provider.Settings;
 
-import com.example.xposedemo.Utis.SharedPref;
+import com.example.xposedemo.utils.SharedPref;
 
 import java.lang.reflect.Member;
 

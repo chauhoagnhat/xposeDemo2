@@ -1,6 +1,6 @@
 package com.example.xposedemo.Hook;
 
-import com.example.xposedemo.Utis.SharedPref;
+import com.example.xposedemo.utils.SharedPref;
 
 import de.robv.android.xposed.XC_MethodHook;
 import de.robv.android.xposed.XposedBridge;

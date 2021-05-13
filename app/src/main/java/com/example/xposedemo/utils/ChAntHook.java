@@ -1,4 +1,4 @@
-package com.example.xposedemo.Utis;
+package com.example.xposedemo.utils;
 
 import android.app.ActivityManager.RunningAppProcessInfo;
 import android.app.ActivityManager.RunningServiceInfo;
@@ -9,7 +9,10 @@ import android.content.pm.PackageInfo;
 import android.os.Build;
 import android.os.StrictMode;
 import android.provider.Settings;
+//import android.support.annotation.RequiresApi;
 import android.text.TextUtils;
+
+import androidx.annotation.RequiresApi;
 
 import java.io.File;
 import java.io.IOException;
@@ -33,7 +36,7 @@ import de.robv.android.xposed.callbacks.XCallback;
 import static de.robv.android.xposed.XposedHelpers.findAndHookMethod;
 import static de.robv.android.xposed.XposedHelpers.findConstructorExact;
 
-public class RootCloak implements IXposedHookLoadPackage {
+public class ChAntHook implements IXposedHookLoadPackage{
     private static final String FAKE_COMMAND = "FAKEJUNKCOMMAND";
     private static final String FAKE_FILE = "FAKEJUNKFILE";
     private static final String FAKE_PACKAGE = "FAKE.JUNK.PACKAGE";
@@ -47,6 +50,7 @@ public class RootCloak implements IXposedHookLoadPackage {
     private boolean isRootCloakLoadingPref = false;
     private String listApp;
 
+    @RequiresApi(api = Build.VERSION_CODES.JELLY_BEAN_MR1)
     public void handleLoadPackage(final LoadPackageParam lpparam) throws Throwable {
         loadPrefs(); // 加载首选项为任何应用程序。 这样我们可以确定它是否匹配应用程序列表以隐藏根。
 	/*	if (debugPref) {
@@ -97,7 +101,7 @@ public class RootCloak implements IXposedHookLoadPackage {
         findAndHookMethod("android.os.SystemProperties", lpparam.classLoader, "get", String.class , new XC_MethodHook() {
             @Override
             protected void beforeHookedMethod(MethodHookParam param) throws Throwable {
-                if (((String) param.args[0]).equals("ro.build.selinux")) {
+                if (param.args[0].equals("ro.build.selinux")) {
                     param.setResult("1");
                     if (debugPref) {
                         XposedBridge.log("SELinux is enforced.");
@@ -136,7 +140,7 @@ public class RootCloak implements IXposedHookLoadPackage {
             protected void beforeHookedMethod(MethodHookParam param) throws Throwable {
                 if (param.args[0] != null) {
                     if (debugPref) {
-                        XposedBridge.log("File: Found a File constructor: " + ((String) param.args[0]));
+                        XposedBridge.log("File: Found a File constructor: " + param.args[0]);
                     }
                 }
 
@@ -174,7 +178,7 @@ public class RootCloak implements IXposedHookLoadPackage {
             protected void beforeHookedMethod(MethodHookParam param) throws Throwable {
                 if (param.args[0] != null && param.args[1] != null) {
                     if (debugPref) {
-                        XposedBridge.log("File: Found a File constructor: " + ((String) param.args[0]) + ", with: " + ((String) param.args[1]));
+                        XposedBridge.log("File: Found a File constructor: " + param.args[0] + ", with: " + param.args[1]);
                     }
                 }
 
@@ -213,7 +217,7 @@ public class RootCloak implements IXposedHookLoadPackage {
             protected void beforeHookedMethod(MethodHookParam param) throws Throwable {
                 if (param.args[0] != null) {
                     if (debugPref) {
-                        XposedBridge.log("文件：找到一个URI文件构造函数： " + ((URI) param.args[0]).toString());
+                        XposedBridge.log("文件：找到一个URI文件构造函数： " + param.args[0].toString());
                     }
                 }
             }
@@ -528,7 +532,7 @@ public class RootCloak implements IXposedHookLoadPackage {
                 }
             }
         });
-        
+
         /**
          * 挂钩在java.lang.Runtime中loadLibrary（）。
                    有专门为检查根目录的库。 这有助于我们阻止
@@ -588,6 +592,7 @@ public class RootCloak implements IXposedHookLoadPackage {
     /**
      * 挂钩设备设置。
      */
+    @RequiresApi(api = Build.VERSION_CODES.JELLY_BEAN_MR1)
     private void initSettingsGlobal(final LoadPackageParam lpparam) {
         // Hooks Settings.Global.getInt。 对于这种方法，我们将阻止列表中任何应用程序获取包信息
         findAndHookMethod(Settings.Global.class, "getInt", ContentResolver.class, String.class, int.class, new XC_MethodHook() {
@@ -619,20 +624,20 @@ public class RootCloak implements IXposedHookLoadPackage {
 
         try {
 
-        	keywordSet = new HashSet<String>();
-        	commandSet = new HashSet<String>();
-        	libnameSet = new HashSet<String>();
-        	
-        	keywordSet.isEmpty();
+            keywordSet = new HashSet<String>();
+            commandSet = new HashSet<String>();
+            libnameSet = new HashSet<String>();
+
+            keywordSet.isEmpty();
             commandSet.isEmpty();
             libnameSet.isEmpty();
 
-        	listApp = SharedPref.getXValue("HideRootPackge");
-        	if(listApp != null){
-        		appSet = new HashSet<String>(getAppset(listApp));
-        	}else {
-        		appSet = Common.DEFAULT_APPS_SET;
-			}
+            listApp = "com.alibaba.aliexpresshd";
+            if(listApp != null){
+                appSet = new HashSet<String>(getAppset(listApp));
+            }else {
+                appSet = Common.DEFAULT_APPS_SET;
+            }
             if (keywordSet.isEmpty()) {
                 keywordSet = Common.DEFAULT_KEYWORD_SET;
             }
@@ -649,7 +654,7 @@ public class RootCloak implements IXposedHookLoadPackage {
         }
 
     }
-    
+
     public static List<String> getAppset(String parramString) {
         if (TextUtils.isEmpty(parramString)) {
             return null;
@@ -729,3 +734,4 @@ public class RootCloak implements IXposedHookLoadPackage {
     }
 
 }
+

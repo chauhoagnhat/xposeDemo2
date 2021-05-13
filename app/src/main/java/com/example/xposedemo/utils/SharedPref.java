@@ -1,4 +1,4 @@
-package com.example.xposedemo.Utis;
+package com.example.xposedemo.utils;
 
 import android.content.Context;
 import android.content.SharedPreferences;

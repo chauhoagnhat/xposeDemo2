@@ -2,12 +2,8 @@ package com.example.xposedemo.MyProvider;
 
 import android.content.Context;
 import android.database.sqlite.SQLiteDatabase;
-import android.database.sqlite.SQLiteDatabase.CursorFactory;
 import android.database.sqlite.SQLiteOpenHelper;
 import android.util.Log;
-
-import com.example.xposedemo.Utis.Common;
-import com.example.xposedemo.Utis.Utils;
 
 
 public class MyOpenHelper extends SQLiteOpenHelper {

@@ -1,26 +1,12 @@
 package com.example.xposedemo;
 
-import android.telephony.PhoneNumberFormattingTextWatcher;
 import android.util.Log;
 
-import androidx.appcompat.app.AppCompatActivity;
-
-import com.alibaba.fastjson.JSON;
-import com.alibaba.fastjson.JSONObject;
-import com.example.xposedemo.Hook.Hook;
+import com.example.xposedemo.Hook.CPUHook;
 import com.example.xposedemo.Hook.Phone;
-import com.example.xposedemo.Hook.XBuild;
-import com.example.xposedemo.Utis.RootCloak;
-import com.example.xposedemo.Utis.SharedPref;
-import com.example.xposedemo.Utis.Utils;
-
-import java.security.PublicKey;
-import java.util.HashMap;
-import java.util.Map;
 
 import de.robv.android.xposed.IXposedHookLoadPackage;
 import de.robv.android.xposed.XC_MethodHook;
-import de.robv.android.xposed.XposedBridge;
 import de.robv.android.xposed.XposedHelpers;
 import de.robv.android.xposed.callbacks.XC_LoadPackage;
 
@@ -33,10 +19,19 @@ public class HookMain  implements IXposedHookLoadPackage   {
     @Override
     public void handleLoadPackage(XC_LoadPackage.LoadPackageParam loadPackageParam)  throws Throwable {
         
-        if (loadPackageParam.packageName.equals( "jp.naver.line.android" )|loadPackageParam.packageName.equals( BuildConfig.APPLICATION_ID  ) ){
+        if (loadPackageParam.packageName.equals( "jp.naver.line.android" )|loadPackageParam.packageName.equals( BuildConfig.APPLICATION_ID  )
+
+            |loadPackageParam.packageName.equals("com.google.android.gms")
+            |loadPackageParam.packageName.equals("com.android.vending")){
             Log.d(TAG, "handleLoadPackage: new phone");
+            //hookBuild();
+            //hookBuild();
             new Phone( loadPackageParam  ) ;
+            new CPUHook( loadPackageParam );
+
         }
+
+
 
 /*        if (loadPackageParam.packageName.equals( BuildConfig.APPLICATION_ID )) {
             Class clazz = loadPackageParam.classLoader.loadClass("com.example.xposedemo.MainActivity");
@@ -53,6 +48,25 @@ public class HookMain  implements IXposedHookLoadPackage   {
         }*/
 
     }
+
+    public void  hookBuild(){
+
+        // 修改手机系统信息 此处是手机的基本信息 包括厂商 信号 ROM版本 安卓版本 主板 设备名 指纹名称等信息
+        XposedHelpers.setStaticObjectField(android.os.Build.class,  "MODEL" ,"Nexus 6P" );
+        XposedHelpers.setStaticObjectField(android.os.Build.class,  "MANUFACTURER" ,"Huawei");
+        XposedHelpers.setStaticObjectField(android.os.Build.class,  "BRAND" , "google");
+        XposedHelpers.setStaticObjectField(android.os.Build.class,  "HARDWARE" ,"angler");
+        XposedHelpers.setStaticObjectField(android.os.Build.class,  "BOARD" ,"angler");
+        XposedHelpers.setStaticObjectField(android.os.Build.class,  "SERIAL" ,"ENU7N15A28004256" );
+        XposedHelpers.setStaticObjectField(android.os.Build.class,  "DEVICE" ,"angler");
+        //XposedHelpers.setStaticObjectField(android.os.Build.class,  "ID" , );
+        XposedHelpers.setStaticObjectField(android.os.Build.class,  "PRODUCT" , "angler");
+        XposedHelpers.setStaticObjectField(android.os.Build.class,  "DISPLAY" ,"MTC20L" );
+        XposedHelpers.setStaticObjectField(android.os.Build.class,  "FINGERPRINT","google/angler/angler:6.0.1/MTC20L/3230295:user/release-keys" );
+        Log.d(TAG, "hookBuild: hookBuild");
+
+    }
+
 
     public class  MyXc_MethodHook extends XC_MethodHook {
         private Object ObjSetParam;

@@ -1,10 +1,11 @@
-package com.example.xposedemo.Utis;
+package com.example.xposedemo.utils;
 
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
 
 public class Common {
+
 
     public static final String PREFS_FILE = "Device";
     public static final String PACKAGE_NAME = "com.example.xposedemo";
@@ -15,7 +16,6 @@ public class Common {
     public static final String PREFS_LIBNAMES = "CustomizeLibnames";
     public static final String FIRST_RUN_KEY = "IS_FIRST_RUN";
     public static final String DEVICE_PATH = "sdcard/yztc/device.txt";
-    public static final String URI="content://com.example.xposedemo.MyProvider/";
 
     public static final String[] DEFAULT_KEYWORD_LIST = new String[]{"supersu", "superuser", "Superuser",
             "noshufou", "xposed", "rootcloak",
