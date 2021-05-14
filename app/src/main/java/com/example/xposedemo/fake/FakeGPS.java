@@ -1,6 +1,6 @@
 package com.example.xposedemo.fake;
 
-import com.zhang.emulatorhook.bean.GPSInfo;
+import com.example.xposedemo.bean.GPSInfo;
 
 import java.util.Random;
 

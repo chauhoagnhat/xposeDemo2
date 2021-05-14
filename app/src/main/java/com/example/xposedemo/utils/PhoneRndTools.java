@@ -15,6 +15,17 @@ public class PhoneRndTools {
         return res;
     }
 
+
+    /**
+     * 随机生成n位数字
+     */
+    public static String randomImei( ){
+        String[] start={ "99", "35"  };
+        Random rnd = new Random();
+        String res = start[ rnd.nextInt(start.length) ];
+        return res+randomNum(13);
+    }
+
     /**
      * 随机一个手机号码
      * @return
@@ -97,6 +108,16 @@ public class PhoneRndTools {
         String ip = num2ip(range[index][0]+new Random().nextInt(range[index][1]-range[index][0]));
         return ip;
     }
+    //8996-130091-1802061512
+    //8996-130091-1802061512 谷歌pixel
+    public static String setSystemBaseband(){
+        //
+        StringBuilder sb=new StringBuilder();
+        sb.append( "8996-130091-180206" );
+        sb.append( randomNum(4) );
+        return sb.toString();
+
+    }
 
     public static int randomIPNum(){
         //ip范围
@@ -121,15 +142,15 @@ public class PhoneRndTools {
     }
 
     public static String num2ip(int ip) {
+
         int [] b=new int[4] ;
         String x = "";
-
         b[0] = (ip >> 24) & 0xff;
         b[1] = (ip >> 16) & 0xff;
         b[2] = (ip >> 8) & 0xff;
         b[3] = ip & 0xff;
         x=Integer.toString(b[0])+"."+Integer.toString(b[1])+"."+Integer.toString(b[2])+"."+Integer.toString(b[3]);
-
         return x;
+
     }
 }

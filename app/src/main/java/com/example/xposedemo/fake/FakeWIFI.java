@@ -1,7 +1,7 @@
 package com.example.xposedemo.fake;
 
-import com.zhang.emulatorhook.bean.WIFIInfo;
-import com.zhang.emulatorhook.util.PhoneRndTools;
+import com.example.xposedemo.bean.WIFIInfo;
+import com.example.xposedemo.utils.PhoneRndTools;
 
 public class FakeWIFI {
     public static WIFIInfo makeWIFI(){

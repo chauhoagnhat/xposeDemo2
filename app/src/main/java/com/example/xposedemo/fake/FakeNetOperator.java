@@ -1,7 +1,7 @@
 package com.example.xposedemo.fake;
 
-import com.zhang.emulatorhook.bean.NetOperatorInfo;
-import com.zhang.emulatorhook.util.PhoneRndTools;
+import com.example.xposedemo.bean.NetOperatorInfo;
+import com.example.xposedemo.utils.PhoneRndTools;
 
 public class FakeNetOperator {
     public static NetOperatorInfo makeNetOperator(){

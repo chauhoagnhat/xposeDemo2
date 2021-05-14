@@ -22,9 +22,11 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.FileReader;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
+import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -36,6 +38,44 @@ public class Ut {
     protected static final String PREFS_DEVICE_ID = "gank_device_id";
     private static final String TAG = "DeviceUtils";
     protected static String uuid;
+
+    /**
+     * 获取系统属性
+     * @param properties
+     * @return
+     */
+    public  static Object getSystemProperties( String properties )  {
+        String arch = "";//cpu类型
+        Method get;
+        try {
+            Class<?> clazz = Class.forName("android.os.SystemProperties");
+            get = clazz.getDeclaredMethod("get", new Class[]{String.class});
+            return get.invoke(clazz, new Object[]{properties});
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        return  null;
+    }
+
+    public static void fileWriterTxt(String filePath,String content) {
+        FileWriter fwriter = null;
+        try {
+            // true表示不覆盖原来的内容，而是加到文件的后面。若要覆盖原来的内容，直接省略这个参数就好
+            fwriter = new FileWriter( filePath );
+            fwriter.write(content);
+        } catch (IOException ex) {
+            ex.printStackTrace();
+        } finally {
+            try {
+                fwriter.flush();
+                fwriter.close();
+            } catch (IOException ex) {
+                ex.printStackTrace();
+            }
+        }
+    }
+
 
     /**
      * 获取uuid
@@ -229,6 +269,7 @@ public class Ut {
     public static String readFileToString ( String FILE_IN ) {
         String str="";
         File file=new File( FILE_IN );
+
         try {
             FileInputStream in=new FileInputStream(file);
             // size 为字串的长度 ，这里一次性读完
@@ -256,7 +297,7 @@ public class Ut {
             BufferedReader br = new BufferedReader(new FileReader(file));//构造一个BufferedReader类来读取文件
             String s = null;
             while((s = br.readLine())!=null){//使用readLine方法，一次读一行
-                result.append(System.lineSeparator()+s);
+                result.append(System.lineSeparator()+s );
             }
             br.close();
         }catch(Exception e){

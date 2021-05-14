@@ -51,7 +51,7 @@ public class Phone  {
     }
 
     // ------- MAC 蓝牙-----------------------------------------------------------
-    public void Bluetooth(XC_LoadPackage.LoadPackageParam loadPkgParam) {
+ /*   public void Bluetooth(XC_LoadPackage.LoadPackageParam loadPkgParam) {
         try {
 
             // 双层 MAC
@@ -87,11 +87,11 @@ public class Phone  {
         } catch (Exception e) {
             XposedBridge.log("phone MAC HOOK 失败 " + e.getMessage());
         }
-    }
+    }*/
 
     // -----------------------------------------------------------------------------
 
-    // WIF MAC
+  /*  // WIF MAC
     public void Wifi(XC_LoadPackage.LoadPackageParam loadPkgParam) {
         try {
 
@@ -161,7 +161,7 @@ public class Phone  {
 
                 });
     }
-
+*/
     public void  hookBuild(){
 
         // 修改手机系统信息 此处是手机的基本信息 包括厂商 信号 ROM版本 安卓版本 主板 设备名 指纹名称等信息
@@ -334,9 +334,9 @@ public class Phone  {
             }
         });
 */
-
-
     }
+
+
     private void HookTelephony(String hookClass, XC_LoadPackage.LoadPackageParam loadPkgParam,
                                final String funcName, final boolean value) {
         try {
@@ -375,9 +375,9 @@ public class Phone  {
 
     }
 
-
     private void HookTelephony(String hookClass, XC_LoadPackage.LoadPackageParam loadPkgParam,
-                               final String funcName, final int value) {
+
+            final String funcName, final int value) {
         try {
 
             XposedHelpers.findAndHookMethod(hookClass,

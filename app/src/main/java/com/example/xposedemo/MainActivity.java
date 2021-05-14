@@ -1,5 +1,6 @@
 package com.example.xposedemo;
 
+import androidx.annotation.RequiresApi;
 import androidx.appcompat.app.AppCompatActivity;
 
 import android.content.ComponentName;
@@ -44,6 +45,7 @@ public class MainActivity extends AppCompatActivity {
     private String string;
     private   Context context =  null ;
 
+
     @Override
         protected void onCreate( Bundle savedInstanceState ) {
 
@@ -82,7 +84,7 @@ public class MainActivity extends AppCompatActivity {
         Log.d(TAG, "onCreate:getSubscriberId"+telephonyManager.getSubscriberId() );
         Log.d(TAG, "onCreate:getDeviceId"+telephonyManager.getDeviceId  () );
 
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M ) {
                 
                 Log.d(TAG, "onCreate: getDeviceId="+telephonyManager.getDeviceId(0) );
                 Log.d(TAG, "onCreate: getSubscriberId="+telephonyManager. getSubscriberId () );
@@ -103,6 +105,8 @@ public class MainActivity extends AppCompatActivity {
                 Log.d(TAG,  "configAll navigationHidden-"+configuration.navigationHidden );
                 Log.d(TAG,  "configAll touchscreen-"+configuration.touchscreen );
 
+                Log.d(TAG, "onCreate: getSystemProperties-ro.build.description-"+Ut.getSystemProperties("ro.build.description")  );
+                Log.d(TAG, "onCreate: getSystemProperties-gsm.version.baseband-"+Ut.getSystemProperties("gsm.version.baseband")  );
                 Log.d(TAG, "onCreate: getConfiguration mccmnc="+configuration.mcc+configuration.mnc );
                 Log.d(TAG, "onCreate: getConfiguration="+configuration.toString()  );
                 Log.d(TAG, "onCreate:"   ) ;
@@ -116,6 +120,29 @@ public class MainActivity extends AppCompatActivity {
                 Log.d(TAG, "onCreate: build DEVICE-"+Build.DEVICE );
                 Log.d(TAG, "onCreate: build FINGERPRINT-"+Build.FINGERPRINT );
                 Log.d(TAG, "onCreate: build DISPLAY-"+Build.DISPLAY );
+                Log.d(TAG, "onCreate: build ID-"+Build.ID  );
+                Log.d(TAG, "onCreate: build HOST-"+Build.HOST  );
+                Log.d(TAG, "onCreate: build TAGS-"+Build.TAGS  );
+                Log.d(TAG, "onCreate: build TIME-"+Build.TIME  );
+                Log.d(TAG, "onCreate: build .VERSION.INCREMENTAL-"+Build.VERSION.INCREMENTAL  );
+                Log.d(TAG, "onCreate: build .VERSION.RELEASE-"+Build.VERSION.RELEASE  );
+                Log.d(TAG, "onCreate: build .VERSION.CODENAME-"+Build.VERSION.CODENAME  );
+               // Log.d(TAG, "onCreate: build TAGS-"+Build.   );
+
+                Log.d(TAG, "onCreate: build getRadioVersion-"+Build.getRadioVersion()  );
+
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                    Log.d(TAG, "onCreate: build getSerial-"+Build.getSerial() );
+                }
+                Log.d(TAG, "onCreate: build BOOTLOADER-"+Build.BOOTLOADER  );
+                Log.d(TAG, "onCreate: build HOST-"+Build.HOST  );
+                Log.d(TAG, "onCreate: build TAGS-"+Build.TAGS  );
+                Log.d(TAG, "onCreate: build TYPE-"+Build.TYPE  );
+                Log.d(TAG, "onCreate: build RADIO-"+Build.RADIO  );
+                Log.d(TAG, "onCreate: build TIME-"+Build.TIME  );
+                //Log.d(TAG, "onCreate: build HOST-"  );
+
+
 
             }
 
@@ -185,6 +212,7 @@ public class MainActivity extends AppCompatActivity {
     public void insert(String json){
 
         //①获取内容解析者
+/*
         ContentResolver resolver = getContentResolver();
         Uri url = Uri.parse( Common.URI+"insert" );
         Log.d(TAG, "insert: =" +Common.URI+"insert" );
@@ -192,12 +220,13 @@ public class MainActivity extends AppCompatActivity {
         values.put("device",json  );
         Uri insert = resolver.insert(url, values);
         System.out.println(insert);
+*/
 
     }
 
     public void query(){
         //获取内容解析者
-        ContentResolver contentResolver = getContentResolver();
+/*        ContentResolver contentResolver = getContentResolver();
         Uri uri =Uri.parse(Common.URI+"query");
         Cursor cursor = contentResolver.query(uri, null, null, null, null);
 //	Cursor cursor = database.rawQuery("select * from info", null);
@@ -206,7 +235,7 @@ public class MainActivity extends AppCompatActivity {
             String name = cursor.getString(cursor.getColumnIndex("device"));
             String phone = cursor.getString(cursor.getColumnIndex("json"));
             System.out.println("name="+name+"phone"+phone);
-        }
+        }*/
 
     }
 

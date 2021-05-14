@@ -1,6 +1,6 @@
 package com.example.xposedemo.fake;
 
-import com.zhang.emulatorhook.bean.GPUInfo;
+import com.example.xposedemo.bean.GPUInfo;
 
 public class FakeGPU {
 

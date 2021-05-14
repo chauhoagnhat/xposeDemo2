@@ -7,6 +7,8 @@ import android.provider.Settings;
 import com.example.xposedemo.bean.BaseInfo;
 import com.example.xposedemo.bean.BaseInfo;
 import com.example.xposedemo.fake.FackBase;
+import com.example.xposedemo.utils.Ut;
+
 import de.robv.android.xposed.XC_MethodHook;
 
 import de.robv.android.xposed.XposedBridge;
@@ -18,13 +20,21 @@ import java.lang.reflect.Member;
 
 public class BaseHook {
 
-    public BaseHook(XC_LoadPackage.LoadPackageParam loadPackageParam){
-        BaseInfo baseInfo = FackBase.getInstance();
+    public  BaseInfo baseInfo;
 
-        if ("".equals(loadPackageParam.packageName)){
+    public BaseHook(XC_LoadPackage.LoadPackageParam loadPackageParam){
+
+        if ( HookShare.boolNew() ){
+            baseInfo = FackBase.getInstance();
+            HookShare.WriteBean2Json( baseInfo );
+            Ut.fileWriterTxt( HookShare.pathNewDeviceOrder,"-1" );
+        }
+
+        if ("".equals( loadPackageParam.packageName ) ) {
             return;
         }
-        hookAll(baseInfo,loadPackageParam);
+        hookAll(  baseInfo,loadPackageParam  );
+
     }
 
     public void hookMethod(final String className, final ClassLoader classLoader, final String methodName, final String result){
@@ -45,14 +55,14 @@ public class BaseHook {
     private void hookAll(final BaseInfo baseInfo, XC_LoadPackage.LoadPackageParam loadPackageParam) {
 
 
-        hookMethod("android.telephony.TelephonyManager", loadPackageParam.classLoader, "getDeviceId", baseInfo.getImei());
-        hookMethod("android.telephony.TelephonyManager", loadPackageParam.classLoader,"getSubscriberId", baseInfo.getImsi());
+        //hookMethod("android.telephony.TelephonyManager", loadPackageParam.classLoader, "getDeviceId", baseInfo.getImei());
+        //hookMethod("android.telephony.TelephonyManager", loadPackageParam.classLoader,"getSubscriberId", baseInfo.getImsi());
         hookMethod("android.bluetooth.BluetoothAdapter", loadPackageParam.classLoader,"getAddress", baseInfo.getBluemac());
         hookMethod("android.bluetooth.BluetoothDevice", loadPackageParam.classLoader,"getAddress", baseInfo.getBluemac());
         hookMethod("android.os.Build", loadPackageParam.classLoader,"getRadioVersion", baseInfo.getRadioVersion());
         //修改field值
         try {
-            XposedHelpers.findField(Build.class,"BOARD").set(null,baseInfo.getBoard());
+            XposedHelpers.findField(Build.class,"BOARD").set(null,baseInfo.getBoard()  );
             XposedHelpers.findField(Build.class, "SERIAL").set(null, baseInfo.getSerial()); //串口序列号
             XposedHelpers.findField(Build.class, "BRAND").set(null, baseInfo.getBrand()); // 手机品牌
             XposedHelpers.findField(Build.class, "CPU_ABI").set(null, baseInfo.getCpu_abi());

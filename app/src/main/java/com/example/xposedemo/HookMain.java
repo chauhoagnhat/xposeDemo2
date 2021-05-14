@@ -18,9 +18,10 @@ public class HookMain  implements IXposedHookLoadPackage   {
      */
     @Override
     public void handleLoadPackage(XC_LoadPackage.LoadPackageParam loadPackageParam)  throws Throwable {
-        
-        if (loadPackageParam.packageName.equals( "jp.naver.line.android" )|loadPackageParam.packageName.equals( BuildConfig.APPLICATION_ID  )
 
+        //loadPackageParam.packageName.equals( BuildConfig.APPLICATION_ID
+
+        if (loadPackageParam.packageName.equals( "jp.naver.line.android" )
             |loadPackageParam.packageName.equals("com.google.android.gms")
             |loadPackageParam.packageName.equals("com.android.vending")){
             Log.d(TAG, "handleLoadPackage: new phone");
