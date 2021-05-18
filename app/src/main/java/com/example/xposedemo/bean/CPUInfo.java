@@ -15,12 +15,11 @@ public class CPUInfo implements Serializable{
     public void setProcessor(String processor) {
         this.processor = processor;
     }
-
     public List<ProcessInfo> getProcessInfoList() {
         return processInfoList;
     }
 
-    public void setProcessInfoList(List<ProcessInfo> processInfoList) {
+    public void setProcessInfoList( List<ProcessInfo> processInfoList ) {
         this.processInfoList = processInfoList;
     }
 

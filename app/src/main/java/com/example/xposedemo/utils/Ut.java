@@ -1,10 +1,13 @@
 package com.example.xposedemo.utils;
 
+import android.app.AlertDialog;
 import android.content.ComponentName;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.ServiceConnection;
 import android.content.SharedPreferences;
+import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.os.IBinder;
 import android.os.IInterface;
@@ -14,8 +17,10 @@ import android.os.RemoteException;
 import android.provider.Settings;
 import android.telephony.TelephonyManager;
 import android.util.Log;
+import android.widget.Toast;
 
 import com.example.xposedemo.MainActivity;
+import com.example.xposedemo.R;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -38,6 +43,66 @@ public class Ut {
     protected static final String PREFS_DEVICE_ID = "gank_device_id";
     private static final String TAG = "DeviceUtils";
     protected static String uuid;
+
+    /**
+     *
+     * @param context
+     * @return
+     */
+    public static List<String> getPackageInfo( Context context ){
+
+        PackageManager packageManager = context.getPackageManager();
+        //获取所有已安装程序的包信息
+        List<PackageInfo> packageInfos = packageManager.getInstalledPackages(0);
+        //用于存储所有已安装程序的包名
+        List<String> packageNames = new ArrayList<>();
+        //从pinfo中将包名字逐一取出，压入pName list中
+        if (packageInfos != null) {
+            for (int i = 0; i < packageInfos.size(); i++) {
+                String packName = packageInfos.get(i).packageName;
+                packageNames.add( packName );
+            }
+        }
+        return packageNames;
+
+    }
+
+    /**
+     * 弹框
+     * @param context
+     * @param items  new String[]{ "消息内容" }
+     */
+    private void dialogShow(final Context context, String[] items ){
+
+        final String[] items2=items;
+
+        //dialog参数设置
+        AlertDialog.Builder builder=new AlertDialog.Builder(context);  //先得到构造器
+        builder.setTitle("settingPath"); //设置标题
+        builder.setIcon(R.mipmap.ic_launcher);
+
+        //设置图标，图片id即可
+        //设置列表显示，注意设置了列表显示就不要设置builder.setMessage()了，否则列表不起作用。
+        builder.setItems(items,new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                dialog.dismiss();
+                Toast.makeText(context, items2[which], Toast.LENGTH_SHORT).show();
+            }
+        });
+
+        builder.setPositiveButton("返回",new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                dialog.dismiss();
+                //Toast.makeText(MainActivity.this, "完成", Toast.LENGTH_SHORT).show();
+            }
+        });
+
+        builder.create().show();
+    }
+
+
 
     /**
      * 获取系统属性

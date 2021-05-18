@@ -2,8 +2,12 @@ package com.example.xposedemo;
 
 import android.util.Log;
 
+import com.example.xposedemo.Hook.BaseHook;
 import com.example.xposedemo.Hook.CPUHook;
+import com.example.xposedemo.Hook.HookShare;
 import com.example.xposedemo.Hook.Phone;
+import com.example.xposedemo.Hook.WIFIHook;
+import com.example.xposedemo.utils.Ut;
 
 import de.robv.android.xposed.IXposedHookLoadPackage;
 import de.robv.android.xposed.XC_MethodHook;
@@ -16,23 +20,24 @@ public class HookMain  implements IXposedHookLoadPackage   {
     /**
      * XposedBridge.log()：以原生logcat的形式写入到/data/user_de/0/de.robv.android.xposed.installer/log/error.log
      */
+
+
+
     @Override
     public void handleLoadPackage(XC_LoadPackage.LoadPackageParam loadPackageParam)  throws Throwable {
 
         //loadPackageParam.packageName.equals( BuildConfig.APPLICATION_ID
 
-        if (loadPackageParam.packageName.equals( "jp.naver.line.android" )
-            |loadPackageParam.packageName.equals("com.google.android.gms")
-            |loadPackageParam.packageName.equals("com.android.vending")){
-            Log.d(TAG, "handleLoadPackage: new phone");
-            //hookBuild();
-            //hookBuild();
+        String json= Ut.readFileToString(HookShare.pathSelectedPackages);
+
+        Log.d(TAG, "handleLoadPackage: boolSelectedPackages"+ HookShare.boolSelectedPackages( loadPackageParam ) );
+
+        if ( HookShare.boolSelectedPackages( loadPackageParam ) ){
             new Phone( loadPackageParam  ) ;
             new CPUHook( loadPackageParam );
-
+            new BaseHook( loadPackageParam );
+            new WIFIHook( loadPackageParam );
         }
-
-
 
 /*        if (loadPackageParam.packageName.equals( BuildConfig.APPLICATION_ID )) {
             Class clazz = loadPackageParam.classLoader.loadClass("com.example.xposedemo.MainActivity");

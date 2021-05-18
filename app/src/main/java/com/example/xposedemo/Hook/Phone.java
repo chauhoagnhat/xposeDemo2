@@ -50,118 +50,7 @@ public class Phone  {
         Log.d(TAG, "query: query");
     }
 
-    // ------- MAC 蓝牙-----------------------------------------------------------
- /*   public void Bluetooth(XC_LoadPackage.LoadPackageParam loadPkgParam) {
-        try {
 
-            // 双层 MAC
-            XposedHelpers.findAndHookMethod(
-                    "android.bluetooth.BluetoothAdapter",
-                    loadPkgParam.classLoader, "getAddress",
-                    new XC_MethodHook() {
-
-                        @Override
-                        protected void afterHookedMethod(MethodHookParam param)
-                                throws Throwable {
-                            // TODO Auto-generated method stub
-                            super.afterHookedMethod(param);
-                            param.setResult(SharedPref.getXValue("LYMAC"));
-                        }
-
-                    });
-            // 双层MAC
-            XposedHelpers.findAndHookMethod(
-                    "android.bluetooth.BluetoothDevice",
-                    loadPkgParam.classLoader, "getAddress",
-                    new XC_MethodHook() {
-
-                        @Override
-                        protected void afterHookedMethod(MethodHookParam param)
-                                throws Throwable {
-                            // TODO Auto-generated method stub
-                            // super.afterHookedMethod(param);
-                            param.setResult(SharedPref.getXValue("LYMAC"));
-                        }
-
-                    });
-        } catch (Exception e) {
-            XposedBridge.log("phone MAC HOOK 失败 " + e.getMessage());
-        }
-    }*/
-
-    // -----------------------------------------------------------------------------
-
-  /*  // WIF MAC
-    public void Wifi(XC_LoadPackage.LoadPackageParam loadPkgParam) {
-        try {
-
-            XposedHelpers.findAndHookMethod("android.net.wifi.WifiInfo",
-                    loadPkgParam.classLoader, "getMacAddress",
-                    new XC_MethodHook() {
-
-                        @Override
-                        protected void afterHookedMethod(MethodHookParam param)
-                                throws Throwable {
-                            // TODO Auto-generated method stub
-                            super.afterHookedMethod(param);
-                            param.setResult(SharedPref.getXValue("WifiMAC"));
-                        }
-
-                    });
-
-            // 内网IP
-            XposedHelpers.findAndHookMethod("android.net.wifi.WifiInfo",
-                    loadPkgParam.classLoader, "getIpAddress",
-                    new XC_MethodHook() {
-
-                        @Override
-                        protected void afterHookedMethod(MethodHookParam param)
-                                throws Throwable {
-                            // TODO Auto-generated method stub
-                            super.afterHookedMethod(param);
-                            param.setResult(SharedPref.getintXValue("getIP"));
-                            // param.setResult(tryParseInt(SharedPref.getXValue("getIP")));
-
-                        }
-
-                    });
-
-            XposedHelpers.findAndHookMethod("android.net.wifi.WifiInfo",
-                    loadPkgParam.classLoader, "getSSID", new XC_MethodHook() {
-
-                        @Override
-                        protected void afterHookedMethod(MethodHookParam param)
-                                throws Throwable {
-                            // TODO Auto-generated method stub
-                            super.afterHookedMethod(param);
-                            param.setResult(SharedPref.getXValue("WifiName"));
-                        }
-
-                    });
-
-
-        } catch (Exception e) {
-
-        }
-
-        // ------------------------基站信息
-
-
-        // 基站的信号强度
-        XposedHelpers.findAndHookMethod("android.net.wifi.WifiInfo",
-                loadPkgParam.classLoader, "getBSSID", new XC_MethodHook() {
-
-                    @Override
-                    protected void afterHookedMethod(MethodHookParam param)
-                            throws Throwable {
-                        // TODO Auto-generated method stub
-                        super.afterHookedMethod(param);
-                        param.setResult(SharedPref.getXValue("BSSID"));
-                    }
-
-                });
-    }
-*/
     public void  hookBuild(){
 
         // 修改手机系统信息 此处是手机的基本信息 包括厂商 信号 ROM版本 安卓版本 主板 设备名 指纹名称等信息
@@ -302,18 +191,21 @@ public class Phone  {
         fucName="getSimCountryIso";       //hk 手机卡国家
         HookTelephony( TelePhone, loadPkgParam, fucName,
                 jsonObjectPara.getString( fucName )  );
+        fucName="getDeviceSoftwareVersion";
+        HookTelephony( TelePhone, loadPkgParam, fucName,
+                "100"  );
 
-//        fucName="GetNeighboringCellInfo";       //
+        //        fucName="GetNeighboringCellInfo";       //
 //        HookTelephony( TelePhone, loadPkgParam, fucName,
 //                jsonObjectPara.getString( fucName )  ); // 获取邻近的基站信息，返回的是List<NeighboringCellInfo>基站列表信息
-        fucName="getCellLocation";       //
-        HookTelephony( TelePhone, loadPkgParam, fucName,
-                jsonObjectPara.getString( fucName )  ); // 获取当前基站信息
-        fucName="getAllCellInfo";       //
-        HookTelephony( TelePhone, loadPkgParam, fucName,
-                jsonObjectPara.getString( fucName )  ); // List<CellInfo>基站列表信息
+//        fucName="getCellLocation";       //
+//        HookTelephony( TelePhone, loadPkgParam, fucName,
+//                jsonObjectPara.getString( fucName )  ); // 获取当前基站信息
+ //       fucName="getAllCellInfo";       //
+//        HookTelephony( TelePhone, loadPkgParam, fucName,
+//                jsonObjectPara.getString( fucName )  ); // List<CellInfo>基站列表信息
 
-
+        
         HookTelephony(android.telephony.TelephonyManager.class.getName(),loadPkgParam,  "getPhoneType" , TelephonyManager.PHONE_TYPE_GSM );
         HookTelephony(android.telephony.TelephonyManager.class.getName(),loadPkgParam,  "getNetworkType" , TelephonyManager.NETWORK_TYPE_HSPAP);
         HookTelephony(android.telephony.TelephonyManager.class.getName(),loadPkgParam,  "getSimState" , TelephonyManager.SIM_STATE_READY);
