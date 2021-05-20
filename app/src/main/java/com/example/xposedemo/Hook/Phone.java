@@ -38,7 +38,7 @@ public class Phone  {
                 new XC_MethodHook() {
                     protected void afterHookedMethod(MethodHookParam param) throws Throwable {
                         super.afterHookedMethod(param);
-                        param.setResult(SharedPref.getintXValue("getType"));
+                        param.setResult(  SharedPref.getintXValue("getType") );
                     }
                     ;
                 });

@@ -33,12 +33,9 @@ public class ExampleInstrumentedTest {
     @Test
     public void useAppContext() {
 
-        // Context of the app under test.
-        // Context appContext = InstrumentationRegistry.getTargetContext();
-        // assertEquals("com.example.xposedemo", appContext.getPackageName());
-        // Log.d(TAG, "useAppContext: build ID-"+ Build.ID  );
-       // HookShare.WriteBean2Json( FackBase.getInstance() );
-        // Log.d(TAG, "useAppContext: read="+Ut.readFileToString( HookShare.pathNewDeviceOrder )  );
+        for (int i=0;i<10;i++)
+            Log.d(TAG, "useAppContext: "+Ut.r_(2,10) );
+
 
     }
 }

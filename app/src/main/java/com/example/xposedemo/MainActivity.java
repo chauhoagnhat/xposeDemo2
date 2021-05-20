@@ -3,6 +3,7 @@ package com.example.xposedemo;
 import androidx.annotation.RequiresApi;
 import androidx.appcompat.app.AppCompatActivity;
 
+import android.Manifest;
 import android.app.AlertDialog;
 import android.app.DirectAction;
 import android.app.ProgressDialog;
@@ -33,9 +34,11 @@ import android.widget.Toast;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import com.alibaba.fastjson.TypeReference;
+import com.example.xposedemo.Hook.Hook;
 import com.example.xposedemo.Hook.HookShare;
 import com.example.xposedemo.bean.BaseInfo;
 import com.example.xposedemo.fake.FackBase;
+import com.example.xposedemo.fake.FackPages;
 import com.example.xposedemo.utils.Common;
 import com.example.xposedemo.utils.Ut;
 import com.example.xposedemo.utils.SharedPref;
@@ -64,16 +67,19 @@ public class MainActivity extends AppCompatActivity {
     private   Context context =  null ;
     private Button bt_new;
 
-
     @Override
     protected void onCreate( Bundle savedInstanceState ) {
 
-        super.onCreate(savedInstanceState);
+        super.onCreate( savedInstanceState );
         setContentView(R.layout.activity_main);
+
+        FackPages fackPages=FackPages.getInstance(getApplicationContext());
+        fackPages.fakePackages ();
+
         viewById=findViewById(R.id.textView);
         viewById.setText("no data");
-
         //setSelectedPackges();
+
         ui();
 
             //testHook();
@@ -100,7 +106,6 @@ public class MainActivity extends AppCompatActivity {
 
         Log.d(TAG, "onCreate: run finish");
 
-
     }
 
     public void setSelectedPackges() {
@@ -116,6 +121,30 @@ public class MainActivity extends AppCompatActivity {
         Ut.fileWriterTxt( HookShare.pathSelectedPackages,jobj2.toJSONString() );
     }
 
+
+    public void Permission() {
+        boolean isGranted = true;
+        if (android.os.Build.VERSION.SDK_INT >= 23) {
+            if (this.checkSelfPermission(Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
+                //如果没有写sd卡权限
+                isGranted = false;
+            }
+            if (this.checkSelfPermission(Manifest.permission.READ_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
+                isGranted = false;
+            }
+            Log.i("cbs", "isGranted == " + isGranted);
+            if (!isGranted) {
+                this.requestPermissions(
+                        new String[]{Manifest.permission.ACCESS_COARSE_LOCATION, Manifest.permission
+                                .ACCESS_FINE_LOCATION,
+                                Manifest.permission.READ_EXTERNAL_STORAGE,
+                                Manifest.permission.WRITE_EXTERNAL_STORAGE},
+                        102);
+            }
+
+        }
+
+    }
 
     @Override
     protected void onStop() {
@@ -232,15 +261,71 @@ public class MainActivity extends AppCompatActivity {
                 dialogShowDevice();
             }
         });
-
-
     }
 
 
     private  void dialogSelectPackageName(){
 
-        List<String> listStringPackages =Ut.getPackageInfo( MainActivity.this );
+        List<String> listStringPackages =Ut.getPackageNames( MainActivity.this );
+
+        List<String> google=new ArrayList<>();
+        List<String> android=new ArrayList<>();
+        List<String> other=new ArrayList<>();
+
+
+        for ( String str :
+           listStringPackages  ) {
+            if(str.indexOf( "com.google." )!=-1)
+                google.add(str);
+            else if ( str.indexOf("com.android")!=-1 )
+                android.add(str);
+            else if (str.indexOf("com.lge")==-1)
+                other.add( str );
+        }
+
+        Ut.writeLines( "/sdcard/google.txt",google );
+        Ut.writeLines( "/sdcard/android.txt",android );
+        Ut.writeLines( "/sdcard/other.txt",other );
+        Ut.writeLines( "/sdcard/1.txt",listStringPackages );
         List<Boolean> listBooleanPackages=new ArrayList<>();
+
+        PackageManager packageManager = getApplication() .getPackageManager();
+
+       //  +"\r\n,"+
+        List<PackageInfo> listPackageInfos=packageManager.getInstalledPackages(0);
+        for ( PackageInfo p :
+              listPackageInfos ) {
+            
+
+            Log.d(TAG, "dialogSelectPackageName: \r\n" +
+                            "packages="+p.packageName+"\r\n-sharedUserId="+p.sharedUserId
+            +"\r\n,applicationInfo"+p.applicationInfo
+                            +"\r\n,sharedUserId="+p.sharedUserId
+                            +"\r\n,firstInstallTime="+p.firstInstallTime
+                            +"\r\n,versionName="+p.versionName
+                            +"\r\n,activities="+p.activities
+                            +"\r\n,baseRevisionCode="+p.baseRevisionCode
+                            +"\r\n,configPreferences="+p.configPreferences
+                            +"\r\n,featureGroups="+p.featureGroups
+                            +"\r\n,gids="+p.gids
+                            +"\r\n,installLocation="+p.installLocation
+                            +"\r\n,instrumentation="+p.instrumentation
+                            +"\r\n,lastUpdateTime="+p.lastUpdateTime
+                            +"\r\n,splitNames="+p.splitNames
+                            +"\r\n,signatures="+p.signatures
+                            +"\r\n,splitRevisionCodes="+p.splitRevisionCodes
+                            +"\r\n,sharedUserLabel="+p.sharedUserLabel
+                            +"\r\n,receivers="+p.receivers
+                            +"\r\n,services="+p.services
+                            +"\r\n,providers="+p.providers
+                            +"\r\n,requestedPermissions="+p.requestedPermissions
+                            +"\r\n,requestedPermissionsFlags="+p.requestedPermissionsFlags
+                            +"\r\n,reqFeatures="+p.reqFeatures
+                            +"\r\n,featureGroups="+p.featureGroups
+                            +"\r\n______________________________________________"
+                    );
+        }
+
 
         String jsonTxtPackages=Ut.readFileToString( HookShare.pathPackages );
         final JSONObject jsonObject;
@@ -255,12 +340,31 @@ public class MainActivity extends AppCompatActivity {
             Ut.fileWriterTxt( HookShare.pathPackages ,jsonObject.toJSONString() );}
         }else {
             Log.d(TAG, "dialogSelectPackageName: read last");
+            JSONObject jobjSelectedPackages;
+
             jsonObject=JSON.parseObject( jsonTxtPackages );
-            for ( String string :
-                    listStringPackages  ) {
-                Log.d(TAG, "dialogSelectPackageName: k,v="+string+","+jsonObject.getBoolean( string )  );
-                listBooleanPackages.add ( jsonObject.getBoolean (string) );
+            if (jsonObject.size()!=listStringPackages.size() ){
+                 jobjSelectedPackages=HookShare.returnSelectedPackages();
+                for ( String string :
+                        listStringPackages  ) {
+                    //listBooleanPackages.add ( false );
+                    if (jobjSelectedPackages!=null){
+                        if ( jobjSelectedPackages.containsKey( string ) )
+                            listBooleanPackages.add ( true );
+                        else
+                            listBooleanPackages.add(false);
+                    }
+
+                }
+
+            }else {
+                for ( String string :
+                        listStringPackages  ) {
+                    Log.d(TAG, "dialogSelectPackageName: k,v="+string+","+jsonObject.getBoolean( string )  );
+                    listBooleanPackages.add ( jsonObject.getBoolean (string) );
+                }
             }
+
         }
 
         final String items[]=listStringPackages.toArray( new String[ listStringPackages.size() ] );
@@ -281,6 +385,7 @@ public class MainActivity extends AppCompatActivity {
         Log.d( TAG, "dialogSelectPackageName: alertBuild" );
         builder.setTitle("appPackage"); //设置标题
         builder.setIcon(R.mipmap.ic_launcher);//设置图标，图片id即可
+
 
         for ( boolean b :
          selected    ) {

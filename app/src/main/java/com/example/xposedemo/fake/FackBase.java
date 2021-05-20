@@ -43,7 +43,7 @@ public class FackBase {
         baseInfo.setRelease("8.1.0");
         baseInfo.setSdk("27");
         baseInfo.setCodename("REL");
-        baseInfo.setBuildtime("1528156262000");
+        baseInfo.setBuildtime("15281562"+PhoneRndTools.randomNum(7) );
         baseInfo.setDiscription("sailfish-user 8.1.0 OPM4.171019.021.P1 4820305 release-keys");
         //XposedBridge.log( baseInfo.toString() );
         return baseInfo;

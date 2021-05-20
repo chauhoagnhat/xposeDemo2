@@ -98,7 +98,7 @@ public class BaseHook {
             XposedHelpers.findField(Build.VERSION.class, "RELEASE").set(null, jsonObject.get("release")  );
             XposedHelpers.findField(Build.VERSION.class, "SDK").set(null, jsonObject.get("sdk") );
             XposedHelpers.findField(Build.VERSION.class, "CODENAME").set(null, "REL"); //写死就行 这个值为固定
-            XposedHelpers.findField(Build.class, "TIME").set(null, Integer.parseInt( (String)jsonObject.get("buildtime")));  // 固件时间build
+            XposedHelpers.findField(Build.class, "TIME").set(null, Long.parseLong((String) jsonObject.get("buildtime") )   );  // 固件时间build
 
         } catch (Throwable e)
         {

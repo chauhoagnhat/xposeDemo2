@@ -23,18 +23,24 @@ import com.example.xposedemo.MainActivity;
 import com.example.xposedemo.R;
 
 import java.io.BufferedReader;
+import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.OutputStreamWriter;
 import java.io.UnsupportedEncodingException;
 import java.lang.reflect.Method;
+import java.sql.Connection;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.Random;
 import java.util.UUID;
 import java.util.concurrent.LinkedBlockingQueue;
 
@@ -45,11 +51,107 @@ public class Ut {
     protected static String uuid;
 
     /**
+     * 按行写入
+     * @param path
+     * @param list
+     * @throws IOException
+     */
+    public static void writeLines( String path,List<String> list )   {
+
+        File fout = new File(path);
+        FileOutputStream fos = null;
+        try {
+            fos = new FileOutputStream(fout);
+            BufferedWriter bw = new BufferedWriter(new OutputStreamWriter(fos));
+            for (String string:
+                    list ) {
+                bw.write(string);
+                bw.newLine();
+            }
+            bw.close();
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+            Log.d(TAG, "writeLines: FileNotFoundException"+e);
+        } catch (IOException e) {
+            e.printStackTrace();
+            Log.d(TAG, "writeLines: IOException"+e);
+        }
+
+
+    }
+
+    /**
+     *
+     * @param min
+     * @param max
+     * @return
+     */
+    public static int r_( int min,int max ){
+        int randomNumber;
+            randomNumber = (int) (((max - min + 1) * Math.random() + min ));
+            return randomNumber;
+    }
+
+    /**
+     * 从list中随机取n个元素
+     * @param listObj
+     * @param n
+     * @return
+     */
+    public static <T> List<T> r_list(List<T> listObj , int n ){
+        Collections.shuffle( listObj );
+        List<T> listRet=new ArrayList<>();
+        for ( int i=0;i<n;i++){
+            listRet.add( listObj.get(i)  );
+        }
+        return  listRet;
+    }
+
+
+    /**
+     * 获取txt文件内容并按行放入list中
+     */
+    public static List<String> readLines(String path)   {
+        List<String> list=null;
+        FileReader fileReader = null;
+        try {
+            fileReader = new FileReader(path);
+            BufferedReader bufferedReader =new BufferedReader(fileReader);
+            list =new ArrayList<String>();
+            String str=null;
+            while((str=bufferedReader.readLine())!=null) {
+                if(str.trim().length()>2) {
+                    list.add(str);
+                }
+            }
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+            Log.d(TAG, "getFileContext: FileNotFoundException");
+        } catch (IOException e) {
+            e.printStackTrace();
+            Log.d(TAG, "getFileContext: IOException");
+        }
+
+        return list;
+    }
+
+    /**
+     *
+     * @param path 文件夹路径
+     */
+    public static void crFolder(String path) {
+        File file = new File(path);
+        if (!file.exists()) {
+            file.mkdir();
+        }
+    }
+
+    /**
      *
      * @param context
      * @return
      */
-    public static List<String> getPackageInfo( Context context ){
+    public static List<String> getPackageNames( Context context ){
 
         PackageManager packageManager = context.getPackageManager();
         //获取所有已安装程序的包信息

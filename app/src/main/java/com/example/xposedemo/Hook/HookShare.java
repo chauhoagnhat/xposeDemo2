@@ -18,8 +18,8 @@ public class HookShare {
     public final static String  pathPackages ="/sdcard/packages.txt";
     public final static String  pathSelectedPackages ="/sdcard/selectedPackages.txt";
 
-    private static final String TAG ="HookShare" ;
 
+    private static final String TAG ="HookShare" ;
     public static boolean boolSelectedPackages( XC_LoadPackage.LoadPackageParam loadPackageParam ){
 
         String json= Ut.readFileToString( HookShare.pathPackages );
@@ -49,6 +49,31 @@ public class HookShare {
         return  ret;
 
     }
+
+    /**
+     * 返回已经选择的包名
+     * @return
+     */
+    public static JSONObject returnSelectedPackages( ) {
+
+        String json= Ut.readFileToString( HookShare.pathPackages );
+        JSONObject jsonObject= JSON.parseObject(json);
+        JSONObject jobj2=null;
+
+        if( jsonObject ==null)
+            return null;
+        for ( Map.Entry<String,Object> entry :
+                jsonObject.entrySet() ) {
+            if( (boolean)entry.getValue() ){
+                if( jobj2==null ){
+                    jobj2=new JSONObject();
+                }
+                jobj2.put( entry.getKey(),true );
+            }
+        }
+            return jobj2;
+    }
+
 
     public static boolean boolIsPackageEmpty( ) {
         String json= Ut.readFileToString( HookShare.pathPackages );
