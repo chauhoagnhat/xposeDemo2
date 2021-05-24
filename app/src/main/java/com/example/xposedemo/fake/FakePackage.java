@@ -1,20 +1,16 @@
 package com.example.xposedemo.fake;
 
 import android.content.Context;
-import android.content.pm.PackageInfo;
-import android.content.pm.PackageManager;
-import android.net.LinkAddress;
 
-import com.example.xposedemo.Hook.HookShare;
 import com.example.xposedemo.utils.Ut;
 
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-public class FackPages {
+public class FakePackage {
 
-    private volatile static FackPages instance=null;
+    private volatile static FakePackage instance=null;
 
     public final static String  pathPackagesGoogle ="/sdcard/packages/google.txt";
     public final static String  pathPackagesAndorid ="/sdcard/packages/andorid.txt";
@@ -22,20 +18,19 @@ public class FackPages {
     public final static String  pathPackagesOther  ="/sdcard/packages/other.txt";
     public final String pathPackagesFolder="/sdcard/packages";
     public final Context context;
-    public final String getPathPackagesFinalResult="/sdcard/packages/finalResult.txt";
+    public static final String PathPackagesFinalResult="/sdcard/packages/finalResult.txt";
 
-    private  FackPages( Context context ){
+    private FakePackage(Context context ){
         Ut.crFolder( pathPackagesFolder );
         this.context=context;
-        FackPages.fakeInit(context);
-
+        FakePackage.fakeInit(context);
     }
 
-    public static FackPages getInstance( Context context ){
+    public static FakePackage getInstance(Context context ){
         if (instance == null) {
-            synchronized (FackPages.class) {
+            synchronized (FakePackage.class) {
                 if (instance == null) {
-                    instance = new FackPages( context );
+                    instance = new FakePackage( context );
                 }
             }
 
@@ -69,7 +64,7 @@ public class FackPages {
         listAll.addAll(listChatRet);
         listAll.addAll(listOtherRet);
         Collections.shuffle( listAll );
-        Ut.writeLines( getPathPackagesFinalResult ,listAll );
+        Ut.writeLines( PathPackagesFinalResult ,listAll );
 
     }
 

@@ -6,7 +6,7 @@ import com.example.xposedemo.utils.PhoneRndTools;
 import de.robv.android.xposed.XposedBridge;
 import de.robv.android.xposed.XposedHelpers;
 
-public class FackBase {
+public class FakeBase {
 
     public static BaseInfo getInstance(){
 

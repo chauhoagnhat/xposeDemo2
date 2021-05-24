@@ -1,56 +1,46 @@
 package com.example.xposedemo;
 
-import androidx.annotation.RequiresApi;
 import androidx.appcompat.app.AppCompatActivity;
 
 import android.Manifest;
 import android.app.AlertDialog;
-import android.app.DirectAction;
-import android.app.ProgressDialog;
 import android.content.ComponentName;
-import android.content.ContentResolver;
 import android.content.ContentValues;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
+import android.content.pm.ResolveInfo;
 import android.content.res.Configuration;
-import android.database.Cursor;
+import android.database.sqlite.SQLiteDatabase;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
-import android.provider.Settings;
 import android.telecom.TelecomManager;
 import android.telephony.TelephonyManager;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
-import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import com.alibaba.fastjson.TypeReference;
-import com.example.xposedemo.Hook.Hook;
 import com.example.xposedemo.Hook.HookShare;
+import com.example.xposedemo.MyProvider.MyOpenHelper;
 import com.example.xposedemo.bean.BaseInfo;
-import com.example.xposedemo.fake.FackBase;
-import com.example.xposedemo.fake.FackPages;
+import com.example.xposedemo.fake.FakeBase;
+import com.example.xposedemo.fake.FakePackage;
 import com.example.xposedemo.utils.Common;
 import com.example.xposedemo.utils.Ut;
 import com.example.xposedemo.utils.SharedPref;
 import com.example.xposedemo.utils.Utils;
 
-import java.io.IOException;
-import java.lang.reflect.Array;
-import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Iterator;
-import java.util.LinkedHashMap;
-import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.regex.Matcher;
@@ -66,21 +56,50 @@ public class MainActivity extends AppCompatActivity {
     private String string;
     private   Context context =  null ;
     private Button bt_new;
+    private List<Object> listDevice;
 
     @Override
     protected void onCreate( Bundle savedInstanceState ) {
 
         super.onCreate( savedInstanceState );
         setContentView(R.layout.activity_main);
+       // ApplicationPackageManager
+        MyOpenHelper myOpenHelper=new MyOpenHelper( getApplicationContext() );
+        myOpenHelper.getWritableDatabase();
 
-        FackPages fackPages=FackPages.getInstance(getApplicationContext());
-        fackPages.fakePackages ();
+        PackageManager packageManager = getPackageManager();
+        Intent mIntent = new Intent(Intent.ACTION_MAIN, null);
+        Log.d(TAG, "onCreate: isInstance"+Intent.class.isInstance( mIntent ) );
+
+        mIntent.addCategory(Intent.CATEGORY_LAUNCHER);
+        List<ResolveInfo> listAllApps = packageManager.queryIntentActivities(mIntent, 0);
+
+
+   /*     for ( ResolveInfo appInfo :
+                listAllApps   ) {
+            // appInfo = listAllApps.get(position);
+            String pkgName = appInfo.activityInfo.packageName;//获取包名
+            //根据包名获取PackageInfo mPackageInfo;（需要处理异常）
+
+            PackageInfo mPackageInfo = null;
+            try {
+                mPackageInfo = getApplication().getPackageManager().getPackageInfo(pkgName, 0);
+                Log.d(TAG, "onCreate: appName"+appInfo.loadLabel(packageManager).toString() );
+                Log.d(TAG, "onCreate: packageName");
+            } catch (PackageManager.NameNotFoundException e) {
+                e.printStackTrace();
+            }
+            if (( mPackageInfo.applicationInfo.flags & ApplicationInfo.FLAG_SYSTEM) <= 0) {
+                //第三方应用
+            } else {
+                //系统应用
+            }
+
+        }*/
 
         viewById=findViewById(R.id.textView);
         viewById.setText("no data");
         //setSelectedPackges();
-
-        ui();
 
             //testHook();
             Ut.copyAssetsFile(context,"cpuinfo","/sdcard/cpuinfo" );
@@ -88,6 +107,10 @@ public class MainActivity extends AppCompatActivity {
             Log.d(TAG, "onCreate: path="+path);
 
         deviceLog();
+        ui();
+
+
+
         // String jsonStr= Utils.readFileToString(Environment.getExternalStorageDirectory ()+"/device.txt");
 
         String jsonStr= Utils.readFileToString( Common.DEVICE_PATH );
@@ -161,52 +184,113 @@ public class MainActivity extends AppCompatActivity {
         Log.d(TAG, "onCreate:getSubscriberId"+telephonyManager.getSubscriberId() );
         Log.d(TAG, "onCreate:getDeviceId"+telephonyManager.getDeviceId  () );
 
+            PackageManager packageManager=getApplication().getPackageManager();
+            List< PackageInfo > tp=packageManager.getInstalledPackages(0);
+
+             listDevice=new ArrayList<>();
+            String pa;
+
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M ) {
 
-            Log.d(TAG, "onCreate: getDeviceId="+telephonyManager.getDeviceId(0) );
-            Log.d(TAG, "onCreate: getSubscriberId="+telephonyManager. getSubscriberId () );
+            pa="onCreate: getDeviceId="+telephonyManager.getDeviceId(0);
+            Log.d(TAG, pa );
+            listDevice.add(pa);
+            pa="onCreate: getSubscriberId="+telephonyManager. getSubscriberId ();
+            Log.d(TAG, pa );
+            listDevice.add(pa);
+            pa="onCreate: build model-"+Build.MODEL;
+            Log.d(TAG, pa );
+            listDevice.add(pa);
+            pa="onCreate: build MANUFACTURER-"+Build.MANUFACTURER;
+            Log.d(TAG, pa);
+            listDevice.add(pa);
+            pa="onCreate: build BRAND-"+Build.BRAND;
+            Log.d(TAG, pa );
+            listDevice.add(pa);
+            pa="onCreate: build HARDWARE-"+Build.HARDWARE ;
+            Log.d(TAG,pa);
+            listDevice.add(pa);
+            pa="onCreate: build BOARD-"+Build.BOARD;
+            Log.d(TAG,pa  );
+            listDevice.add(pa);
+            pa="onCreate: build SERIAL-"+Build.SERIAL;
+            Log.d(TAG, pa );
+            listDevice.add(pa);
+            pa="onCreate: build DEVICE-"+Build.DEVICE;
+            Log.d(TAG,  pa);
+            listDevice.add(pa);
+            pa="onCreate: build FINGERPRINT-"+Build.FINGERPRINT;
+            Log.d(TAG,  pa);
+            listDevice.add(pa);
+            pa="onCreate: build DISPLAY-"+Build.DISPLAY;
+            Log.d(TAG, pa );
+            listDevice.add(pa);
+            pa="onCreate: build ID-"+Build.ID;
+            Log.d(TAG, pa  );
+            listDevice.add(pa);
+            pa="onCreate: build HOST-"+Build.HOST ;
+            Log.d(TAG,pa  );
+            listDevice.add(pa);
+            pa="onCreate: build TAGS-"+Build.TAGS  ;
+            Log.d(TAG,pa );
+            listDevice.add(pa);
+            pa= "onCreate: build TIME-"+Build.TIME ;
+            Log.d(TAG, pa);
+            listDevice.add(pa);
+            pa="onCreate: build .VERSION.INCREMENTAL-"+Build.VERSION.INCREMENTAL;
+            Log.d(TAG,  pa );
+            listDevice.add(pa);
+            pa="onCreate: build .VERSION.RELEASE-"+Build.VERSION.RELEASE;
+            Log.d(TAG,  pa );
+            listDevice.add(pa);
+            pa="onCreate: build .VERSION.CODENAME-"+Build.VERSION.CODENAME;
+            Log.d(TAG,  pa );
+            listDevice.add(pa);
+
             Configuration configuration=getResources().getConfiguration();
+            listDevice.add(pa);
             //Log.d(TAG,  "colorMode-"+configuration.colorMode );
             Log.d(TAG,  "configAll densityDpi-"+configuration.densityDpi );
+            listDevice.add(pa);
             Log.d(TAG,  "configAll fontScale-"+configuration.fontScale );
+            listDevice.add(pa);
             Log.d(TAG,  "configAll hardKeyboardHidden-"+configuration.hardKeyboardHidden );
+            listDevice.add(pa);
             Log.d(TAG,  "configAll keyboard-"+configuration.keyboard );
+            listDevice.add(pa);
             Log.d(TAG,  "configAll orientation-"+configuration.orientation );
+            listDevice.add(pa);
             Log.d(TAG,  "configAll screenHeightDp-"+configuration.screenHeightDp );
+            listDevice.add(pa);
             Log.d(TAG,  "configAll screenLayout-"+configuration.screenLayout );
+            listDevice.add(pa);
             Log.d(TAG,  "configAll screenWidthDp-"+configuration.screenWidthDp );
+            listDevice.add(pa);
             Log.d(TAG,  "configAll smallestScreenWidthDp-"+configuration.smallestScreenWidthDp );
+            listDevice.add(pa);
             Log.d(TAG,  "configAll uiMode-"+configuration.uiMode );
+            listDevice.add(pa);
             Log.d(TAG,  "configAll keyboardHidden-"+configuration.keyboardHidden );
+            listDevice.add(pa);
             Log.d(TAG,  "configAll navigation-"+configuration.navigation );
+            listDevice.add(pa);
             Log.d(TAG,  "configAll navigationHidden-"+configuration.navigationHidden );
+            listDevice.add(pa);
             Log.d(TAG,  "configAll touchscreen-"+configuration.touchscreen );
+            listDevice.add(pa);
             Log.d(TAG, "onCreate: getConfiguration mccmnc="+configuration.mcc+configuration.mnc );
+            listDevice.add(pa);
             Log.d(TAG, "onCreate: getConfiguration="+configuration.toString()  );
+            listDevice.add(pa);
             Log.d(TAG, "onCreate: getSystemProperties-ro.product.cpu.abi-"+ Ut.getSystemProperties("ro.product.cpu.abi")  );
+            listDevice.add(pa);
             Log.d(TAG, "onCreate: getSystemProperties-ro.build.description-"+ Ut.getSystemProperties("ro.build.description")  );
+            listDevice.add(pa);
             Log.d(TAG, "onCreate: getSystemProperties-gsm.version.baseband-"+Ut.getSystemProperties("gsm.version.baseband")  );
+            listDevice.add(pa);
 
 
-            Log.d(TAG, "onCreate:"   ) ;
-            Log.d(TAG, "onCreate: build model-"+Build.MODEL );
-            Log.d(TAG, "onCreate: build MANUFACTURER-"+Build.MANUFACTURER );
-            Log.d(TAG, "onCreate: build BRAND-"+Build.BRAND );
-            Log.d(TAG, "onCreate: build HARDWARE-"+Build.HARDWARE );
-            Log.d(TAG, "onCreate: build BOARD-"+Build.BOARD );
-            Log.d(TAG, "onCreate: build SERIAL-"+Build.SERIAL );
-            Log.d(TAG, "onCreate: build DEVICE-"+Build.DEVICE );
-            Log.d(TAG, "onCreate: build FINGERPRINT-"+Build.FINGERPRINT );
-            Log.d(TAG, "onCreate: build DISPLAY-"+Build.DISPLAY );
-            Log.d(TAG, "onCreate: build ID-"+Build.ID  );
-            Log.d(TAG, "onCreate: build HOST-"+Build.HOST  );
-            Log.d(TAG, "onCreate: build TAGS-"+Build.TAGS  );
-            Log.d(TAG, "onCreate: build TIME-"+Build.TIME  );
-            Log.d(TAG, "onCreate: build .VERSION.INCREMENTAL-"+Build.VERSION.INCREMENTAL  );
-            Log.d(TAG, "onCreate: build .VERSION.RELEASE-"+Build.VERSION.RELEASE  );
-            Log.d(TAG, "onCreate: build .VERSION.CODENAME-"+Build.VERSION.CODENAME  );
-
-           // Log.d(TAG, "onCreate: build TAGS-"+Build.   );
+            // Log.d(TAG, "onCreate: build TAGS-"+Build.   );
             Log.d(TAG, "onCreate: build getRadioVersion-"+Build.getRadioVersion()  );
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
                 Log.d(TAG, "onCreate: build getSerial-"+Build.getSerial() );
@@ -223,6 +307,14 @@ public class MainActivity extends AppCompatActivity {
     }
 
     public void ui(){
+        //
+        Button bt_test=(Button) findViewById(R.id.bt_test);
+        bt_test.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                dialogShow( listDevice.toArray( new String[listDevice.size() ] ) ) ;
+            }
+        });
 
         //
         Button bt_permission=(Button) findViewById(R.id.bt_permission);
@@ -256,8 +348,35 @@ public class MainActivity extends AppCompatActivity {
         bt_new.setOnClickListener( new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                BaseInfo baseInfo = FackBase.getInstance();
+                //basehook
+                BaseInfo baseInfo = FakeBase.getInstance();
+                JSONObject jsonObject= (JSONObject) JSONObject.toJSON( baseInfo ) ;
                 HookShare.WriteBean2Json( baseInfo );
+
+                MyOpenHelper myOpenHelper=new MyOpenHelper( getApplicationContext() );
+                SQLiteDatabase db=myOpenHelper.getWritableDatabase();
+
+
+                for (  Map.Entry<String, Object> entry :
+                    jsonObject.entrySet() ) {
+                    ContentValues contentValues=new ContentValues();
+
+                    if ( entry.getValue()!=null ){
+                        contentValues.put( "k",entry.getKey()  );
+                        contentValues.put("v",entry.getValue().toString() );
+                    }else {
+                        contentValues.put( "k",entry.getKey()  );
+                        contentValues.put("v","" );
+                    }
+                    Log.d(TAG, "onClick: "+contentValues.toString());
+                    db.insert( "base","k",contentValues );
+                }
+                db.close();
+                
+                //hookPackages
+                FakePackage fakePackage = FakePackage.getInstance(getApplicationContext());
+                fakePackage.fakePackages ();
+
                 dialogShowDevice();
             }
         });
@@ -295,9 +414,11 @@ public class MainActivity extends AppCompatActivity {
         List<PackageInfo> listPackageInfos=packageManager.getInstalledPackages(0);
         for ( PackageInfo p :
               listPackageInfos ) {
-            
 
-            Log.d(TAG, "dialogSelectPackageName: \r\n" +
+            Log.d(TAG, "PackageNameHook: " +
+                    "name="+p.packageName+","+p.lastUpdateTime);
+
+          /*  Log.d(TAG, "dialogSelectPackageName: \r\n" +
                             "packages="+p.packageName+"\r\n-sharedUserId="+p.sharedUserId
             +"\r\n,applicationInfo"+p.applicationInfo
                             +"\r\n,sharedUserId="+p.sharedUserId
@@ -323,7 +444,7 @@ public class MainActivity extends AppCompatActivity {
                             +"\r\n,reqFeatures="+p.reqFeatures
                             +"\r\n,featureGroups="+p.featureGroups
                             +"\r\n______________________________________________"
-                    );
+                    );*/
         }
 
 

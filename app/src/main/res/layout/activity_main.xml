@@ -47,6 +47,13 @@
                 android:id="@+id/bt_permission"
                 />
 
+            <Button
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="实际获取到参数"
+                android:id="@+id/bt_test"
+                />
+
         </LinearLayout>
 
 

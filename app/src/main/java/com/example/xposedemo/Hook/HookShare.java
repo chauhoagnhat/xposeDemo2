@@ -1,5 +1,7 @@
 package com.example.xposedemo.Hook;
 
+import android.app.AndroidAppHelper;
+import android.content.Context;
 import android.util.Log;
 
 import com.alibaba.fastjson.JSON;
@@ -17,7 +19,6 @@ public class HookShare {
     public final static String pathDeviceJson="/sdcard/deviceJson.txt";
     public final static String  pathPackages ="/sdcard/packages.txt";
     public final static String  pathSelectedPackages ="/sdcard/selectedPackages.txt";
-
 
     private static final String TAG ="HookShare" ;
     public static boolean boolSelectedPackages( XC_LoadPackage.LoadPackageParam loadPackageParam ){
@@ -48,6 +49,10 @@ public class HookShare {
         }
         return  ret;
 
+    }
+
+    public static Context getContext(){
+        return AndroidAppHelper.currentApplication();
     }
 
     /**

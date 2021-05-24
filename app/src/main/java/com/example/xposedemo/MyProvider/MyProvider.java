@@ -19,6 +19,7 @@ public class MyProvider  extends ContentProvider {
     private static final int UPDATE_MATCHED = 2;
     private static final int DELETE_MATCHED = 3;
 
+
     static
     {
         //给当前的URI匹配器添加一个匹配规则
@@ -28,7 +29,6 @@ public class MyProvider  extends ContentProvider {
         sURIMatcher.addURI("com.example.xposedemo.MyProvider", "delete", DELETE_MATCHED);
         //sURIMatcher.addURI("com.itheima.provider", "student", 5);
     }
-
 
     @Override
     public boolean onCreate() {
@@ -98,4 +98,6 @@ public class MyProvider  extends ContentProvider {
             return -1;
         }
     }
+
+
 }

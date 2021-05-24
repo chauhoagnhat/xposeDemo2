@@ -1,6 +1,5 @@
 package com.example.xposedemo.Hook;
 
-import android.bluetooth.BluetoothAdapter;
 import android.content.ContentResolver;
 import android.os.Build;
 import android.provider.Settings;
@@ -9,8 +8,6 @@ import android.util.Log;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import com.example.xposedemo.bean.BaseInfo;
-import com.example.xposedemo.bean.BaseInfo;
-import com.example.xposedemo.fake.FackBase;
 import com.example.xposedemo.utils.Ut;
 
 import de.robv.android.xposed.XC_MethodHook;
@@ -19,7 +16,6 @@ import de.robv.android.xposed.XposedBridge;
 import de.robv.android.xposed.XposedHelpers;
 import de.robv.android.xposed.callbacks.XC_LoadPackage;
 
-import java.lang.reflect.Field;
 import java.lang.reflect.Member;
 
 
@@ -37,7 +33,6 @@ public class BaseHook {
 //        if ("".equals( loadPackageParam.packageName ) ) {
 //            return;
 //        }
-
         hookAll(  baseInfo,loadPackageParam  );
 
     }
@@ -55,7 +50,6 @@ public class BaseHook {
 
 
     //public static Field findField(Class<?> clazz, String fieldName)
-
     /**
      *
      */

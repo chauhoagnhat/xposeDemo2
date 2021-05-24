@@ -1,25 +1,13 @@
 package com.example.xposedemo;
 
-import android.content.Context;
-import android.os.Build;
 import android.util.Log;
 
-import androidx.test.InstrumentationRegistry;
 import androidx.test.runner.AndroidJUnit4;
 
-import com.example.xposedemo.Hook.HookShare;
-import com.example.xposedemo.Hook.Phone;
-import com.example.xposedemo.fake.FackBase;
-import com.example.xposedemo.utils.PhoneRndTools;
-import com.example.xposedemo.utils.Ut;
+import com.example.xposedemo.Hook.PackagesHook;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
-
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
-
-import static org.junit.Assert.*;
 
 /**
  * Instrumented test, which will execute on an Android device.
@@ -32,10 +20,7 @@ public class ExampleInstrumentedTest {
 
     @Test
     public void useAppContext() {
-
-        for (int i=0;i<10;i++)
-            Log.d(TAG, "useAppContext: "+Ut.r_(2,10) );
-
-
+        String time=""+ PackagesHook.rnd_time( 60*60*24,60*60*24*7  );
+        Log.d(TAG, "useAppContext: " +time );
     }
 }
