@@ -5,8 +5,8 @@ import com.example.xposedemo.bean.GPUInfo;
 public class FakeGPU {
 
     public static GPUInfo makeARMGPU(){
-        GPUInfo gpuInfo = new GPUInfo();
 
+        GPUInfo gpuInfo = new GPUInfo();
         gpuInfo.setRenderer("Mali-T628");
         gpuInfo.setVender("ARM");
         gpuInfo.setGpuVersion("OpenGL ES 3.0");
@@ -14,6 +14,7 @@ public class FakeGPU {
         gpuInfo.setHeight(1920);
         gpuInfo.setDensity("480");
         return gpuInfo;
+
     }
 
     public static GPUInfo makeAdrenoGPU(){
@@ -26,5 +27,6 @@ public class FakeGPU {
         gpuInfo.setHeight(320);
         gpuInfo.setDensity("500");
         return gpuInfo;
+
     }
 }

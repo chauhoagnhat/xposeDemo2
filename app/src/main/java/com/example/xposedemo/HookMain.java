@@ -35,7 +35,7 @@ public class HookMain  implements IXposedHookLoadPackage   {
         if ( HookShare.boolSelectedPackages( loadPackageParam ) ){
 
             new Phone( loadPackageParam  ) ;
-            new CPUHook( loadPackageParam );
+            //new CPUHook( loadPackageParam );
             new BaseHook( loadPackageParam );
             new WIFIHook( loadPackageParam );
             new PackagesHook( loadPackageParam );
