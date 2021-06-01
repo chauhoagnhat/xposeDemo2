@@ -14,6 +14,8 @@ import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
 import android.content.res.Configuration;
 import android.database.sqlite.SQLiteDatabase;
+import android.net.ConnectivityManager;
+import android.net.LinkProperties;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
@@ -39,6 +41,7 @@ import com.example.xposedemo.utils.Ut;
 import com.example.xposedemo.utils.SharedPref;
 import com.example.xposedemo.utils.Utils;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
@@ -63,9 +66,22 @@ public class MainActivity extends AppCompatActivity {
 
         super.onCreate( savedInstanceState );
         setContentView(R.layout.activity_main);
+        new HookShare();
        // ApplicationPackageManager
         MyOpenHelper myOpenHelper=new MyOpenHelper( getApplicationContext() );
         myOpenHelper.getWritableDatabase();
+
+//        Intent intent = getIntent();
+//        CharSequence cs = intent.getCharSequenceExtra("filePath"); //filePath 为传入的文件路径信息
+//        if (cs != null) {
+//            File file = new File(cs.toString());
+//            tvPath.setText(file.getPath());
+//            files = file.listFiles();
+//        } else {
+//            File sdFile = Environment.getExternalStorageDirectory();
+//            tvPath.setText(sdFile.getPath());
+//            files = sdFile.listFiles();
+//        }ra("filePath");
 
         PackageManager packageManager = getPackageManager();
         Intent mIntent = new Intent(Intent.ACTION_MAIN, null);
@@ -187,9 +203,11 @@ public class MainActivity extends AppCompatActivity {
             PackageManager packageManager=getApplication().getPackageManager();
             List< PackageInfo > tp=packageManager.getInstalledPackages(0);
 
-             listDevice=new ArrayList<>();
+            listDevice=new ArrayList<>();
             String pa;
 
+        Log.d(TAG, "deviceLog: ip="+Ut.getIPAddress( getApplicationContext() ) );
+            
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M ) {
 
             pa="onCreate: getDeviceId="+telephonyManager.getDeviceId(0);
@@ -326,7 +344,7 @@ public class MainActivity extends AppCompatActivity {
         });
 
         //settingPath
-        Button bt_showPath=( Button )findViewById(R.id.bt_showPath );
+        Button bt_showPath=( Button )findViewById( R.id.bt_showPath );
         bt_showPath.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -348,14 +366,14 @@ public class MainActivity extends AppCompatActivity {
         bt_new.setOnClickListener( new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+
                 //basehook
                 BaseInfo baseInfo = FakeBase.getInstance();
                 JSONObject jsonObject= (JSONObject) JSONObject.toJSON( baseInfo ) ;
-                HookShare.WriteBean2Json( baseInfo );
+                HookShare.WriteBean2Json( baseInfo,HookShare.pathDeviceJson );
 
                 MyOpenHelper myOpenHelper=new MyOpenHelper( getApplicationContext() );
                 SQLiteDatabase db=myOpenHelper.getWritableDatabase();
-
 
                 for (  Map.Entry<String, Object> entry :
                     jsonObject.entrySet() ) {
@@ -382,7 +400,9 @@ public class MainActivity extends AppCompatActivity {
         });
     }
 
-
+    /**
+     *
+     */
     private  void dialogSelectPackageName(){
 
         List<String> listStringPackages =Ut.getPackageNames( MainActivity.this );
@@ -390,7 +410,6 @@ public class MainActivity extends AppCompatActivity {
         List<String> google=new ArrayList<>();
         List<String> android=new ArrayList<>();
         List<String> other=new ArrayList<>();
-
 
         for ( String str :
            listStringPackages  ) {
@@ -408,7 +427,7 @@ public class MainActivity extends AppCompatActivity {
         Ut.writeLines( "/sdcard/1.txt",listStringPackages );
         List<Boolean> listBooleanPackages=new ArrayList<>();
 
-        PackageManager packageManager = getApplication() .getPackageManager();
+        PackageManager packageManager = getApplication().getPackageManager();
 
        //  +"\r\n,"+
         List<PackageInfo> listPackageInfos=packageManager.getInstalledPackages(0);
@@ -451,9 +470,11 @@ public class MainActivity extends AppCompatActivity {
         String jsonTxtPackages=Ut.readFileToString( HookShare.pathPackages );
         final JSONObject jsonObject;
 
+        //
         if ( jsonTxtPackages=="" ){
             {Log.d(TAG, "dialogSelectPackageName: first run");
             jsonObject=new JSONObject();
+            //all packageName option put into listBooleanPackages
             for ( String string : listStringPackages  ) {
                 jsonObject.put( string,false );
                 listBooleanPackages.add(false);
@@ -462,9 +483,10 @@ public class MainActivity extends AppCompatActivity {
         }else {
             Log.d(TAG, "dialogSelectPackageName: read last");
             JSONObject jobjSelectedPackages;
-
             jsonObject=JSON.parseObject( jsonTxtPackages );
+            //判断实际应用列表和上次读取设置的差值,说明可能有安装卸载的变化
             if (jsonObject.size()!=listStringPackages.size() ){
+                //获取上次选中的包名,然后将列表item 对应显示出来
                  jobjSelectedPackages=HookShare.returnSelectedPackages();
                 for ( String string :
                         listStringPackages  ) {
@@ -473,7 +495,7 @@ public class MainActivity extends AppCompatActivity {
                         if ( jobjSelectedPackages.containsKey( string ) )
                             listBooleanPackages.add ( true );
                         else
-                            listBooleanPackages.add(false);
+                            listBooleanPackages.add( false );
                     }
 
                 }
@@ -490,7 +512,6 @@ public class MainActivity extends AppCompatActivity {
 
         final String items[]=listStringPackages.toArray( new String[ listStringPackages.size() ] );
        // final Boolean[] selectedTmp=listBooleanPackages.toArray( new Boolean[listBooleanPackages.size()] ) ;
-
         boolean[] selected=new boolean[ listStringPackages.size() ];
         boolean tp=false;
 
@@ -502,17 +523,11 @@ public class MainActivity extends AppCompatActivity {
         }
 
         Log.d(TAG, "dialogSelectPackageName: selected-size=" +selected.length );
+
         final AlertDialog.Builder builder=new AlertDialog.Builder( MainActivity.this );  //先得到构造器
         Log.d( TAG, "dialogSelectPackageName: alertBuild" );
         builder.setTitle("appPackage"); //设置标题
         builder.setIcon(R.mipmap.ic_launcher);//设置图标，图片id即可
-
-
-        for ( boolean b :
-         selected    ) {
-            Log.d(TAG, "dialogSelectPackageName: boolean="+ b);
-        }
-
 
         List<String> packageSeleted=new ArrayList<>();
             builder.setMultiChoiceItems(items,selected,new DialogInterface.OnMultiChoiceClickListener() {
@@ -529,7 +544,6 @@ public class MainActivity extends AppCompatActivity {
 
 
             builder.setPositiveButton("确定",new DialogInterface.OnClickListener() {
-
                 @Override
                 public void onClick(DialogInterface dialog, int which) {
                     Ut.fileWriterTxt( HookShare.pathPackages,jsonObject.toJSONString() );

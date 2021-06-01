@@ -23,8 +23,17 @@
         <Button
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="应用列表"
+            android:text="参数生效应用列表"
             android:id="@+id/bt_package"
+            />
+
+
+
+        <Button
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="执行功能应用列表"
+            android:id="@+id/bt_run_function"
             />
 
         <LinearLayout

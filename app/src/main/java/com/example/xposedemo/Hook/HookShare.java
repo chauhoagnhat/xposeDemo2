@@ -15,10 +15,16 @@ import de.robv.android.xposed.callbacks.XC_LoadPackage;
 
 public class HookShare {
 
-    public final static String pathNewDeviceOrder="/sdcard/run.txt";
-    public final static String pathDeviceJson="/sdcard/deviceJson.txt";
-    public final static String  pathPackages ="/sdcard/packages.txt";
-    public final static String  pathSelectedPackages ="/sdcard/selectedPackages.txt";
+    public final static String pathNkFolder="/sdcard/nk";
+    public final static String pathNewDeviceOrder="/sdcard/nk/run.txt";
+    public final static String pathDeviceJson="/sdcard/nk/deviceJson.txt";
+    public final static String  pathPackages ="/sdcard/nk/packages.txt";
+    public final static String  pathSelectedPackages ="/sdcard/nk/selectedPackages.txt";
+    public final static String getPathPackagesFunction="";
+
+    static {
+        Ut.crFolder(pathNkFolder);
+    }
 
     private static final String TAG ="HookShare" ;
     public static boolean boolSelectedPackages( XC_LoadPackage.LoadPackageParam loadPackageParam ){
@@ -113,13 +119,13 @@ public class HookShare {
     }
 
   
-    public static void WriteBean2Json( Object o ){
+    public static void WriteBean2Json(Object o, String pathJson ){
 
         Class c=o.getClass();
         Field [] fields=c.getDeclaredFields();
         Log.d(TAG, "WriteBean2Json: "+c.getName() );
         JSONObject jsonObject= (JSONObject) JSONObject.toJSON( o );
-        Ut.fileWriterTxt ( pathDeviceJson, jsonObject.toJSONString() );
+        Ut.fileWriterTxt (pathJson, jsonObject.toJSONString() );
         Log.d(TAG, "WriteBean2Json: json="+jsonObject.toJSONString()  );
 
     }

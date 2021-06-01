@@ -9,6 +9,10 @@ import android.content.ServiceConnection;
 import android.content.SharedPreferences;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
+import android.net.wifi.WifiInfo;
+import android.net.wifi.WifiManager;
 import android.os.IBinder;
 import android.os.IInterface;
 import android.os.Looper;
@@ -19,6 +23,9 @@ import android.telephony.TelephonyManager;
 import android.util.Log;
 import android.widget.Toast;
 
+import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.JSONObject;
+import com.example.xposedemo.Hook.HookShare;
 import com.example.xposedemo.MainActivity;
 import com.example.xposedemo.R;
 
@@ -34,13 +41,21 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStreamWriter;
 import java.io.UnsupportedEncodingException;
+import java.lang.reflect.Field;
 import java.lang.reflect.Method;
-import java.sql.Connection;
+import java.net.Inet4Address;
+import java.net.InetAddress;
+import java.net.NetworkInterface;
+import java.net.SocketException;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Enumeration;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.Random;
+import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.LinkedBlockingQueue;
 
@@ -50,77 +65,124 @@ public class Ut {
     private static final String TAG = "DeviceUtils";
     protected static String uuid;
 
+    public static String getIPAddress(Context context) {
+        NetworkInfo info = ((ConnectivityManager) context
+                .getSystemService(Context.CONNECTIVITY_SERVICE)).getActiveNetworkInfo();
+        if (info != null && info.isConnected()) {
+            if (info.getType() == ConnectivityManager.TYPE_MOBILE) {//当前使用2G/3G/4G网络
+                try {
+                    //Enumeration<NetworkInterface> en=NetworkInterface.getNetworkInterfaces();
+                    for (Enumeration<NetworkInterface> en = NetworkInterface.getNetworkInterfaces(); en.hasMoreElements(); ) {
+                        NetworkInterface intf = en.nextElement();
+                        for (Enumeration<InetAddress> enumIpAddr = intf.getInetAddresses(); enumIpAddr.hasMoreElements(); ) {
+                            InetAddress inetAddress = enumIpAddr.nextElement();
+                            if (!inetAddress.isLoopbackAddress() && inetAddress instanceof Inet4Address) {
+                                return inetAddress.getHostAddress();
+                            }
+                        }
+                    }
+                } catch (SocketException e) {
+                    e.printStackTrace();
+                }
+
+            } else if (info.getType() == ConnectivityManager.TYPE_WIFI) {//当前使用无线网络
+                WifiManager wifiManager = (WifiManager) context.getSystemService(Context.WIFI_SERVICE);
+                WifiInfo wifiInfo = wifiManager.getConnectionInfo();
+                String ipAddress = intIP2StringIP(wifiInfo.getIpAddress());//得到IPV4地址
+                return ipAddress;
+            }
+        } else {
+            //当前无网络连接,请在设置中打开网络
+        }
+        return null;
+    }
+
+    /**
+     * 将得到的int类型的IP转换为String类型
+     *
+     * @param ip
+     * @return
+     */
+    public static String intIP2StringIP(int ip) {
+        return (ip & 0xFF) + "." +
+                ((ip >> 8) & 0xFF) + "." +
+                ((ip >> 16) & 0xFF) + "." +
+                (ip >> 24 & 0xFF);
+    }
+
+
     /**
      * 按行写入
+     *
      * @param path
      * @param list
      * @throws IOException
      */
-    public static void writeLines( String path,List<String> list )   {
+    public static void writeLines(String path, List<String> list) {
 
         File fout = new File(path);
         FileOutputStream fos = null;
         try {
             fos = new FileOutputStream(fout);
             BufferedWriter bw = new BufferedWriter(new OutputStreamWriter(fos));
-            for (String string:
-                    list ) {
+            for (String string :
+                    list) {
                 bw.write(string);
                 bw.newLine();
             }
             bw.close();
         } catch (FileNotFoundException e) {
             e.printStackTrace();
-            Log.d(TAG, "writeLines: FileNotFoundException"+e);
+            Log.d(TAG, "writeLines: FileNotFoundException" + e);
         } catch (IOException e) {
             e.printStackTrace();
-            Log.d(TAG, "writeLines: IOException"+e);
+            Log.d(TAG, "writeLines: IOException" + e);
         }
 
 
     }
 
     /**
-     *
      * @param min
      * @param max
      * @return
      */
-    public static int r_( int min,int max ){
+    public static int r_(int min, int max) {
         int randomNumber;
-            randomNumber = (int) (((max - min + 1) * Math.random() + min ));
-            return randomNumber;
+        randomNumber = (int) (((max - min + 1) * Math.random() + min));
+        return randomNumber;
     }
 
     /**
      * 从list中随机取n个元素
+     *
      * @param listObj
      * @param n
      * @return
      */
-    public static <T> List<T> r_list(List<T> listObj , int n ){
-        Collections.shuffle( listObj );
-        List<T> listRet=new ArrayList<>();
-        for ( int i=0;i<n;i++){
-            listRet.add( listObj.get(i)  );
+    public static <T> List<T> r_list(List<T> listObj, int n) {
+        Collections.shuffle(listObj);
+        List<T> listRet = new ArrayList<>();
+        for (int i = 0; i < n; i++) {
+            listRet.add(listObj.get(i));
         }
-        return  listRet;
+        return listRet;
     }
 
 
     /**
      * 获取txt文件内容并按行放入list中
      */
-    public static List<String> readLines(String path)   {
-        List<String> list=null;
+    public static List<String> readLines(String path) {
+        List<String> list = null;
         FileReader fileReader = null;
         try {
             fileReader = new FileReader(path);
-            BufferedReader bufferedReader =new BufferedReader(fileReader);
-            list =new ArrayList<String>();
-            String str=null;
-            while((str=bufferedReader.readLine())!=null) {
-                if(str.trim().length()>2) {
+            BufferedReader bufferedReader = new BufferedReader(fileReader);
+            list = new ArrayList<String>();
+            String str = null;
+            while ((str = bufferedReader.readLine()) != null) {
+                if (str.trim().length() > 2) {
                     list.add(str);
                 }
             }
@@ -135,8 +197,23 @@ public class Ut {
         return list;
     }
 
+    /***
+     * 将bean对象写成json 到指定txt
+     * @param o
+     * @param pathJson
+     */
+    public static void WriteBean2Json(Object o, String pathJson ){
+
+        Class c=o.getClass();
+        Field[] fields=c.getDeclaredFields();
+        Log.d(TAG, "WriteBean2Json: "+c.getName() );
+        JSONObject jsonObject= (JSONObject) JSONObject.toJSON( o );
+        Ut.fileWriterTxt (pathJson, jsonObject.toJSONString() );
+        Log.d(TAG, "WriteBean2Json: json="+jsonObject.toJSONString()  );
+
+    }
+
     /**
-     *
      * @param path 文件夹路径
      */
     public static void crFolder(String path) {
@@ -144,6 +221,153 @@ public class Ut {
         if (!file.exists()) {
             file.mkdir();
         }
+    }
+
+    /**
+     *  返回值为true的 { "key1","key2".. }  ,一般用于 多选列表对话框展示
+     * @param pathJsonTxt  txt路径 txtJson格式 { "key":boolean }
+     * @return
+     */
+    public static List<String>  returnSelectedJobj ( String pathJsonTxt ) {
+
+        String json= readFileToString( pathJsonTxt );
+        JSONObject jsonObject= JSON.parseObject(json);
+        JSONObject jobj2=null;
+
+        List<String> listRet=null;
+
+        if( jsonObject ==null)
+            return null;
+
+        listRet=new ArrayList<>();
+        for ( Map.Entry<String,Object> entry :
+                jsonObject.entrySet() ) {
+            if( (boolean)entry.getValue() ){
+                    listRet.add( entry.getKey() );
+            }
+        }
+        return listRet;
+    }
+
+
+    /**
+     * 多选列表框 根据jsontxt { "包名":boolean },展示列表,点确定后回写json到路径
+     * @param activityContext
+     * @param title
+     * @param icon  R.mipmap.ic_launcher
+     * @param pathJsonConfigO
+     * @param PositiveButtonText
+     */
+    public static void setMultiChoiceItems(Context activityContext, String title
+            , int icon, String pathJsonConfigO
+            , String PositiveButtonText) {
+
+        final String pathJsonConfig = pathJsonConfigO;
+        String jsonTxtPackages = readFileToString(pathJsonConfig);
+        final JSONObject jsonObject;
+        String k;
+
+        List<String> listItems = new ArrayList<>();
+        List<Boolean> listSelected = new ArrayList<>();
+        Map<String,Boolean> mapRet=null;
+
+        if (jsonTxtPackages == "") {
+            Log.d(TAG, "setMultiChoiceItems: txtEmpty");
+            return ;
+        } else {
+            mapRet=new HashMap<>();
+
+            jsonObject = JSON.parseObject(jsonTxtPackages);
+            if (jsonObject.size() < 1) {
+                Log.d(TAG, "setMultiChoiceItems: jobj size<1");
+                return ;
+            }
+            for (Map.Entry<String, Object> entry :
+                    jsonObject.entrySet()) {
+                k = entry.getKey();
+                if (entry.getValue().equals(true) )
+                    mapRet.put(k,true);
+                listItems.add(k);
+                listSelected.add( jsonObject.getBoolean( entry.getKey() ) );
+            }
+
+        }
+
+        final String[] items = listItems.toArray( new String[listItems.size()] );
+        boolean[] selected = listBooleanToArray(listSelected);
+        if (selected == null) {
+            Log.d(TAG, "setMultiChoiceItems: selected size err-null");
+            return ;
+        }
+
+        final AlertDialog.Builder builder = new AlertDialog.Builder(activityContext);  //先得到构造器
+        builder.setTitle(title); //设置标题
+        builder.setIcon(icon);//设置图标，图片id即可
+        List<String> packageSeleted = new ArrayList<>();
+
+        final MyOnMultiChoiceClickListener myOnMultiChoiceClickListener=new MyOnMultiChoiceClickListener(
+                jsonObject,items,selected
+        );
+
+        builder.setMultiChoiceItems(items, selected, myOnMultiChoiceClickListener);
+
+        builder.setPositiveButton(PositiveButtonText, new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                Ut.fileWriterTxt( pathJsonConfig, myOnMultiChoiceClickListener.jsonObjectListItems.toJSONString() );
+                dialog.dismiss();
+                //Toast.makeText(MainActivity.this, "确定", Toast.LENGTH_SHORT).show();
+                //android会自动根据你选择的改变selected数组的值。
+                    /*
+                        for (int i=0;i<selected.length;i++){
+                        Log.e("hongliang",""+selected[i]);
+                    }
+                    */
+            }
+        });
+
+        AlertDialog alertDialo = builder.create();
+        alertDialo.show();
+    }
+
+    public static class  MyOnMultiChoiceClickListener implements DialogInterface.OnMultiChoiceClickListener{
+
+        public JSONObject jsonObjectListItems;
+        public String[] items;
+        public boolean[] selected;
+
+        public MyOnMultiChoiceClickListener(JSONObject jsonObjectListItems,String[] items,boolean[] selected ){
+            this.jsonObjectListItems=jsonObjectListItems;
+            this.items=items;
+            this.selected=selected;
+        }
+
+        public Map<String,Boolean> mapRet;
+        @Override
+        public void onClick(DialogInterface dialog, int which, boolean isChecked) {
+            // dialog.dismiss();
+            if (isChecked){
+                jsonObjectListItems.put( items[ which ],true );
+            }
+            else
+                jsonObjectListItems.put( items[ which ], false );
+        }
+
+    }
+
+    public static boolean[] listBooleanToArray( List<Boolean> listBoolean ){
+
+        if ( listBoolean.size()<1 )
+            return null;
+        boolean[] selected=new boolean[ listBoolean.size() ];
+        Iterator<Boolean> iterator=listBoolean.iterator();
+        int i=0;
+        while ( iterator.hasNext() ) {
+            selected[i]=iterator.next().booleanValue();
+            i=i+1;
+        }
+
+        return selected;
     }
 
     /**
