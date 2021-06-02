@@ -5,7 +5,7 @@ import android.telephony.TelephonyManager;
 import android.util.Log;
 
 import com.alibaba.fastjson.JSONObject;
-import com.example.xposedemo.utils.Common;
+
 import com.example.xposedemo.utils.SharedPref;
 import com.example.xposedemo.utils.Utils;
 
@@ -97,7 +97,7 @@ public class Phone  {
         }
 */
        // jsonStr=SharedPref.getXValue("json");
-        jsonStr=Utils.readFileToString(Common.DEVICE_PATH);
+        jsonStr=Utils.readFileToString(  HookShare.PATH_PHONE_DEVICE );
         jsonObjectPara = JSONObject.parseObject( jsonStr );
         //hookBuild();
         Log.d(TAG, "Telephony: json="+jsonStr );

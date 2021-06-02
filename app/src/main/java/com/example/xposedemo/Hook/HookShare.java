@@ -21,6 +21,8 @@ public class HookShare {
     public final static String  pathPackages ="/sdcard/nk/packages.txt";
     public final static String  pathSelectedPackages ="/sdcard/nk/selectedPackages.txt";
     public final static String getPathPackagesFunction="";
+    public static final String PATH_PHONE_DEVICE = "/sdcard/nk/devicePhone.txt";
+    public static final String PATH_FUNCTION_PACKAGES="/sdcard/nk/packagesFunction.txt";
 
     static {
         Ut.crFolder(pathNkFolder);

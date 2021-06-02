@@ -88,7 +88,7 @@ public class Ut {
             } else if (info.getType() == ConnectivityManager.TYPE_WIFI) {//当前使用无线网络
                 WifiManager wifiManager = (WifiManager) context.getSystemService(Context.WIFI_SERVICE);
                 WifiInfo wifiInfo = wifiManager.getConnectionInfo();
-                String ipAddress = intIP2StringIP(wifiInfo.getIpAddress());//得到IPV4地址
+                String ipAddress = intIP2StringIP( wifiInfo.getIpAddress() );//得到IPV4地址
                 return ipAddress;
             }
         } else {
@@ -228,7 +228,7 @@ public class Ut {
      * @param pathJsonTxt  txt路径 txtJson格式 { "key":boolean }
      * @return
      */
-    public static List<String>  returnSelectedJobj ( String pathJsonTxt ) {
+    public static List<String>  getSelectedJobjByPath ( String pathJsonTxt ) {
 
         String json= readFileToString( pathJsonTxt );
         JSONObject jsonObject= JSON.parseObject(json);
@@ -243,7 +243,35 @@ public class Ut {
         for ( Map.Entry<String,Object> entry :
                 jsonObject.entrySet() ) {
             if( (boolean)entry.getValue() ){
+                Log.d(TAG, "returnSelectedJobj: "+entry.getKey()  );
                     listRet.add( entry.getKey() );
+            }
+        }
+        return listRet;
+    }
+
+
+    /**
+     *  返回值为true的 { "key1","key2".. }  ,一般用于 多选列表对话框展示
+     * @param json  txt路径 txtJson格式 { "key":boolean }
+     * @return
+     */
+    public static List<String>  getSelectedJobjByJson ( String json ) {
+
+        JSONObject jsonObject= JSON.parseObject(json);
+        JSONObject jobj2=null;
+
+        List<String> listRet=null;
+
+        if( jsonObject ==null)
+            return null;
+
+        listRet=new ArrayList<>();
+        for ( Map.Entry<String,Object> entry :
+                jsonObject.entrySet() ) {
+            if( (boolean)entry.getValue() ){
+                Log.d(TAG, "returnSelectedJobj: "+entry.getKey()  );
+                listRet.add( entry.getKey() );
             }
         }
         return listRet;
@@ -258,7 +286,7 @@ public class Ut {
      * @param pathJsonConfigO
      * @param PositiveButtonText
      */
-    public static void setMultiChoiceItems(Context activityContext, String title
+    public static void dialogSetMultiChoiceItems(Context activityContext, String title
             , int icon, String pathJsonConfigO
             , String PositiveButtonText) {
 

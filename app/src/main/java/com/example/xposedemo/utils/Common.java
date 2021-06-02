@@ -15,7 +15,7 @@ public class Common {
     public static final String PREFS_COMMANDS = "CustomizeCommands";
     public static final String PREFS_LIBNAMES = "CustomizeLibnames";
     public static final String FIRST_RUN_KEY = "IS_FIRST_RUN";
-    public static final String DEVICE_PATH = "sdcard/yztc/device.txt";
+    public static final String DEVICE_PATH = "/sdcard/yztc/device.txt";
 
     public static final String[] DEFAULT_KEYWORD_LIST = new String[]{"supersu", "superuser", "Superuser",
             "noshufou", "xposed", "rootcloak",

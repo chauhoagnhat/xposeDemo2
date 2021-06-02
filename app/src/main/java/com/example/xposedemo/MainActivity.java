@@ -161,6 +161,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
 
+
     public void Permission() {
         boolean isGranted = true;
         if (android.os.Build.VERSION.SDK_INT >= 23) {
@@ -324,7 +325,58 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
+    public void dialogShowFunctionPackage(){
+
+        List<String> packagesNames= Ut.getPackageNames( getApplicationContext() );
+        List<String> listSelected;
+
+        JSONObject jsonObject;
+        jsonObject=new JSONObject();
+
+        //获取到的包名写成{ "key1":false,"key2":.. }
+        for (String name:
+                packagesNames ) {
+                jsonObject.put( name,false );
+        }
+
+        //将勾选的包名改写为true
+        String packagesJson=Ut.readFileToString( HookShare.PATH_FUNCTION_PACKAGES );
+        if( packagesJson!="" ){
+            listSelected= Ut.getSelectedJobjByJson ( packagesJson );
+
+            if (listSelected!=null){
+                Log.d(TAG, "dialogShowFunctionPackage: listSelected"+listSelected.size() );
+                for ( String str :
+                     listSelected ) {
+                    Log.d(TAG, "dialogShowFunctionPackage: Str="+str );
+                    if (jsonObject.containsKey( str ) ){
+                        jsonObject.put( str,true );
+                    }
+                }
+            }
+        }
+
+        Ut.fileWriterTxt( HookShare.PATH_FUNCTION_PACKAGES,jsonObject.toJSONString() );
+        Ut.dialogSetMultiChoiceItems( MainActivity.this,"packages"
+                ,R.mipmap.ic_launcher,HookShare.PATH_FUNCTION_PACKAGES,"确定");
+
+
+
+
+    }
+
     public void ui(){
+
+        Button bt_run_function=findViewById( R.id.bt_run_function );
+        bt_run_function.setOnClickListener(
+                new View.OnClickListener() {
+                    @Override
+                    public void onClick( View v ) {
+                        dialogShowFunctionPackage();
+                    }
+                }
+        );
+
         //
         Button bt_test=(Button) findViewById(R.id.bt_test);
         bt_test.setOnClickListener(new View.OnClickListener() {
@@ -406,7 +458,6 @@ public class MainActivity extends AppCompatActivity {
     private  void dialogSelectPackageName(){
 
         List<String> listStringPackages =Ut.getPackageNames( MainActivity.this );
-
         List<String> google=new ArrayList<>();
         List<String> android=new ArrayList<>();
         List<String> other=new ArrayList<>();
