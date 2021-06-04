@@ -8,6 +8,7 @@ import android.util.Log;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import com.example.xposedemo.bean.BaseInfo;
+import com.example.xposedemo.utils.MyFile;
 import com.example.xposedemo.utils.Ut;
 
 import de.robv.android.xposed.XC_MethodHook;
@@ -63,7 +64,7 @@ public class BaseHook {
      */
     private void hookAll(final BaseInfo baseInfo, XC_LoadPackage.LoadPackageParam loadPackageParam) {
 
-        String json=Ut.readFileToString( HookShare.pathDeviceJson );
+        String json= MyFile.readFileToString( HookShare.pathDeviceJson );
         final JSONObject jsonObject= JSON.parseObject  ( json );
 
         hookMethod("android.bluetooth.BluetoothAdapter", loadPackageParam.classLoader,"getAddress", String.valueOf(jsonObject.get("bluemac")) );

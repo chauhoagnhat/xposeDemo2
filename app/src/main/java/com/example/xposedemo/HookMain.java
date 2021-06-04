@@ -11,6 +11,7 @@ import com.example.xposedemo.Hook.HookShare;
 import com.example.xposedemo.Hook.PackagesHook;
 import com.example.xposedemo.Hook.Phone;
 import com.example.xposedemo.Hook.WIFIHook;
+import com.example.xposedemo.utils.MyFile;
 import com.example.xposedemo.utils.Ut;
 
 import de.robv.android.xposed.IXposedHookLoadPackage;
@@ -28,8 +29,7 @@ public class HookMain  implements IXposedHookLoadPackage   {
     public void handleLoadPackage(XC_LoadPackage.LoadPackageParam loadPackageParam)  throws Throwable {
 
         //loadPackageParam.packageName.equals( BuildConfig.APPLICATION_ID
-
-        String json= Ut.readFileToString(HookShare.pathSelectedPackages);
+        //String json= MyFile.readFileToString(HookShare.pathSelectedPackages);
 
         Log.d(TAG, "handleLoadPackage: boolSelectedPackages"+ HookShare.boolSelectedPackages( loadPackageParam ) );
         if ( HookShare.boolSelectedPackages( loadPackageParam ) ){

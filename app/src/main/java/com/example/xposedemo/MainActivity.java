@@ -25,6 +25,7 @@ import android.telephony.TelephonyManager;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
+import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -34,9 +35,13 @@ import com.alibaba.fastjson.TypeReference;
 import com.example.xposedemo.Hook.HookShare;
 import com.example.xposedemo.MyProvider.MyOpenHelper;
 import com.example.xposedemo.bean.BaseInfo;
+import com.example.xposedemo.bean.MainActivityData;
 import com.example.xposedemo.fake.FakeBase;
 import com.example.xposedemo.fake.FakePackage;
+import com.example.xposedemo.functionModule.DataBack;
 import com.example.xposedemo.utils.Common;
+import com.example.xposedemo.utils.MyFile;
+import com.example.xposedemo.utils.MyUi;
 import com.example.xposedemo.utils.Ut;
 import com.example.xposedemo.utils.SharedPref;
 import com.example.xposedemo.utils.Utils;
@@ -60,28 +65,20 @@ public class MainActivity extends AppCompatActivity {
     private   Context context =  null ;
     private Button bt_new;
     private List<Object> listDevice;
+    private Context appContext=null;
+    private MainActivityData mainActivityData=null;
 
     @Override
     protected void onCreate( Bundle savedInstanceState ) {
 
         super.onCreate( savedInstanceState );
         setContentView(R.layout.activity_main);
+        appContext=getApplicationContext();
         new HookShare();
-       // ApplicationPackageManager
+        mainActivityDataInit();
+
         MyOpenHelper myOpenHelper=new MyOpenHelper( getApplicationContext() );
         myOpenHelper.getWritableDatabase();
-
-//        Intent intent = getIntent();
-//        CharSequence cs = intent.getCharSequenceExtra("filePath"); //filePath 为传入的文件路径信息
-//        if (cs != null) {
-//            File file = new File(cs.toString());
-//            tvPath.setText(file.getPath());
-//            files = file.listFiles();
-//        } else {
-//            File sdFile = Environment.getExternalStorageDirectory();
-//            tvPath.setText(sdFile.getPath());
-//            files = sdFile.listFiles();
-//        }ra("filePath");
 
         PackageManager packageManager = getPackageManager();
         Intent mIntent = new Intent(Intent.ACTION_MAIN, null);
@@ -89,29 +86,6 @@ public class MainActivity extends AppCompatActivity {
 
         mIntent.addCategory(Intent.CATEGORY_LAUNCHER);
         List<ResolveInfo> listAllApps = packageManager.queryIntentActivities(mIntent, 0);
-
-
-   /*     for ( ResolveInfo appInfo :
-                listAllApps   ) {
-            // appInfo = listAllApps.get(position);
-            String pkgName = appInfo.activityInfo.packageName;//获取包名
-            //根据包名获取PackageInfo mPackageInfo;（需要处理异常）
-
-            PackageInfo mPackageInfo = null;
-            try {
-                mPackageInfo = getApplication().getPackageManager().getPackageInfo(pkgName, 0);
-                Log.d(TAG, "onCreate: appName"+appInfo.loadLabel(packageManager).toString() );
-                Log.d(TAG, "onCreate: packageName");
-            } catch (PackageManager.NameNotFoundException e) {
-                e.printStackTrace();
-            }
-            if (( mPackageInfo.applicationInfo.flags & ApplicationInfo.FLAG_SYSTEM) <= 0) {
-                //第三方应用
-            } else {
-                //系统应用
-            }
-
-        }*/
 
         viewById=findViewById(R.id.textView);
         viewById.setText("no data");
@@ -126,10 +100,8 @@ public class MainActivity extends AppCompatActivity {
         ui();
 
 
-
         // String jsonStr= Utils.readFileToString(Environment.getExternalStorageDirectory ()+"/device.txt");
-
-        String jsonStr= Utils.readFileToString( Common.DEVICE_PATH );
+        String jsonStr= Utils.readFileToString( HookShare.pathDeviceJson );
 
         if (jsonStr!=""&&jsonStr!=null){
 
@@ -147,8 +119,20 @@ public class MainActivity extends AppCompatActivity {
 
     }
 
+    public void mainActivityDataInit(){
+
+        mainActivityData=new MainActivityData();
+        mainActivityData.setContext( getApplicationContext() );
+        mainActivityData.setActivityContext(MainActivity.this);
+        mainActivityData.setLogTextview((TextView)findViewById( R.id.tv_log ) );
+        mainActivityData.setEt_path( (EditText)findViewById(R.id.et_path ) );
+        //
+
+    }
+
     public void setSelectedPackges() {
-        String json= Ut.readFileToString( HookShare.pathPackages );
+
+        String json= MyFile.readFileToString( HookShare.pathPackages );
         JSONObject jsonObject= JSON.parseObject(json);
         JSONObject jobj2=new JSONObject();
         for ( Map.Entry<String,Object> entry :
@@ -190,7 +174,7 @@ public class MainActivity extends AppCompatActivity {
     protected void onStop() {
         Log.d(TAG, "onStop: " );
         if ( HookShare.boolIsPackageEmpty()!=true )
-            dialogShow( new String[]{ "未指定app" } );
+         MyUi.dialogShow( new String[]{ "未指定app" },MainActivity.this );
         super.onStop();
 
     }
@@ -340,7 +324,7 @@ public class MainActivity extends AppCompatActivity {
         }
 
         //将勾选的包名改写为true
-        String packagesJson=Ut.readFileToString( HookShare.PATH_FUNCTION_PACKAGES );
+        String packagesJson=MyFile.readFileToString( HookShare.PATH_FUNCTION_PACKAGES );
         if( packagesJson!="" ){
             listSelected= Ut.getSelectedJobjByJson ( packagesJson );
 
@@ -357,15 +341,25 @@ public class MainActivity extends AppCompatActivity {
         }
 
         Ut.fileWriterTxt( HookShare.PATH_FUNCTION_PACKAGES,jsonObject.toJSONString() );
-        Ut.dialogSetMultiChoiceItems( MainActivity.this,"packages"
+        MyUi.dialogSetMultiChoiceItems( MainActivity.this,"packages"
                 ,R.mipmap.ic_launcher,HookShare.PATH_FUNCTION_PACKAGES,"确定");
-
 
 
 
     }
 
     public void ui(){
+
+        //保存数据
+        Button bt_save=findViewById( R.id.bt_save  );
+        bt_save.setOnClickListener(
+                new View.OnClickListener() {
+                    @Override
+                    public void onClick( View v ) {
+                        DataBack.getInstance(mainActivityData).loadData( "1622792723522" );
+                    }
+                }
+        );
 
         Button bt_run_function=findViewById( R.id.bt_run_function );
         bt_run_function.setOnClickListener(
@@ -382,7 +376,7 @@ public class MainActivity extends AppCompatActivity {
         bt_test.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                dialogShow( listDevice.toArray( new String[listDevice.size() ] ) ) ;
+                MyUi.dialogShow( listDevice.toArray( new String[listDevice.size() ] ),MainActivity.this ) ;
             }
         });
 
@@ -413,7 +407,7 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
-//device
+        //device
         bt_new=(Button) findViewById(R.id.bt_new);
         bt_new.setOnClickListener( new View.OnClickListener() {
             @Override
@@ -518,7 +512,7 @@ public class MainActivity extends AppCompatActivity {
         }
 
 
-        String jsonTxtPackages=Ut.readFileToString( HookShare.pathPackages );
+        String jsonTxtPackages=MyFile.readFileToString( HookShare.pathPackages );
         final JSONObject jsonObject;
 
         //
@@ -616,7 +610,7 @@ public class MainActivity extends AppCompatActivity {
 
     private void dialogShowDevice () {
 
-        String json=Ut.readFileToString( HookShare.pathDeviceJson );
+        String json=MyFile.readFileToString( HookShare.pathDeviceJson );
         JSONObject jobj=  JSON.parseObject ( json);
 
         ArrayList<String> list=new ArrayList<>();
@@ -651,36 +645,6 @@ public class MainActivity extends AppCompatActivity {
 
         builder.create().show();
 
-    }
-
-    private void dialogShow( String[] items ){
-
-        final String[] items2=items;
-
-        //dialog参数设置
-        AlertDialog.Builder builder=new AlertDialog.Builder(MainActivity.this);  //先得到构造器
-        builder.setTitle("settingPath"); //设置标题
-        builder.setIcon(R.mipmap.ic_launcher);
-
-        //设置图标，图片id即可
-        //设置列表显示，注意设置了列表显示就不要设置builder.setMessage()了，否则列表不起作用。
-        builder.setItems(items,new DialogInterface.OnClickListener() {
-            @Override
-            public void onClick(DialogInterface dialog, int which) {
-                dialog.dismiss();
-                Toast.makeText(MainActivity.this, items2[which], Toast.LENGTH_SHORT).show();
-            }
-        });
-
-        builder.setPositiveButton("返回",new DialogInterface.OnClickListener() {
-            @Override
-            public void onClick(DialogInterface dialog, int which) {
-                dialog.dismiss();
-                //Toast.makeText(MainActivity.this, "完成", Toast.LENGTH_SHORT).show();
-            }
-        });
-
-        builder.create().show();
     }
 
     private void dialogShowPath(){

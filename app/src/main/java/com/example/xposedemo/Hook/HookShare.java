@@ -6,6 +6,7 @@ import android.util.Log;
 
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
+import com.example.xposedemo.utils.MyFile;
 import com.example.xposedemo.utils.Ut;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
@@ -25,13 +26,17 @@ public class HookShare {
     public static final String PATH_FUNCTION_PACKAGES="/sdcard/nk/packagesFunction.txt";
 
     static {
-        Ut.crFolder(pathNkFolder);
+        Ut.crFolder( pathNkFolder );
+    }
+
+    public static String getDataBackPath( String packageName ){
+        return "/nk/back/"+packageName+"/"+System.currentTimeMillis();
     }
 
     private static final String TAG ="HookShare" ;
     public static boolean boolSelectedPackages( XC_LoadPackage.LoadPackageParam loadPackageParam ){
 
-        String json= Ut.readFileToString( HookShare.pathPackages );
+        String json= MyFile.readFileToString( HookShare.pathPackages );
         JSONObject jsonObject= JSON.parseObject(json);
         JSONObject jobj2=new JSONObject();
 
@@ -89,7 +94,7 @@ public class HookShare {
 
 
     public static boolean boolIsPackageEmpty( ) {
-        String json= Ut.readFileToString( HookShare.pathPackages );
+        String json= MyFile.readFileToString( HookShare.pathPackages );
         JSONObject jsonObject= JSON.parseObject(json);
         JSONObject jobj2=new JSONObject();
 
@@ -108,8 +113,8 @@ public class HookShare {
 
     public static boolean boolNew(){
 
-        String ret=Ut.readFileToString( pathNewDeviceOrder );
-        String json=Ut.readFileToString( pathDeviceJson );
+        String ret= MyFile.readFileToString( pathNewDeviceOrder );
+        String json=MyFile.readFileToString( pathDeviceJson );
         if (ret==""){
             return true;
         }else if (ret=="0") {

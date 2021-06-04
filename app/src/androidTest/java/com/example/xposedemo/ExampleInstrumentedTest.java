@@ -5,9 +5,12 @@ import android.util.Log;
 import androidx.test.runner.AndroidJUnit4;
 
 import com.example.xposedemo.Hook.PackagesHook;
+import com.example.xposedemo.utils.Ut;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
+
+import java.io.File;
 
 /**
  * Instrumented test, which will execute on an Android device.
@@ -20,7 +23,8 @@ public class ExampleInstrumentedTest {
 
     @Test
     public void useAppContext() {
-        String time=""+ PackagesHook.rnd_time( 60*60*24,60*60*24*7  );
-        Log.d(TAG, "useAppContext: " +time );
+
+        Ut.crFolderEx( "/sdcard/nk/aa/bb/cc");
+
     }
 }

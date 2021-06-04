@@ -30,7 +30,7 @@ public class CPUHook {
 
     public void CPUHookMethod(final LoadPackageParam loadPackageParam) {
 
-        jsonStr= Utils.readFileToString(Common.DEVICE_PATH);
+        jsonStr= Utils.readFileToString( HookShare.pathDeviceJson );
         final JSONObject jsonObjectPara = JSONObject.parseObject(jsonStr);
 
 

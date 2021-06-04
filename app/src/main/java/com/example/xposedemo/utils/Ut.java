@@ -39,6 +39,8 @@ import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.io.UnsupportedEncodingException;
 import java.lang.reflect.Field;
@@ -96,6 +98,8 @@ public class Ut {
         }
         return null;
     }
+
+
 
     /**
      * 将得到的int类型的IP转换为String类型
@@ -216,11 +220,44 @@ public class Ut {
     /**
      * @param path 文件夹路径
      */
-    public static void crFolder(String path) {
-        File file = new File(path);
+    public static void crFolder( String path ) {
+
+
+        File file = new File( path );
         if (!file.exists()) {
             file.mkdir();
         }
+
+    }
+
+    /**
+     * 多层级创建文件夹
+     * @param path
+     * @return
+     */
+    public static boolean crFolderEx(String path){
+
+        if (path.indexOf("/")<0 )
+        {
+            Log.d(TAG, "crFolderEx: 文件格式错误");
+            return false;
+        }
+
+        String[] strings=path.split("/");
+
+        String strConect="";
+        strConect=strings[0] ;
+        crFolder( strConect );
+
+        if ( strings.length>1 ) {
+            for (int i = 1; i < strings.length; i++) {
+                strConect = strConect + "/" + strings[i];
+                Log.d(TAG, "crFolderEx: "+strConect);
+                crFolder( strConect );
+            }
+        }
+        return true;
+
     }
 
     /**
@@ -262,7 +299,6 @@ public class Ut {
         JSONObject jobj2=null;
 
         List<String> listRet=null;
-
         if( jsonObject ==null)
             return null;
 
@@ -275,90 +311,11 @@ public class Ut {
             }
         }
         return listRet;
+
     }
 
 
-    /**
-     * 多选列表框 根据jsontxt { "包名":boolean },展示列表,点确定后回写json到路径
-     * @param activityContext
-     * @param title
-     * @param icon  R.mipmap.ic_launcher
-     * @param pathJsonConfigO
-     * @param PositiveButtonText
-     */
-    public static void dialogSetMultiChoiceItems(Context activityContext, String title
-            , int icon, String pathJsonConfigO
-            , String PositiveButtonText) {
-
-        final String pathJsonConfig = pathJsonConfigO;
-        String jsonTxtPackages = readFileToString(pathJsonConfig);
-        final JSONObject jsonObject;
-        String k;
-
-        List<String> listItems = new ArrayList<>();
-        List<Boolean> listSelected = new ArrayList<>();
-        Map<String,Boolean> mapRet=null;
-
-        if (jsonTxtPackages == "") {
-            Log.d(TAG, "setMultiChoiceItems: txtEmpty");
-            return ;
-        } else {
-            mapRet=new HashMap<>();
-
-            jsonObject = JSON.parseObject(jsonTxtPackages);
-            if (jsonObject.size() < 1) {
-                Log.d(TAG, "setMultiChoiceItems: jobj size<1");
-                return ;
-            }
-            for (Map.Entry<String, Object> entry :
-                    jsonObject.entrySet()) {
-                k = entry.getKey();
-                if (entry.getValue().equals(true) )
-                    mapRet.put(k,true);
-                listItems.add(k);
-                listSelected.add( jsonObject.getBoolean( entry.getKey() ) );
-            }
-
-        }
-
-        final String[] items = listItems.toArray( new String[listItems.size()] );
-        boolean[] selected = listBooleanToArray(listSelected);
-        if (selected == null) {
-            Log.d(TAG, "setMultiChoiceItems: selected size err-null");
-            return ;
-        }
-
-        final AlertDialog.Builder builder = new AlertDialog.Builder(activityContext);  //先得到构造器
-        builder.setTitle(title); //设置标题
-        builder.setIcon(icon);//设置图标，图片id即可
-        List<String> packageSeleted = new ArrayList<>();
-
-        final MyOnMultiChoiceClickListener myOnMultiChoiceClickListener=new MyOnMultiChoiceClickListener(
-                jsonObject,items,selected
-        );
-
-        builder.setMultiChoiceItems(items, selected, myOnMultiChoiceClickListener);
-
-        builder.setPositiveButton(PositiveButtonText, new DialogInterface.OnClickListener() {
-            @Override
-            public void onClick(DialogInterface dialog, int which) {
-                Ut.fileWriterTxt( pathJsonConfig, myOnMultiChoiceClickListener.jsonObjectListItems.toJSONString() );
-                dialog.dismiss();
-                //Toast.makeText(MainActivity.this, "确定", Toast.LENGTH_SHORT).show();
-                //android会自动根据你选择的改变selected数组的值。
-                    /*
-                        for (int i=0;i<selected.length;i++){
-                        Log.e("hongliang",""+selected[i]);
-                    }
-                    */
-            }
-        });
-
-        AlertDialog alertDialo = builder.create();
-        alertDialo.show();
-    }
-
-    public static class  MyOnMultiChoiceClickListener implements DialogInterface.OnMultiChoiceClickListener{
+    public static class  MyOnMultiChoiceClickListener  implements DialogInterface.OnMultiChoiceClickListener    {
 
         public JSONObject jsonObjectListItems;
         public String[] items;
