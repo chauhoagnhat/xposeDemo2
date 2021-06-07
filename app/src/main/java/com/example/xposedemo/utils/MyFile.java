@@ -1,16 +1,22 @@
 package com.example.xposedemo.utils;
 
+import android.util.Log;
+
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.util.ArrayList;
+import java.util.List;
 
 public class MyFile {
+
+    private static final String TAG = "MyFile";
 
     /**
      * https://blog.csdn.net/lnn368/article/details/103276529
@@ -56,13 +62,24 @@ public class MyFile {
     }
 
 
+
     /**
-     *
-     *  String command = "cp -r " + sd_path + " " + data_path; 复制文件
+     * 执行cmd遍历文件名，需root
+     * @param path
+     * @return
+     */
+    public static List<String> execCmdGetFileNameList( String path ){
+       return execCmdsforResult(
+               new String[] {"cd "+path, "ls" } );
+    }
+
+    /**
+     *String command = "cp -r " + sd_path + " " + data_path; 复制文件
      * ex: 获取文件名  ArrayList<String> list = execCmdsforResult(new String[] {"cd /data/data/com.testapp", "ls -R"});
      * @param cmds
      * @return
      */
+
     public static ArrayList execCmdsforResult(String[] cmds) {
         ArrayList<String> list = new ArrayList<String>();
         try {
@@ -120,6 +137,39 @@ public class MyFile {
             e.printStackTrace();
         }
         return str;
+    }
+
+    /**
+     *
+     * @param filePath
+     * @param content
+     */
+    public static void fileWriterTxt(String filePath,String content) {
+
+        File f=new File( filePath );
+        if ( !f.exists() ) {
+            try {
+                f.createNewFile();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+        Log.d(TAG, "fileWriterTxt: path="+filePath);
+        FileWriter fwriter = null;
+        try {
+            // true表示不覆盖原来的内容，而是加到文件的后面。若要覆盖原来的内容，直接省略这个参数就好
+            fwriter = new FileWriter( filePath );
+            fwriter.write(content);
+        } catch (IOException ex) {
+            ex.printStackTrace();
+        } finally {
+            try {
+                fwriter.flush();
+                fwriter.close();
+            } catch (IOException ex) {
+                ex.printStackTrace();
+            }
+        }
     }
 
 

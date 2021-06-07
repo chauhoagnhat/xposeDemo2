@@ -1,5 +1,6 @@
 package com.example.xposedemo.bean;
 
+import android.app.Activity;
 import android.content.Context;
 import android.widget.EditText;
 import android.widget.TextView;
@@ -12,10 +13,19 @@ public class MainActivityData {
     private Context activityContext;
     private EditText et_path;
 
+    public Activity getActivity() {
+        return activity;
+    }
+    public void setActivity(Activity activity) {
+        this.activity = activity;
+    }
+
+    private Activity activity;
+
+
     public EditText getEt_path() {
         return et_path;
     }
-
     public void setEt_path(EditText et_path) {
         this.et_path = et_path;
     }

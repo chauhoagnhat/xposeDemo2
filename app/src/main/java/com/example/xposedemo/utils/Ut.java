@@ -315,31 +315,6 @@ public class Ut {
     }
 
 
-    public static class  MyOnMultiChoiceClickListener  implements DialogInterface.OnMultiChoiceClickListener    {
-
-        public JSONObject jsonObjectListItems;
-        public String[] items;
-        public boolean[] selected;
-
-        public MyOnMultiChoiceClickListener(JSONObject jsonObjectListItems,String[] items,boolean[] selected ){
-            this.jsonObjectListItems=jsonObjectListItems;
-            this.items=items;
-            this.selected=selected;
-        }
-
-        public Map<String,Boolean> mapRet;
-        @Override
-        public void onClick(DialogInterface dialog, int which, boolean isChecked) {
-            // dialog.dismiss();
-            if (isChecked){
-                jsonObjectListItems.put( items[ which ],true );
-            }
-            else
-                jsonObjectListItems.put( items[ which ], false );
-        }
-
-    }
-
     public static boolean[] listBooleanToArray( List<Boolean> listBoolean ){
 
         if ( listBoolean.size()<1 )

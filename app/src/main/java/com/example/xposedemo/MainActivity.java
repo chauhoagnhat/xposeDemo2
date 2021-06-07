@@ -14,8 +14,6 @@ import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
 import android.content.res.Configuration;
 import android.database.sqlite.SQLiteDatabase;
-import android.net.ConnectivityManager;
-import android.net.LinkProperties;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
@@ -39,14 +37,13 @@ import com.example.xposedemo.bean.MainActivityData;
 import com.example.xposedemo.fake.FakeBase;
 import com.example.xposedemo.fake.FakePackage;
 import com.example.xposedemo.functionModule.DataBack;
-import com.example.xposedemo.utils.Common;
+import com.example.xposedemo.MyInterface.DialogCallBack;
 import com.example.xposedemo.utils.MyFile;
 import com.example.xposedemo.utils.MyUi;
 import com.example.xposedemo.utils.Ut;
 import com.example.xposedemo.utils.SharedPref;
 import com.example.xposedemo.utils.Utils;
 
-import java.io.File;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
@@ -67,6 +64,7 @@ public class MainActivity extends AppCompatActivity {
     private List<Object> listDevice;
     private Context appContext=null;
     private MainActivityData mainActivityData=null;
+
 
     @Override
     protected void onCreate( Bundle savedInstanceState ) {
@@ -99,7 +97,6 @@ public class MainActivity extends AppCompatActivity {
         deviceLog();
         ui();
 
-
         // String jsonStr= Utils.readFileToString(Environment.getExternalStorageDirectory ()+"/device.txt");
         String jsonStr= Utils.readFileToString( HookShare.pathDeviceJson );
 
@@ -111,7 +108,7 @@ public class MainActivity extends AppCompatActivity {
                     new TypeReference< Map<String, String> >(){});
             string=Utils.join_map2str( map,"\r\n");
             Log.d(TAG, "onCreate: mapStr="+string );
-            viewById.setText(string);
+            viewById.setText( string );
 
         }
 
@@ -126,7 +123,7 @@ public class MainActivity extends AppCompatActivity {
         mainActivityData.setActivityContext(MainActivity.this);
         mainActivityData.setLogTextview((TextView)findViewById( R.id.tv_log ) );
         mainActivityData.setEt_path( (EditText)findViewById(R.id.et_path ) );
-        //
+        mainActivityData.setActivity( MainActivity.this );
 
     }
 
@@ -341,14 +338,30 @@ public class MainActivity extends AppCompatActivity {
         }
 
         Ut.fileWriterTxt( HookShare.PATH_FUNCTION_PACKAGES,jsonObject.toJSONString() );
-        MyUi.dialogSetMultiChoiceItems( MainActivity.this,"packages"
-                ,R.mipmap.ic_launcher,HookShare.PATH_FUNCTION_PACKAGES,"确定");
-
-
+        MyUi.dialogSetMultiChoiceItems(MainActivity.this, "packages"
+                , R.mipmap.ic_launcher, HookShare.PATH_FUNCTION_PACKAGES, "确定", null);
 
     }
 
     public void ui(){
+
+        //显示备份的内容
+        Button  bt_dataList = findViewById(R.id.bt_dataList );
+        bt_dataList.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                DataBack.getInstance( mainActivityData ).dialogShowDataBack();
+            }
+        });
+
+        //载入
+        Button bt_load=findViewById( R.id.bt_load );
+        bt_load.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                DataBack.getInstance( mainActivityData ).loadData();
+            }
+        });
 
         //保存数据
         Button bt_save=findViewById( R.id.bt_save  );
@@ -356,7 +369,7 @@ public class MainActivity extends AppCompatActivity {
                 new View.OnClickListener() {
                     @Override
                     public void onClick( View v ) {
-                        DataBack.getInstance(mainActivityData).loadData( "1622792723522" );
+                        DataBack.getInstance(mainActivityData). saveAppByThread ();
                     }
                 }
         );
