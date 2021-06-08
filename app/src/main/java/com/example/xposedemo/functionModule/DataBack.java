@@ -2,18 +2,19 @@ package com.example.xposedemo.functionModule;
 
 import android.app.Activity;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.os.Handler;
+import android.os.Looper;
 import android.util.Log;
 import android.widget.Button;
 import android.widget.TextView;
 
 import com.example.xposedemo.Hook.HookShare;
-import com.example.xposedemo.MyAbstract.MyAbstractCallBack;
+import com.example.xposedemo.MyInterface.DialogCallBack;
 import com.example.xposedemo.R;
 import com.example.xposedemo.bean.MainActivityData;
 import com.example.xposedemo.utils.MyDate;
 import com.example.xposedemo.utils.MyFile;
-import com.example.xposedemo.utils.MyRunnable;
 import com.example.xposedemo.utils.MyUi;
 import com.example.xposedemo.utils.Ut;
 
@@ -23,7 +24,6 @@ import java.util.List;
 
 
 public class DataBack {
-
     //类加载时就初始化
     //private static final DataBack instance = new DataBack(  );
 
@@ -41,7 +41,7 @@ public class DataBack {
     public Handler handler;
     public  Thread curThread;
 
-    private DataBack(MainActivityData mainActivityData){
+    private DataBack( MainActivityData mainActivityData ){
 
         this.activity=mainActivityData.getActivity();
         this.context=mainActivityData.getContext();
@@ -54,9 +54,7 @@ public class DataBack {
 //            saveAppData();
 //        else
 //            logTextview.setText( "未选中执行功能的app" );
-
     }
-
 
     public static DataBack getInstance( MainActivityData mainActivityData ){
         instance=new DataBack(mainActivityData);
@@ -99,10 +97,12 @@ public class DataBack {
             logUi("未找到指定数据"+pathLoadData);
             return;
         }
+        Ut.stopAppByKill( activity.getApplicationContext(),functionPackageName);
 
         Runnable runnable=new Runnable() {
             @Override
             public void run() {
+
                 delCache();
                 logUi("删除完成" + "->" + "/data/data/" + functionPackageName);
                 logUi("载入数据" + pathLoadData);
@@ -133,10 +133,30 @@ public class DataBack {
 
     }
 
+    public void delCacheByThread(){
+        Runnable runnable=new Runnable() {
+            @Override
+            public void run() {
+                delCache();
+            }
+        };
+
+        curThread=new Thread( runnable );
+        threadWaitting();
+        curThread.start();
+
+    }
+
     /**
      * 删除缓存
      */
     public void delCache() {
+
+        if ( functionPackageName==""|!new File("/data/data/"+functionPackageName ).exists() ){
+            logUi("没找到缓存文件");
+            return;
+        }
+
         ArrayList<String> list = MyFile.execCmdsforResult(new String[] {"cd /data/data/"+functionPackageName , "ls"});
         for (String str :
                 list) {
@@ -148,13 +168,57 @@ public class DataBack {
                 logUi( "删除文件-"+delCommandFile );
             }
         }
+        logUi("删除缓存完成");
     }
+
+    public void delBack(){
+        final List<String> listSelected=Ut.getSelectedJobjByPath( HookShare.PATH_DATABACK_JSON );
+        if ( listSelected.size()<1 ){
+            logTextview.setText( "未选中数据" );
+        }else {
+
+            Runnable runnable=new Runnable() {
+                @Override
+                public void run() {
+                    Looper.prepare();
+                    for ( String str :
+                            listSelected  ) {
+                        String path=desSaveFilePathCommon+"/"+str;
+                        if ( !new File(path).exists() ){
+                            logUi("备份不存在");
+                            break;
+                        }else {
+                            for (int i=0;i<3;i++) {
+                                logUi("开始删除第" + i + "次" + path);
+                                MyFile.execCmdsforResult(new String[]{"rm -r " +
+                                        path});
+                                if (!new File(path).exists())
+                                    break;
+                            }
+
+                        }
+
+                    }
+                    logUi("删除完成" );
+                    //dialogShowDataBack(3);
+                    Looper.loop();
+
+                }
+            };
+
+            threadWaitting();
+            curThread=new Thread( runnable );
+            curThread.start();
+
+        }
+
+    }
+
 
     /**
      * 列表展示应用备份数据,并保存.
      */
-    public void dialogShowDataBack(){
-
+    public void dialogShowDataBack( int countTime ){
         //MyUi.dialogSetMultiChoiceItems();
         /**
          * 多选列表框 根据jsontxt { "包名":boolean },展示列表,点确定后回写json到路径
@@ -165,11 +229,37 @@ public class DataBack {
          * @param PositiveButtonText
          */
 
+        if (!new File( desSaveFilePathCommon ).exists() ){
+             logUi ( "没有目录,是否指定app？" );
+            return;
+        }
+
+        Log.d(TAG, "dialogShowDataBack: savepath="+desSaveFilePathCommon );
+
         List<String> listFile= MyFile.execCmdGetFileNameList( desSaveFilePathCommon);
         Log.d(TAG, "dialogShowDataBack: listFile"+listFile.size() );
         MyUi.dialogSetMultiChoiceItems(activity, "备份文件列表",
                 R.mipmap.ic_launcher, listFile, HookShare.PATH_DATABACK_JSON,
-                "确定", null);
+                "确定", null,new DialogCallBack() {
+                    @Override
+                    public void setPositiveButtonCallback(DialogInterface dialog, int which) {
+                        String showStr="已选中数据:\r\n";
+                        List<String> listSelected=MyUi.getSelectedJobjByPath( HookShare.PATH_DATABACK_JSON );
+                        if ( listSelected.size()<1 ){
+                            showStr="未选中数据";
+                        }else{
+
+                            showStr=showStr+ Ut.joinListString( listSelected, "\r\n" );
+                            Log.d(TAG, "setPositiveButtonCallback: "+Ut.joinListString( listSelected, "\r\n" ) );
+                        }
+                        logUi ( showStr );
+                    }
+
+                    @Override
+                    public void SetNegativeButtonCallback(DialogInterface dialog, int which) {
+
+                    }
+                },  countTime );
 
     }
 
@@ -192,7 +282,10 @@ public class DataBack {
         Runnable runnable=new Runnable() {
             @Override
             public void run() {
+                //Looper.prepare();
                 saveAppData();
+               //dialogShowDataBack(2);
+                //Looper.loop();
             }
         };
 
@@ -234,6 +327,7 @@ public class DataBack {
         String cachePath="/data/data/"+this.functionPackageName ;
         if ( !new File( cachePath ).exists() ) {
             Log.d(TAG, "saveAppData: "+functionPackageName+",缓存文件未发现");
+            logUi("缓存文件未发现,是否没指定app"  );
             return false;
         }
 

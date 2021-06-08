@@ -24,7 +24,7 @@ public class ExampleInstrumentedTest {
     @Test
     public void useAppContext() {
 
-        Ut.crFolderEx( "/sdcard/nk/aa/bb/cc");
+       // Ut.crFolderEx( "/sdcard/nk/aa/bb/cc");
 
     }
 }

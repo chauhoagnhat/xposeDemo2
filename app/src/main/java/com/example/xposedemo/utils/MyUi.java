@@ -1,8 +1,11 @@
 package com.example.xposedemo.utils;
 
 import android.app.AlertDialog;
+import android.app.Dialog;
 import android.content.Context;
 import android.content.DialogInterface;
+import android.os.Handler;
+import android.os.Message;
 import android.util.Log;
 
 import com.alibaba.fastjson.JSON;
@@ -14,6 +17,8 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Timer;
+import java.util.TimerTask;
 
 /**
  * 简单的弹出显示列表内容的对话框
@@ -21,9 +26,11 @@ import java.util.Map;
 public class MyUi   {
 
     private static final String TAG = "MyUi";
+    public static final int COUNT_FALSE=0;
 
     public static void dialogShow(String[] items, Context activityContext){
         final String[] items2=items;
+
 
         //dialog参数设置
         AlertDialog.Builder builder=new AlertDialog.Builder(activityContext);  //先得到构造器
@@ -113,13 +120,15 @@ public class MyUi   {
         builder.setPositiveButton(PositiveButtonText, new DialogInterface.OnClickListener()  {
             @Override
             public void onClick(DialogInterface dialog, int which  ) {
+                Ut.fileWriterTxt( pathJsonConfig, myOnMultiChoiceClickListener.jsonObjectListItems.toJSONString() );
                 if (dialogCallBack!=null)
                     dialogCallBack.setPositiveButtonCallback( dialog,which);
-                Ut.fileWriterTxt( pathJsonConfig, myOnMultiChoiceClickListener.jsonObjectListItems.toJSONString() );
                 dialog.dismiss();
             }
 
         });
+
+
 
         AlertDialog alertDialo = builder.create();
         alertDialo.show();
@@ -130,13 +139,17 @@ public class MyUi   {
      * @param activityContext
      * @param title
      * @param icon  R.mipmap.ic_launcher
-     *  @param listitemsNew  新的listItem
+     * @param listitemsNew  新的listItem
      * @param pathJsonConfigO
      * @param PositiveButtonText
+     *  @param textSetNegativeButton
+     * @param countTime 是否倒计时
+     * @return
      */
-    public static void dialogSetMultiChoiceItems(Context activityContext, String title
-            , int icon,List<String> listitemsNew, String pathJsonConfigO
-            , String PositiveButtonText , final DialogCallBack dialogCallBack ) {
+    public static AlertDialog dialogSetMultiChoiceItems(Context activityContext, String title
+            , int icon, List<String> listitemsNew, String pathJsonConfigO
+            , String PositiveButtonText, String textSetNegativeButton, final DialogCallBack dialogCallBack,
+                                                       final int countTime) {
 
         final String pathJsonConfig = pathJsonConfigO;
         String jsonTxtPackages =MyFile.readFileToString(pathJsonConfig);
@@ -172,11 +185,10 @@ public class MyUi   {
                     }
                     else
                         listSelected.add(false);
-
-
                 }
             }else
                 listSelected.add(false);
+
 
    /*         mapRet=new HashMap<>();
             jsonObject = JSON.parseObject(jsonTxtPackages);
@@ -195,12 +207,13 @@ public class MyUi   {
 
         }
 
+
         final String[] items = listItems.toArray( new String[listItems.size()] );
         Log.d(TAG, "dialogSetMultiChoiceItems: listSelected-size-"+listSelected.size());
         boolean[] selected = Ut.listBooleanToArray( listSelected );
         if (selected == null) {
             Log.d(TAG, "setMultiChoiceItems: selected size err-null");
-            return ;
+            return null;
         }
 
         final AlertDialog.Builder builder = new AlertDialog.Builder(activityContext);  //先得到构造器
@@ -213,22 +226,79 @@ public class MyUi   {
         );
 
         builder.setMultiChoiceItems(items, selected, myOnMultiChoiceClickListener);
-        builder.setPositiveButton(PositiveButtonText, new DialogInterface.OnClickListener()  {
-
+        builder.setPositiveButton( PositiveButtonText, new DialogInterface.OnClickListener()  {
             @Override
             public void onClick(DialogInterface dialog, int which  ) {
-                if (dialogCallBack!=null)
-                    dialogCallBack.setPositiveButtonCallback( dialog,which);
                 Ut.fileWriterTxt( pathJsonConfig, myOnMultiChoiceClickListener.jsonObjectListItems.toJSONString() );
                 dialog.dismiss();
+                if (dialogCallBack!=null)
+                    dialogCallBack.setPositiveButtonCallback( dialog,which);
             }
-
         });
 
-        AlertDialog alertDialo = builder.create();
-        alertDialo.show();
+        textSetNegativeButton=textSetNegativeButton==null?"返回":textSetNegativeButton;
+        builder.setNegativeButton(textSetNegativeButton, new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                dialog.dismiss();
+                dialogCallBack.setPositiveButtonCallback( dialog,which );
+            }
+        });
+
+        final AlertDialog alertDialog = builder.create();
+        alertDialog.show();
+        if (countTime!=COUNT_FALSE )
+            dialogCountClose( alertDialog,countTime,dialogCallBack,pathJsonConfig,myOnMultiChoiceClickListener );
+
+        return alertDialog;
     }
 
+    public static void dialogCountClose(final Dialog alertDialog, final int countTime
+            , final DialogCallBack dialogCallBack,
+                                        final String pathJsonConfig, final MyOnMultiChoiceClickListener myOnMultiChoiceClickListener){
+        final Timer mOffTime = new Timer(true);
+        final Handler mOffHandler = new Handler() {
+
+            public void handleMessage(Message msg) {
+                if (msg.what > 0) {
+                    // 动态显示倒计时
+                    alertDialog.setTitle ("    即将关闭："+msg.what);
+                } else {
+                    //倒计时结束自己主动关闭
+                    if(alertDialog!=null){
+                        alertDialog.dismiss();
+                    }
+                    //off();关闭后的操作
+                    MyFile.fileWriterTxt( pathJsonConfig, myOnMultiChoiceClickListener.jsonObjectListItems.toJSONString());
+                    dialogCallBack.setPositiveButtonCallback (null,0);
+                    mOffTime.cancel();
+                }
+                super.handleMessage(msg);
+            }
+
+        };
+
+         //倒计时
+            TimerTask tt = new TimerTask(){
+            class TimeTmp{
+                private int time_;
+                public TimeTmp(int time_) {
+                    this.time_=time_;
+                }
+            }
+
+            public final TimeTmp timeTmp=new TimeTmp( countTime );
+            public void run() {
+                if (timeTmp.time_ > 0) {
+                    timeTmp.time_--;
+                }
+                Message msg = new Message();
+                msg.what = timeTmp.time_;
+                mOffHandler.sendMessage(msg);
+            }
+        };
+        mOffTime.schedule(tt, 1000, 1000);
+    }
 
     /**根据将check的选项的最终结果存入 jsonObjectListItems
      * jsonObjectListItems 选项列表,

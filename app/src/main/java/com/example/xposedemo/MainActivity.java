@@ -289,7 +289,6 @@ public class MainActivity extends AppCompatActivity {
             Log.d(TAG, "onCreate: getSystemProperties-gsm.version.baseband-"+Ut.getSystemProperties("gsm.version.baseband")  );
             listDevice.add(pa);
 
-
             // Log.d(TAG, "onCreate: build TAGS-"+Build.   );
             Log.d(TAG, "onCreate: build getRadioVersion-"+Build.getRadioVersion()  );
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
@@ -344,13 +343,21 @@ public class MainActivity extends AppCompatActivity {
     }
 
     public void ui(){
+        //删除备份
+        Button bt_delBack=findViewById( R.id.bt_delBack );
+        bt_delBack.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                DataBack.getInstance(mainActivityData).delBack();
+            }
+        });
 
         //显示备份的内容
         Button  bt_dataList = findViewById(R.id.bt_dataList );
         bt_dataList.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                DataBack.getInstance( mainActivityData ).dialogShowDataBack();
+                DataBack.getInstance( mainActivityData ).dialogShowDataBack(MyUi.COUNT_FALSE);
             }
         });
 
@@ -359,7 +366,9 @@ public class MainActivity extends AppCompatActivity {
         bt_load.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                DataBack.getInstance( mainActivityData ).loadData();
+                DataBack instance = DataBack.getInstance(mainActivityData);
+                Ut.stopAppByKill(  MainActivity.this,instance.getFunctionPackageName() );
+                instance.loadData();
             }
         });
 
@@ -374,6 +383,7 @@ public class MainActivity extends AppCompatActivity {
                 }
         );
 
+        //选中执行功能列表
         Button bt_run_function=findViewById( R.id.bt_run_function );
         bt_run_function.setOnClickListener(
                 new View.OnClickListener() {
@@ -384,7 +394,7 @@ public class MainActivity extends AppCompatActivity {
                 }
         );
 
-        //
+        //测试获取
         Button bt_test=(Button) findViewById(R.id.bt_test);
         bt_test.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -412,11 +422,11 @@ public class MainActivity extends AppCompatActivity {
         });
 
         //packages
-        Button bt_package=  (Button)  findViewById(R.id.bt_package);
-        bt_package.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                dialogSelectPackageName();
+                Button bt_package=  (Button)  findViewById(R.id.bt_package);
+                bt_package.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick( View v ) {
+                        dialogSelectPackageName();
             }
         });
 
@@ -426,9 +436,13 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onClick(View v) {
 
+                DataBack instans=DataBack.getInstance(mainActivityData);
+                Ut.stopAppByKill( getApplicationContext(), instans.getFunctionPackageName() );
+                instans .delCacheByThread();
+
                 //basehook
                 BaseInfo baseInfo = FakeBase.getInstance();
-                JSONObject jsonObject= (JSONObject) JSONObject.toJSON( baseInfo ) ;
+                JSONObject jsonObject= ( JSONObject) JSONObject.toJSON( baseInfo ) ;
                 HookShare.WriteBean2Json( baseInfo,HookShare.pathDeviceJson );
 
                 MyOpenHelper myOpenHelper=new MyOpenHelper( getApplicationContext() );

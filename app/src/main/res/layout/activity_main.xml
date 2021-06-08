@@ -97,8 +97,15 @@
                 android:layout_height="wrap_content"
                 android:text="数据列表"
                 android:id="@+id/bt_dataList">
-
             </Button>
+
+            <Button
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="删除备份"
+                android:id="@+id/bt_delBack">
+            </Button>
+
         </LinearLayout>
 
         <TextView

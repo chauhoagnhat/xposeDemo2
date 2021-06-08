@@ -1,5 +1,6 @@
 package com.example.xposedemo.utils;
 
+import android.app.ActivityManager;
 import android.app.AlertDialog;
 import android.content.ComponentName;
 import android.content.Context;
@@ -62,12 +63,15 @@ import java.util.UUID;
 import java.util.concurrent.LinkedBlockingQueue;
 
 public class Ut {
+
     protected static final String PREFS_FILE = "gank_device_id.xml";
     protected static final String PREFS_DEVICE_ID = "gank_device_id";
     private static final String TAG = "DeviceUtils";
     protected static String uuid;
 
+
     public static String getIPAddress(Context context) {
+
         NetworkInfo info = ((ConnectivityManager) context
                 .getSystemService(Context.CONNECTIVITY_SERVICE)).getActiveNetworkInfo();
         if (info != null && info.isConnected()) {
@@ -101,6 +105,33 @@ public class Ut {
 
 
 
+    /**
+     * join list with joiner
+     * @param list
+     * @param joiner
+     * @return
+     */
+    public static String joinListString( List<String> list,  String joiner  ){
+        if (list.size()<1)
+            return null;
+
+        StringBuilder sb=new StringBuilder( list.get(0) );
+        for (int i=1;i<list.size();i++){
+            sb.append( joiner );
+            sb.append( list.get( i ) );
+        }
+        return sb.toString();
+
+
+
+    }
+
+    //
+    public static void  stopAppByKill(Context context ,String packageName) {
+        ActivityManager mActivityManager = (ActivityManager)
+                context.getSystemService(Context.ACTIVITY_SERVICE);
+        mActivityManager.killBackgroundProcesses(packageName);
+    }
     /**
      * 将得到的int类型的IP转换为String类型
      *
