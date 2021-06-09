@@ -24,7 +24,7 @@ public class HookShare {
     public final static String getPathPackagesFunction="";
     public static final String PATH_PHONE_DEVICE = "/sdcard/nk/devicePhone.txt";
     public static final String PATH_FUNCTION_PACKAGES="/sdcard/nk/packagesFunction.txt";
-
+    public static final String PATH_BACK_PATH="/sdcard/nk/PATH_BACK_PATH.txt";
     public static final String PATH_DATABACK_JSON="/sdcard/nk/PATH_DATABACK_JSON.txt";
     public static final String PATH_DATABACK_SELECTED_PATH="/sdcard/nk/PATH_DATABACK_SELECTED_PATH.txt";
 

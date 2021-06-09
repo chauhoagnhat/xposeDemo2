@@ -121,6 +121,8 @@ public class DataBack {
                         activity.setVisible(true);
                     }
                 });
+                Ut.stopAppByKill( activity.getApplicationContext(),functionPackageName);
+
                 logUi("载入完成" + path);
 
             }
@@ -172,9 +174,13 @@ public class DataBack {
     }
 
     public void delBack(){
+
+        MyUi.setControlEnable( activity,R.id.bt_delBack ,false );
+
         final List<String> listSelected=Ut.getSelectedJobjByPath( HookShare.PATH_DATABACK_JSON );
         if ( listSelected.size()<1 ){
             logTextview.setText( "未选中数据" );
+            MyUi.setControlEnable( activity,R.id.bt_delBack ,true );
         }else {
 
             Runnable runnable=new Runnable() {
@@ -200,6 +206,15 @@ public class DataBack {
 
                     }
                     logUi("删除完成" );
+
+                    activity.runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            MyUi.setControlEnable( activity,R.id.bt_delBack ,true );
+                        }
+                    });
+
+
                     //dialogShowDataBack(3);
                     Looper.loop();
 
@@ -237,6 +252,11 @@ public class DataBack {
         Log.d(TAG, "dialogShowDataBack: savepath="+desSaveFilePathCommon );
 
         List<String> listFile= MyFile.execCmdGetFileNameList( desSaveFilePathCommon);
+        if ( listFile.size()<1 ){
+            MyFile.fileWriterTxt( HookShare.PATH_DATABACK_JSON ,"" );
+            logUi( "err-未找到文件" );
+            return;
+        }
         Log.d(TAG, "dialogShowDataBack: listFile"+listFile.size() );
         MyUi.dialogSetMultiChoiceItems(activity, "备份文件列表",
                 R.mipmap.ic_launcher, listFile, HookShare.PATH_DATABACK_JSON,
@@ -312,6 +332,13 @@ public class DataBack {
 
     public boolean saveAppData()    {
 
+        activity.runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                MyUi.setControlEnable( activity,R.id.bt_save,false );
+            }
+        });
+
       String format=  "yyyy~MM~dd,HH.mm.ss";
       String  timeStamp=MyDate.timeStamp();
       //Log.d(TAG,"saveAppData+timeStap="+ timeStamp );
@@ -328,6 +355,14 @@ public class DataBack {
         if ( !new File( cachePath ).exists() ) {
             Log.d(TAG, "saveAppData: "+functionPackageName+",缓存文件未发现");
             logUi("缓存文件未发现,是否没指定app"  );
+
+            activity.runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    MyUi.setControlEnable( activity,R.id.bt_save,true );
+                }
+            });
+
             return false;
         }
 
@@ -347,6 +382,13 @@ public class DataBack {
                 +desSaveFilePathFinal  });
 
         logUi ( functionPackageName+"备份完成"+desSaveFilePathFinal );
+        activity.runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                MyUi.setControlEnable( activity,R.id.bt_save,true );
+            }
+        });
+
         return true;
 
     }

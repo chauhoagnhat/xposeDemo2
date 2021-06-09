@@ -1,5 +1,6 @@
 package com.example.xposedemo.utils;
 
+import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.Dialog;
 import android.content.Context;
@@ -161,13 +162,14 @@ public class MyUi   {
         Map<String,Boolean> mapRet=null;
 
         listItems=listitemsNew;
-
+        Log.d(TAG, "dialogSetMultiChoiceItems: jsonTxtPackages="+jsonTxtPackages );
         if (jsonTxtPackages == "") {
             Log.d(TAG, "dialogSetMultiChoiceItems: txtEmpty");
             jsonObject=new JSONObject();
+
             for ( String str :
                     listItems ) {
-                listSelected.add(false);
+                listSelected.add( false );
                 jsonObject.put( str,false );
             }
             //return ;
@@ -186,9 +188,12 @@ public class MyUi   {
                     else
                         listSelected.add(false);
                 }
-            }else
-                listSelected.add(false);
-
+            }else {
+                for (String str :
+                        listItems   ) {
+                        listSelected.add(false);
+                }
+            }
 
    /*         mapRet=new HashMap<>();
             jsonObject = JSON.parseObject(jsonTxtPackages);
@@ -210,6 +215,7 @@ public class MyUi   {
 
         final String[] items = listItems.toArray( new String[listItems.size()] );
         Log.d(TAG, "dialogSetMultiChoiceItems: listSelected-size-"+listSelected.size());
+        Log.d(TAG, "dialogSetMultiChoiceItems: listItems-size-"+listItems.size() );
         boolean[] selected = Ut.listBooleanToArray( listSelected );
         if (selected == null) {
             Log.d(TAG, "setMultiChoiceItems: selected size err-null");
@@ -298,6 +304,16 @@ public class MyUi   {
             }
         };
         mOffTime.schedule(tt, 1000, 1000);
+    }
+
+    /**
+     * 设置控件可用状态
+     * @param activity
+     * @param r_id
+     * @param bool
+     */
+    public static void  setControlEnable(Activity activity,int r_id,boolean bool ){
+        activity.findViewById( r_id ).setEnabled( bool );
     }
 
     /**根据将check的选项的最终结果存入 jsonObjectListItems
