@@ -62,8 +62,8 @@ public class DataBack {
     }
 
     public String getPathDataPackage(String packageName){
-        if ( new File( "/data/data/"+packageName ).exists() )
-            return "/data/data/"+packageName;
+        if ( new File( HookShare.PATH_DATA_USER+"/"+packageName ).exists() )
+            return HookShare.PATH_DATA_USER+"/"+packageName;
         else
             return null;
     }
@@ -104,7 +104,7 @@ public class DataBack {
             public void run() {
 
                 delCache();
-                logUi("删除完成" + "->" + "/data/data/" + functionPackageName);
+                logUi("删除完成" + "->" + HookShare.PATH_DATA_USER+"/" + functionPackageName);
                 logUi("载入数据" + pathLoadData);
                 MyFile.execCmdsforResult(new String[]{"cp -r " + pathLoadDeviceTxt + " "
                         + HookShare.pathDeviceJson});
@@ -154,16 +154,17 @@ public class DataBack {
      */
     public void delCache() {
 
-        if ( functionPackageName==""|!new File("/data/data/"+functionPackageName ).exists() ){
-            logUi("没找到缓存文件");
+        if ( functionPackageName==""|!new File(HookShare.PATH_DATA_USER+"/"+functionPackageName ).exists() ){
+            logUi("没找到缓存文件"+HookShare.PATH_DATA_USER+"/"+functionPackageName  );
             return;
         }
 
-        ArrayList<String> list = MyFile.execCmdsforResult(new String[] {"cd /data/data/"+functionPackageName , "ls"});
+        //ArrayList<String> list = MyFile.execCmdsforResult(new String[] {"cd /data/data/"+functionPackageName , "ls"});
+        ArrayList<String> list = MyFile.execCmdsforResult(new String[] {"cd "+HookShare.PATH_DATA_USER+"/" +functionPackageName , "ls"});
         for (String str :
                 list) {
             if ( str!=null&&str!="" ) {
-                String delCommandFile = "/data/data/" + functionPackageName + "/" + str;
+                String delCommandFile = HookShare.PATH_DATA_USER+"/" + functionPackageName + "/" + str;
                 MyFile.execCmdsforResult(new String[]{"rm -r " +
                         delCommandFile}
                 );
@@ -351,7 +352,7 @@ public class DataBack {
         ;
 
         String appDataPath=desSaveFilePathFinal+"/"+functionPackageName;
-        String cachePath="/data/data/"+this.functionPackageName ;
+        String cachePath=HookShare.PATH_DATA_USER+"/"+this.functionPackageName ;
         if ( !new File( cachePath ).exists() ) {
             Log.d(TAG, "saveAppData: "+functionPackageName+",缓存文件未发现");
             logUi("缓存文件未发现,是否没指定app"  );

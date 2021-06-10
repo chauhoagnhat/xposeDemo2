@@ -20,6 +20,7 @@ import android.os.Bundle;
 import android.os.Environment;
 import android.telecom.TelecomManager;
 import android.telephony.TelephonyManager;
+import android.util.JsonReader;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
@@ -64,26 +65,26 @@ public class MainActivity extends AppCompatActivity {
     private List<Object> listDevice;
     private Context appContext=null;
     private MainActivityData mainActivityData=null;
-
+    public TextView logTextview;
 
     @Override
     protected void onCreate( Bundle savedInstanceState ) {
 
         super.onCreate( savedInstanceState );
         setContentView(R.layout.activity_main);
-        appContext=getApplicationContext();
+        logTextview =(TextView)findViewById( R.id.tv_log );
+
+        loadUiSetting();
+        //appContext=getApplicationContext();
         new HookShare();
         mainActivityDataInit();
+//        MyOpenHelper myOpenHelper=new MyOpenHelper( getApplicationContext() );
+//        myOpenHelper.getWritableDatabase();
 
-        MyOpenHelper myOpenHelper=new MyOpenHelper( getApplicationContext() );
-        myOpenHelper.getWritableDatabase();
-
-        PackageManager packageManager = getPackageManager();
         Intent mIntent = new Intent(Intent.ACTION_MAIN, null);
         Log.d(TAG, "onCreate: isInstance"+Intent.class.isInstance( mIntent ) );
 
         mIntent.addCategory(Intent.CATEGORY_LAUNCHER);
-        List<ResolveInfo> listAllApps = packageManager.queryIntentActivities(mIntent, 0);
 
         viewById=findViewById(R.id.textView);
         viewById.setText("no data");
@@ -342,7 +343,58 @@ public class MainActivity extends AppCompatActivity {
 
     }
 
+    public  void loadUiSetting(  ){
+        EditText et_path=( EditText )  findViewById( R.id.et_path );
+        String uiJson=MyFile.readFileToString( HookShare.PATH_UI_SETTING );
+        JSONObject jsonObject = null;
+        if (uiJson!=""){
+            jsonObject=JSON.parseObject(uiJson);
+        }else
+        {
+            jsonObject=new JSONObject();
+            jsonObject.put( "et_path","/sdcard/Download" );
+        }
+
+        et_path.setText( jsonObject.get( "et_path" ).toString() )  ;
+//        MyFile.fileWriterTxt( HookShare.PATH_UI_SETTING,jsonObject.toJSONString() );
+
+    }
+
+    public void saveUiSetting(){
+
+        EditText et_path=( EditText )  findViewById( R.id.et_path );
+        JSONObject jsonObject=new JSONObject();
+        jsonObject.put( "et_path",et_path.getText() );
+        MyFile.fileWriterTxt( HookShare.PATH_UI_SETTING,jsonObject.toJSONString() );
+        logUi("保存完成");
+
+    }
+
+    public void logUi(final String text){
+                logTextview.setText( text );
+    }
+
+
+    public void logUiThread(final String text){
+        runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                logTextview.setText( text );
+            }
+        });
+
+    }
+
     public void ui(){
+        //保存ui设置
+        Button bt_save_ui=(Button)findViewById( R.id.bt_save_ui);
+        bt_save_ui.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                saveUiSetting();
+            }
+        });
+
         //删除备份
         Button bt_delBack=findViewById( R.id.bt_delBack );
         bt_delBack.setOnClickListener(new View.OnClickListener() {
@@ -444,6 +496,12 @@ public class MainActivity extends AppCompatActivity {
                 BaseInfo baseInfo = FakeBase.getInstance();
                 JSONObject jsonObject= ( JSONObject) JSONObject.toJSON( baseInfo ) ;
                 HookShare.WriteBean2Json( baseInfo,HookShare.pathDeviceJson );
+                DeviceWriteDefaultPhone();
+//{"getDeviceId":"352003411773066",
+// "getLine1Number":1164428807,"getNetworkCountryIso":"MY",
+// "getNetworkOperator":50212,"getNetworkOperatorName":"Maxis",
+// "getSimCountryIso":"my","getSimOperator":"50217","getSimOperatorName":"Maxis",
+// "getSubscriberId":"502176939124995","mcc":"502","mnc":"17"}
 
                 MyOpenHelper myOpenHelper=new MyOpenHelper( getApplicationContext() );
                 SQLiteDatabase db=myOpenHelper.getWritableDatabase();
@@ -471,6 +529,28 @@ public class MainActivity extends AppCompatActivity {
                 dialogShowDevice();
             }
         });
+    }
+
+    public void DeviceWriteDefaultPhone(){
+        //{"getDeviceId":"352003411773066",
+    // "getLine1Number":1164428807,"getNetworkCountryIso":"MY",
+    // "getNetworkOperator":50212,"getNetworkOperatorName":"Maxis",
+    // "getSimCountryIso":"my","getSimOperator":"50217","getSimOperatorName":"Maxis",
+    // "getSubscriberId":"502176939124995","mcc":"502","mnc":"17"}
+        JSONObject jsonObject=new JSONObject();
+        jsonObject.put( "getDeviceId","352003411773066" );
+        jsonObject.put( "getLine1Number","1164428807" );
+        jsonObject.put( "getNetworkCountryIso","MY" );
+        jsonObject.put( "getNetworkOperator","50212" );
+        jsonObject.put( "getNetworkOperatorName","Maxis" );
+        jsonObject.put( "getSimCountryIso","my" );
+        jsonObject.put( "getSimOperator","50217" );
+        jsonObject.put( "getSimOperatorName","Maxis" );
+        jsonObject.put( "getSubscriberId","502176939124995" );
+        jsonObject.put( "mcc","502" );
+        jsonObject.put( "mnc","17" );
+
+        MyFile.fileWriterTxt( HookShare.PATH_PHONE_DEVICE,jsonObject.toJSONString() );
     }
 
     /**

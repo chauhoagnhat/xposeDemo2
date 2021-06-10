@@ -105,12 +105,14 @@ public class BaseHook {
             XposedHelpers.findAndHookMethod("android.os.SystemProperties", loadPackageParam.classLoader, "get", String.class, new XC_MethodHook() {
                 @Override
                 protected void afterHookedMethod(MethodHookParam param) throws Throwable {
+
                     super.afterHookedMethod(param);
                     String baseBand = (String) param.args[0];
                     if("gsm.version.baseband".equals(baseBand)||"no message".equals(baseBand)){
                         Log.d(TAG, "afterHookedMethod: baseBand="+jsonObject.get("baseBand")  );
                         param.setResult( jsonObject.get("baseBand") );
                     }
+
                 }
             });
 

@@ -38,7 +38,7 @@ public class HookMain  implements IXposedHookLoadPackage   {
             //new CPUHook( loadPackageParam );
             new BaseHook( loadPackageParam );
             new WIFIHook( loadPackageParam );
-            new PackagesHook( loadPackageParam );
+            //new PackagesHook( loadPackageParam );
 
         }
 

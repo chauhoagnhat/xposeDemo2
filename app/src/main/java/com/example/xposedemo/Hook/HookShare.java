@@ -27,6 +27,9 @@ public class HookShare {
     public static final String PATH_BACK_PATH="/sdcard/nk/PATH_BACK_PATH.txt";
     public static final String PATH_DATABACK_JSON="/sdcard/nk/PATH_DATABACK_JSON.txt";
     public static final String PATH_DATABACK_SELECTED_PATH="/sdcard/nk/PATH_DATABACK_SELECTED_PATH.txt";
+    public static final String PATH_DATA_USER="/data/user/0";
+    public static final String PATH_DEVICE_PHONE="/sdcard/nk/devicePhone.txt";
+    public static final String PATH_UI_SETTING="/sdcard/nk/ui.txt";
 
     static {
         Ut.crFolder( pathNkFolder );
