@@ -73,6 +73,7 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate( savedInstanceState );
         setContentView(R.layout.activity_main);
         logTextview =(TextView)findViewById( R.id.tv_log );
+        logTextview.setText("version-0611");
 
         loadUiSetting();
         //appContext=getApplicationContext();
@@ -83,7 +84,6 @@ public class MainActivity extends AppCompatActivity {
 
         Intent mIntent = new Intent(Intent.ACTION_MAIN, null);
         Log.d(TAG, "onCreate: isInstance"+Intent.class.isInstance( mIntent ) );
-
         mIntent.addCategory(Intent.CATEGORY_LAUNCHER);
 
         viewById=findViewById(R.id.textView);
