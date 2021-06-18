@@ -69,16 +69,17 @@ public class Ut {
     private static final String TAG = "DeviceUtils";
     protected static String uuid;
 
-//————————————————
-//    版权声明：本文为CSDN博主「写代码的日子里」的原创文章，遵循CC 4.0 BY-SA版权协议，转载请附上原文出处链接及本声明。
-//    原文链接：https://blog.csdn.net/qq_35703234/article/details/58585536
+
     /**
      * 检测服务是否开启
+     *     版权声明：本文为CSDN博主「写代码的日子里」的原创文章，遵循CC 4.0 BY-SA版权协议，转载请附上原文出处链接及本声明。
+     *     原文链接：https://blog.csdn.net/qq_35703234/article/details/58585536
      * @param context
      * @param serviceName
      * @return
      */
-    public static boolean isRunning(Context context,String serviceName){
+    public static boolean isRunning ( Context context,String serviceName) {
+
         ActivityManager mAM= (ActivityManager) context.getSystemService(Context.ACTIVITY_SERVICE);
         List<ActivityManager.RunningServiceInfo> runningServices =
                 mAM.getRunningServices(100);

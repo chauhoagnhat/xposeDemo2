@@ -39,8 +39,10 @@ import com.example.xposedemo.fake.FakeBase;
 import com.example.xposedemo.fake.FakePackage;
 import com.example.xposedemo.functionModule.DataBack;
 import com.example.xposedemo.MyInterface.DialogCallBack;
+import com.example.xposedemo.functionModule.ScriptControl;
 import com.example.xposedemo.utils.MyFile;
 import com.example.xposedemo.utils.MyUi;
+import com.example.xposedemo.utils.PhoneRndTools;
 import com.example.xposedemo.utils.Ut;
 import com.example.xposedemo.utils.SharedPref;
 import com.example.xposedemo.utils.Utils;
@@ -89,7 +91,6 @@ public class MainActivity extends AppCompatActivity {
         viewById=findViewById(R.id.textView);
         viewById.setText("no data");
         //setSelectedPackges();
-
             //testHook();
             Ut.copyAssetsFile(context,"cpuinfo","/sdcard/cpuinfo" );
             String path=Environment.getExternalStorageDirectory().toString();
@@ -121,8 +122,8 @@ public class MainActivity extends AppCompatActivity {
 
         mainActivityData=new MainActivityData();
         mainActivityData.setContext( getApplicationContext() );
-        mainActivityData.setActivityContext(MainActivity.this);
-        mainActivityData.setLogTextview((TextView)findViewById( R.id.tv_log ) );
+        mainActivityData.setActivityContext( MainActivity.this );
+        mainActivityData.setLogTextview( (TextView)findViewById( R.id.tv_log ) );
         mainActivityData.setEt_path( (EditText)findViewById(R.id.et_path ) );
         mainActivityData.setActivity( MainActivity.this );
 
@@ -538,19 +539,19 @@ public class MainActivity extends AppCompatActivity {
     // "getSimCountryIso":"my","getSimOperator":"50217","getSimOperatorName":"Maxis",
     // "getSubscriberId":"502176939124995","mcc":"502","mnc":"17"}
         JSONObject jsonObject=new JSONObject();
-        jsonObject.put( "getDeviceId","352003411773066" );
-        jsonObject.put( "getLine1Number","1164428807" );
+        jsonObject.put( "getDeviceId", PhoneRndTools.randomImei() );
+        jsonObject.put( "getLine1Number",11+PhoneRndTools.randomNum(10) );
         jsonObject.put( "getNetworkCountryIso","MY" );
         jsonObject.put( "getNetworkOperator","50212" );
         jsonObject.put( "getNetworkOperatorName","Maxis" );
         jsonObject.put( "getSimCountryIso","my" );
         jsonObject.put( "getSimOperator","50217" );
         jsonObject.put( "getSimOperatorName","Maxis" );
-        jsonObject.put( "getSubscriberId","502176939124995" );
+        jsonObject.put( "getSubscriberId","50217"+PhoneRndTools.randomNum(10) );
         jsonObject.put( "mcc","502" );
         jsonObject.put( "mnc","17" );
-
         MyFile.fileWriterTxt( HookShare.PATH_PHONE_DEVICE,jsonObject.toJSONString() );
+
     }
 
     /**

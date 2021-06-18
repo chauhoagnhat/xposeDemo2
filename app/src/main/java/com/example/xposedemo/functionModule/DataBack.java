@@ -247,6 +247,7 @@ public class DataBack {
 
         if (!new File( desSaveFilePathCommon ).exists() ){
              logUi ( "没有目录,是否指定app？" );
+             MyFile.fileWriterTxt( HookShare.PATH_DATABACK_JSON,"" );
             return;
         }
 
