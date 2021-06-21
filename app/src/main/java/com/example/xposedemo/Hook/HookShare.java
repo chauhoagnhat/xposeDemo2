@@ -30,6 +30,7 @@ public class HookShare {
     public static final String PATH_DATA_USER="/data/user/0";
     public static final String PATH_DEVICE_PHONE="/sdcard/nk/devicePhone.txt";
     public static final String PATH_UI_SETTING="/sdcard/nk/ui.txt";
+    public static final String PATH_SCRIPT_RUNNING="/sdcard/nk/script.txt";
 
     static {
         Ut.crFolder( pathNkFolder );

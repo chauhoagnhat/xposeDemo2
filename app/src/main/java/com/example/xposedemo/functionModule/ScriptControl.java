@@ -1,5 +1,6 @@
 package com.example.xposedemo.functionModule;
 
+import android.app.Service;
 import android.content.Context;
 import android.media.AudioManager;
 
@@ -12,5 +13,7 @@ public class ScriptControl {
       MyFile.execCmdsforResult( new String[]{ "sendevent /dev/input/event2 1 114 1","sendevent /dev/input/event2 0 0 0","sendevent /dev/input/event2 1 114 0",
                 "sendevent /dev/input/event2 0 0 0" } );
     }
+
+
 
 }

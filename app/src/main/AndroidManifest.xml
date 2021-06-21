@@ -9,6 +9,9 @@
     <uses-permission android:name="android.permission.READ_PHONE_STATE" />
     <uses-permission android:name="android.permission.KILL_BACKGROUND_PROCESSES"/>
     <uses-permission android:name="android.permission.ACCESS_NOTIFICATION_POLICY"/>
+    <!-- 接收开机广播权限 -->
+    <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
+
 
     <application
         android:allowBackup="true"
@@ -38,9 +41,31 @@
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
+
             </intent-filter>
 
         </activity>
+
+        <!-- 添加接收开机启动广播 -->
+        <receiver
+         android:name="com.example.xposedemo.myBroadcast.BootBroadcastReceiver">
+        <intent-filter>
+            <action android:name="android.intent.action.BOOT_COMPLETED" />
+            <!--  <category android:name="android.intent.category.LAUNCHER"/> -->
+                <category android:name="android.intent.category.HOME" />
+            </intent-filter>
+        </receiver>
+
+        <service
+            android:name="com.example.xposedemo.myService.BootService"
+        />
+
+        <service
+            android:name=".myService.AlarmService"
+            android:enabled="true"
+            android:exported="true"/>
+        <receiver android:name=".myBroadcast.AlarmReceive"/>
+
 
         <provider android:name="com.example.xposedemo.MyProvider.MyProvider"
             android:authorities="com.example.xposedemo.MyProvider"

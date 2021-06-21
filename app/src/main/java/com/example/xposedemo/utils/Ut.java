@@ -1,5 +1,6 @@
 package com.example.xposedemo.utils;
 
+import android.app.Activity;
 import android.app.ActivityManager;
 import android.app.AlertDialog;
 import android.content.ComponentName;
@@ -10,6 +11,7 @@ import android.content.ServiceConnection;
 import android.content.SharedPreferences;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
+import android.content.pm.ResolveInfo;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.net.wifi.WifiInfo;
@@ -92,6 +94,28 @@ public class Ut {
         return false;
     }
 
+    /**
+     *
+     * @param activity
+     * @param packageName
+     */
+    public static String getActivities(Context activity, String packageName)
+    {
+        Intent localIntent = new Intent("android.intent.action.MAIN", null);
+        localIntent.addCategory("android.intent.category.LAUNCHER");
+        List<ResolveInfo> appList =  activity.getPackageManager().queryIntentActivities(localIntent, 0);
+        for (int i = 0; i < appList.size(); i++) {
+            ResolveInfo resolveInfo = appList.get(i);
+            String packageStr = resolveInfo.activityInfo.packageName;
+            if (packageStr.equals(packageName)) {
+                //这个就是你想要的那个Activity
+                android.util.Log.e("", "" + resolveInfo.activityInfo.name);
+                return resolveInfo.activityInfo.name;
+                //break;
+            }
+        }
+        return null;
+    }
 
     public static String getIPAddress(Context context) {
 

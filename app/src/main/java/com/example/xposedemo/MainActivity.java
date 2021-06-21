@@ -77,6 +77,8 @@ public class MainActivity extends AppCompatActivity {
         logTextview =(TextView)findViewById( R.id.tv_log );
         logTextview.setText("version-0611");
 
+        doStartApplicationWithPackageName( "com.li" );
+
         loadUiSetting();
         //appContext=getApplicationContext();
         new HookShare();
@@ -117,6 +119,50 @@ public class MainActivity extends AppCompatActivity {
         Log.d(TAG, "onCreate: run finish");
 
     }
+
+
+    private void doStartApplicationWithPackageName(String packagename) {
+
+        // 通过包名获取此APP详细信息，包括Activities、services、versioncode、name等等
+        PackageInfo packageinfo = null;
+        try {
+            packageinfo = getPackageManager().getPackageInfo(packagename, 0);
+        } catch (PackageManager.NameNotFoundException e) {
+            e.printStackTrace();
+        }
+        if (packageinfo == null) {
+            return;
+        }
+
+        // 创建一个类别为CATEGORY_LAUNCHER的该包名的Intent
+        Intent resolveIntent = new Intent(Intent.ACTION_MAIN, null);
+        resolveIntent.addCategory(Intent.CATEGORY_LAUNCHER);
+        resolveIntent.setPackage(packageinfo.packageName);
+
+        // 通过getPackageManager()的queryIntentActivities方法遍历
+        List<ResolveInfo> resolveinfoList = getPackageManager()
+                .queryIntentActivities(resolveIntent, 0);
+
+        ResolveInfo resolveinfo = resolveinfoList.iterator().next();
+        if (resolveinfo != null) {
+            // packagename = 参数packname
+            String packageName = resolveinfo.activityInfo.packageName;
+            // 这个就是我们要找的该APP的LAUNCHER的Activity[组织形式：packagename.mainActivityname]
+            String className = resolveinfo.activityInfo.name;
+            // LAUNCHER Intent
+            Intent intent = new Intent(Intent.ACTION_MAIN);
+            intent.addCategory(Intent.CATEGORY_LAUNCHER);
+
+            // 设置ComponentName参数1:packagename参数2:MainActivity路径
+            ComponentName cn = new ComponentName(packageName, className);
+
+            intent.setComponent(cn);
+            startActivity(intent);
+        }
+    }
+//————————————————
+//    版权声明：本文为CSDN博主「Never-say-Never」的原创文章，遵循CC 4.0 BY-SA版权协议，转载请附上原文出处链接及本声明。
+//    原文链接：https://blog.csdn.net/mad1989/article/details/38090513
 
     public void mainActivityDataInit(){
 
