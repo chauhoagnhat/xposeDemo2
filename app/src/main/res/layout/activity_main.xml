@@ -80,13 +80,6 @@
                 android:hint="保存路径"
                 android:text="/sdcard/nk"></EditText>
 
-            <Button
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="保存设置"
-                android:id="@+id/bt_save_ui">
-            </Button>
-
         </LinearLayout>
 
         <LinearLayout
@@ -114,6 +107,27 @@
             </Button>
 
         </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content">
+            <Switch
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="监控脚本运行"
+                android:id="@+id/sw_script_watch">
+
+            </Switch>
+
+        </LinearLayout>
+
+        <Button
+            android:id="@+id/bt_save_ui"
+            android:layout_width="match_parent"
+            android:layout_height="37dp"
+            android:text="保存设置">
+
+        </Button>
 
         <TextView
             android:id="@+id/tv_log"

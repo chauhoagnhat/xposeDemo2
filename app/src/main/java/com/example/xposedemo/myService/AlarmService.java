@@ -18,6 +18,9 @@ import com.example.xposedemo.functionModule.ScriptControl;
 import com.example.xposedemo.myBroadcast.AlarmReceive;
 import com.example.xposedemo.utils.MyFile;
 import com.example.xposedemo.utils.MyUi;
+import com.example.xposedemo.utils.Ut;
+
+import org.json.JSONObject;
 
 public class AlarmService extends Service {
 
@@ -44,25 +47,9 @@ public class AlarmService extends Service {
     public int onStartCommand(Intent intent, int flags, int startId) {
 
         final Context context=this.getApplication();
-        Toast.makeText( context,"检测脚本是否运行",Toast.LENGTH_LONG );
+        String uiJson=MyFile.readFileToString( HookShare.PATH_UI_SETTING );
+        //if (uiJson!="")
 
-        //这里模拟后台操作
-        new Thread(new Runnable() {
-            @Override
-            public void run() {
-                Log.d(TAG, "run: loop");
-                MyFile.fileWriterTxt( HookShare.PATH_SCRIPT_RUNNING,"0" );
-                try {
-                    Thread.sleep(20*1000);
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
-                }
-                String tp= MyFile.readFileToString(HookShare.PATH_SCRIPT_RUNNING);
-                if (tp!="1"){
-
-                }
-            }
-        }).start();
 
         //通过AlarmManager定时启动广播
         AlarmManager alarmManager= (AlarmManager) getSystemService(ALARM_SERVICE);
@@ -74,4 +61,31 @@ public class AlarmService extends Service {
 
 
     }
+
+    public void  scriptRun(final Context context ){
+        Toast.makeText( context,"检测脚本是否运行",Toast.LENGTH_LONG );
+        //这里模拟后台操作
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                synchronized ( this ){
+                    Log.d(TAG, "run: loop");
+                    MyFile.fileWriterTxt( HookShare.PATH_SCRIPT_RUNNING,"0" );
+                    try {
+                        Thread.sleep(20*1000);
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
+                    }
+                    String tp= MyFile.readFileToString(HookShare.PATH_SCRIPT_RUNNING);
+                    if (tp!="1"){
+                        Ut.startApplicationWithPackageName( "com.li",context );
+                    }
+
+                }
+
+            }
+        }).start();
+
+    }
+
 }
