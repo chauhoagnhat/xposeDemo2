@@ -72,6 +72,32 @@ public class Ut {
     protected static String uuid;
 
 
+//
+    public static void getSystemPermission(){
+        // android:sharedUserId="android.uid.system"
+        //https://www.jianshu.com/p/b26201f2b4bb
+        //https://blog.csdn.net/u013491946/article/details/78191591  androidStudio配置
+    }
+
+
+    public static char rLetter(){
+        int c='a'+(int)(Math.random()*26);
+        return  (char)c;
+    }
+
+    public static String rLetterN(int n){
+
+        StringBuilder sb=new StringBuilder("");
+        for (int i=0;i<n;i++){
+            char c= (char) ('a'+(int)(Math.random()*26));
+            sb.append(c);
+        }
+
+        String ret=sb.toString();
+        Log.d(TAG, "rLetterN: "+ret);
+        return  ret;
+    }
+
     /**
      * 检测服务是否开启
      *     版权声明：本文为CSDN博主「写代码的日子里」的原创文章，遵循CC 4.0 BY-SA版权协议，转载请附上原文出处链接及本声明。
@@ -94,6 +120,20 @@ public class Ut {
         return false;
     }
 
+   // https://blog.csdn.net/weixin_35997133/article/details/117314861
+
+    public static void stopAppByForce(Context context ,String packageName) {
+        ActivityManager mActivityManager = (ActivityManager)
+                context.getSystemService(Context.ACTIVITY_SERVICE);
+        Method method = null;
+        try {
+            method = Class.forName("android.app.ActivityManager").getMethod("forceStopPackage", String.class);
+            method.invoke(mActivityManager, packageName);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+    }
 
     public static void startApplicationWithPackageName(String packagename, Context context) {
 
@@ -276,6 +316,28 @@ public class Ut {
         return randomNumber;
     }
 
+    public static String r_num_n(int n,int min,int max) {
+
+        StringBuilder sb=new StringBuilder("");
+        for (int i=0;i<n;i++){
+            sb.append( r_(min,max) );
+        }
+        Log.d(TAG, "r_num_n: "+sb.toString());
+        return sb.toString();
+
+    }
+
+    public static String r_num_n(int n) {
+
+       StringBuilder sb=new StringBuilder("");
+       for (int i=0;i<n;i++){
+            sb.append( r_(0,9) );
+       }
+        Log.d(TAG, "r_num_n: "+sb.toString());
+       return sb.toString();
+
+    }
+
     /**
      * 从list中随机取n个元素
      *
@@ -291,6 +353,7 @@ public class Ut {
         }
         return listRet;
     }
+
 
 
     /**
@@ -316,9 +379,10 @@ public class Ut {
             e.printStackTrace();
             Log.d(TAG, "getFileContext: IOException");
         }
-
         return list;
     }
+
+
 
     /***
      * 将bean对象写成json 到指定txt
@@ -597,10 +661,13 @@ public class Ut {
         return uuid;
     }
 
+
+    //http://web.rslnano.com/yhapi.ashx?act=getPhoneCode&token=83f6f31d1c8b6566bbbc8886c04d8406_647&mobile=65330483&iid=3211
     public static String readAssetsTxt( Context context,String fileName ){
+
         String text=null;
         try {
-            InputStream is = context.getAssets().open(fileName);
+            InputStream is = context.getAssets().open( fileName );
             int size = is.available();
             // Read the entire asset into a local byte buffer.
             byte[] buffer = new byte[size];
@@ -614,6 +681,28 @@ public class Ut {
             throw new RuntimeException(e);
         }
         return text;
+
+
+
+
+
+    }
+
+
+
+    public static String  rLetterCapital(int n){
+
+        StringBuilder stringBuilder=new StringBuilder("");
+
+        for (int i=0;i<n;i++){
+            //char c=(char)(int)(Math.random()*26+97);
+            int ii=(int)Math.round(Math.random()*26);
+            int j=(int)'A'+ii;
+            char c=(char)j;
+            stringBuilder.append(c);
+        }
+        Log.d(TAG, "rLetterCapital: ="+stringBuilder.toString() );
+        return  stringBuilder.toString();
 
     }
 

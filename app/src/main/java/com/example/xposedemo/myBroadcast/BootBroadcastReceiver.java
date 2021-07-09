@@ -29,12 +29,12 @@ public class BootBroadcastReceiver extends BroadcastReceiver {
 //            actIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
 //            context.startActivity(actIntent);
 
-            Log.v(TAG, "开机自动服务自动启动.....");
-            // 启动应用，参数为需要自动启动的应用的包名
-            Intent serIntent= new Intent(context,  AlarmService.class);
-            serIntent.addFlags( Intent.FLAG_ACTIVITY_NEW_TASK );
-            context.startService(serIntent);
-            Log.v(TAG, "开机程序自动启动.....");
+//            Log.v(TAG, "开机自动服务自动启动.....");
+//            // 启动应用，参数为需要自动启动的应用的包名
+//            Intent serIntent= new Intent(context,  AlarmService.class);
+//            serIntent.addFlags( Intent.FLAG_ACTIVITY_NEW_TASK );
+//            context.startService(serIntent);
+//            Log.v(TAG, "开机程序自动启动.....");
 
         }
 

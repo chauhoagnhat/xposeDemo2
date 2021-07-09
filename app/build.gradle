@@ -4,6 +4,7 @@ android {
 
     compileSdkVersion 29
     buildToolsVersion "29.0.3"
+
     defaultConfig {
         applicationId "com.example.xposedemo"
         minSdkVersion 22
@@ -12,6 +13,27 @@ android {
         versionName "1.0"
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
     }
+        signingConfigs {
+        release {
+            storeFile file("../signApk/key0.jks")
+            storePassword '123456'
+            keyAlias 'key0'
+            keyPassword '123456'
+            v1SigningEnabled(true)
+            v2SigningEnabled(true)
+        }
+
+        debug {
+            storeFile file("../signApk/key0.jks")
+            storePassword '123456'
+            keyAlias 'key0'
+            keyPassword '123456'
+            v1SigningEnabled(true)
+            v2SigningEnabled(true)
+        }
+
+    }
+
     buildTypes {
         release {
             minifyEnabled false
@@ -22,6 +44,7 @@ android {
 
 
 dependencies {
+
     //implementation fileTree(dir: 'libs', include: ['*.jar'])
     compileOnly fileTree(dir: 'libs', include: ['*.jar'])
     // https://mvnrepository.com/artifact/com.alibaba/fastjson

@@ -14,5 +14,4 @@ public class AlarmReceive extends BroadcastReceiver {
         context.startService( intent2 );
     }
 
-
 }

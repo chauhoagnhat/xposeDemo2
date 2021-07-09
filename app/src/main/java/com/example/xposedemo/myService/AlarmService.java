@@ -6,12 +6,15 @@ import android.app.Service;
 import android.content.Context;
 import android.content.Intent;
 import android.os.IBinder;
+import android.os.Looper;
 import android.os.SystemClock;
 import android.util.Log;
 import android.widget.Toast;
 
 import androidx.annotation.Nullable;
 
+import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.JSONObject;
 import com.example.xposedemo.Hook.HookShare;
 import com.example.xposedemo.MainActivity;
 import com.example.xposedemo.functionModule.ScriptControl;
@@ -20,11 +23,9 @@ import com.example.xposedemo.utils.MyFile;
 import com.example.xposedemo.utils.MyUi;
 import com.example.xposedemo.utils.Ut;
 
-import org.json.JSONObject;
-
 public class AlarmService extends Service {
 
-    private static final int ONE_Miniute=60*1000;
+    private static final int ONE_Miniute=60*5*1000;
     private static final int PENDING_REQUEST=0;
     private static final String TAG = "AlarmService";
 
@@ -47,9 +48,10 @@ public class AlarmService extends Service {
     public int onStartCommand(Intent intent, int flags, int startId) {
 
         final Context context=this.getApplication();
-        String uiJson=MyFile.readFileToString( HookShare.PATH_UI_SETTING );
-        //if (uiJson!="")
-
+        Log.d(TAG, "onStartCommand: alartSevice is running");
+        if ( getJsonWatch() ){
+            scriptRun(context);
+        }
 
         //通过AlarmManager定时启动广播
         AlarmManager alarmManager= (AlarmManager) getSystemService(ALARM_SERVICE);
@@ -59,7 +61,18 @@ public class AlarmService extends Service {
         alarmManager.set(AlarmManager.ELAPSED_REALTIME_WAKEUP,triggerAtTime,pIntent);
         return super.onStartCommand(intent, flags, startId);
 
+    }
 
+    public boolean getJsonWatch(){
+        String uiJson=MyFile.readFileToString( HookShare.PATH_UI_SETTING );
+        JSONObject jsonObject=null;
+        Log.d(TAG, "getJsonWatch");
+        if (uiJson!=""){
+            jsonObject= JSON.parseObject(uiJson);
+            if (jsonObject.containsKey("sw_script_watch"))
+                return jsonObject.getBoolean ("sw_script_watch") ;
+        }
+        return false;
     }
 
     public void  scriptRun(final Context context ){
@@ -68,19 +81,73 @@ public class AlarmService extends Service {
         new Thread(new Runnable() {
             @Override
             public void run() {
+
                 synchronized ( this ){
+                    Looper.prepare();
                     Log.d(TAG, "run: loop");
                     MyFile.fileWriterTxt( HookShare.PATH_SCRIPT_RUNNING,"0" );
                     try {
-                        Thread.sleep(20*1000);
+                        Thread.sleep(10*1000);
                     } catch (InterruptedException e) {
                         e.printStackTrace();
                     }
                     String tp= MyFile.readFileToString(HookShare.PATH_SCRIPT_RUNNING);
-                    if (tp!="1"){
-                        Ut.startApplicationWithPackageName( "com.li",context );
+                    if (Integer.parseInt(tp)!=1){
+                        for (int i=0;i<4;i++) {
+                            boolean boolSuc=false;
+
+                            try {
+                               Log.d(TAG, "run: stop-app"+i);
+                               Ut.stopAppByForce(context,"com.li");
+                               Ut.stopAppByForce(context,"com.tunnelworkshop.postern");
+
+                               Thread.sleep(1000);
+                               Ut.startApplicationWithPackageName("com.li", context);
+
+                               for (int j=0;j<4;j++){
+
+                                   Thread.sleep(8000);
+                                   ScriptControl.setVolDown();
+                                   Log.d(TAG, "run: set vol down"+j);
+                                   Thread.sleep(6000);
+                                   tp = MyFile.readFileToString(HookShare.PATH_SCRIPT_RUNNING);
+                                   if (Integer.parseInt(tp) == 1) {
+
+                                       boolSuc=true;
+                                       Toast.makeText(context, "启动成功", Toast.LENGTH_SHORT);
+                                       Log.d(TAG, "run: 启动成功");
+
+                                       //再次确认启动成功
+                                       MyFile.fileWriterTxt( HookShare.PATH_SCRIPT_RUNNING,"0" );
+                                       Thread.sleep(10000);
+                                       tp = MyFile.readFileToString(HookShare.PATH_SCRIPT_RUNNING);
+                                       if (Integer.parseInt(tp) == 1) {
+                                           Log.d(TAG, "run: 再次确认启动成功");
+                                           break;
+                                       }else {
+                                           Log.d(TAG, "run: 再次确认启动失败");
+                                           boolSuc=false;
+                                           break;
+                                       }
+
+                                   }
+                               }
+                           } catch (InterruptedException e) {
+                               e.printStackTrace();
+                           }
+                            if (boolSuc)
+                                break;
+                           if (!getJsonWatch()) {
+                               Log.d(TAG, "run: not need watch was set");
+                               break;
+                           }
+                       }
+
+                    }else {
+                        Log.d(TAG, "run: 脚本已启动无需启动");
                     }
 
+                    Looper.loop ();
                 }
 
             }

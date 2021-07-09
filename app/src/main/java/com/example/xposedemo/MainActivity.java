@@ -41,6 +41,7 @@ import com.example.xposedemo.fake.FakePackage;
 import com.example.xposedemo.functionModule.DataBack;
 import com.example.xposedemo.MyInterface.DialogCallBack;
 import com.example.xposedemo.functionModule.ScriptControl;
+import com.example.xposedemo.myService.AlarmService;
 import com.example.xposedemo.utils.MyFile;
 import com.example.xposedemo.utils.MyUi;
 import com.example.xposedemo.utils.PhoneRndTools;
@@ -75,9 +76,12 @@ public class MainActivity extends AppCompatActivity {
 
         super.onCreate( savedInstanceState );
         setContentView(R.layout.activity_main);
+       // Ut.stopAppByForce(getApplicationContext(), "com.li" );
         logTextview =(TextView)findViewById( R.id.tv_log );
-        logTextview.setText("version-0622");
-        //doStartApplicationWithPackageName( "com.li" );
+        logTextview.setText("version-0708c");
+
+        FakeBase.randomDevice( getApplicationContext() );
+        startWatchService();
 
         loadUiSetting();
         //appContext=getApplicationContext();
@@ -105,7 +109,6 @@ public class MainActivity extends AppCompatActivity {
         String jsonStr= Utils.readFileToString( HookShare.pathDeviceJson );
 
         if (jsonStr!=""&&jsonStr!=null){
-
             JSONObject jsonObjectPara;
             Log.d(TAG, "onCreate: jsonStr="+jsonStr );
             Map<String,String> map=JSONObject.parseObject(jsonStr,
@@ -113,9 +116,7 @@ public class MainActivity extends AppCompatActivity {
             string=Utils.join_map2str( map,"\r\n");
             Log.d(TAG, "onCreate: mapStr="+string );
             viewById.setText( string );
-
         }
-
         Log.d(TAG, "onCreate: run finish");
 
     }
@@ -189,20 +190,20 @@ public class MainActivity extends AppCompatActivity {
         Log.d(TAG, "onCreate:getSubscriberId"+telephonyManager.getSubscriberId() );
         Log.d(TAG, "onCreate:getDeviceId"+telephonyManager.getDeviceId  () );
 
-            PackageManager packageManager=getApplication().getPackageManager();
-            List< PackageInfo > tp=packageManager.getInstalledPackages(0);
-
+//            PackageManager packageManager=getApplication().getPackageManager();
+//            List< PackageInfo > tp=packageManager.getInstalledPackages(0);
+            Log.d("aaa","bbbb");
             listDevice=new ArrayList<>();
             String pa;
 
-        Log.d(TAG, "deviceLog: ip="+Ut.getIPAddress( getApplicationContext() ) );
+       // Log.d(TAG, "deviceLog: ip="+Ut.getIPAddress( getApplicationContext() ) );
             
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M ) {
 
             pa="onCreate: getDeviceId="+telephonyManager.getDeviceId(0);
             Log.d(TAG, pa );
             listDevice.add(pa);
-            pa="onCreate: getSubscriberId="+telephonyManager. getSubscriberId ();
+            pa="onCreate: getSubscriberId="+telephonyManager.getSubscriberId();
             Log.d(TAG, pa );
             listDevice.add(pa);
             pa="onCreate: build model-"+Build.MODEL;
@@ -354,9 +355,7 @@ public class MainActivity extends AppCompatActivity {
         EditText et_path=( EditText )  findViewById( R.id.et_path );
         Switch sw_script_watch= (Switch)findViewById( R.id.sw_script_watch );
         String uiJson=MyFile.readFileToString( HookShare.PATH_UI_SETTING );
-
         JSONObject jsonObject = null;
-
 
         if (uiJson!=""){
             jsonObject=JSON.parseObject(uiJson);
@@ -410,7 +409,27 @@ public class MainActivity extends AppCompatActivity {
 
     }
 
+    public void startWatchService(){
+
+        Context context=getApplicationContext();
+        Intent serIntent= new Intent( context, AlarmService.class);
+        serIntent.addFlags( Intent.FLAG_ACTIVITY_NEW_TASK );
+        context.startService(serIntent);
+        Log.v(TAG, "启动服务.....");
+
+    }
+
     public void ui(){
+        //启动监控服务
+        Button bt_watch=  (Button)findViewById( R.id.bt_watch );
+        bt_watch.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                startWatchService();
+            }
+        });
+
+
         //保存ui设置
         Button bt_save_ui=(Button)findViewById( R.id.bt_save_ui);
         bt_save_ui.setOnClickListener(new View.OnClickListener() {
@@ -434,7 +453,7 @@ public class MainActivity extends AppCompatActivity {
         bt_dataList.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                DataBack.getInstance( mainActivityData ).dialogShowDataBack(MyUi.COUNT_FALSE);
+                DataBack.getInstance( mainActivityData ).dialogShowDataBack( MyUi.COUNT_FALSE );
             }
         });
 
@@ -518,10 +537,11 @@ public class MainActivity extends AppCompatActivity {
                 instans .delCacheByThread();
 
                 //basehook
-                BaseInfo baseInfo = FakeBase.getInstance();
+                BaseInfo baseInfo = FakeBase.randomDevice(getApplicationContext());
                 JSONObject jsonObject= ( JSONObject) JSONObject.toJSON( baseInfo ) ;
                 HookShare.WriteBean2Json( baseInfo,HookShare.pathDeviceJson );
                 DeviceWriteDefaultPhone();
+
 //{"getDeviceId":"352003411773066",
 // "getLine1Number":1164428807,"getNetworkCountryIso":"MY",
 // "getNetworkOperator":50212,"getNetworkOperatorName":"Maxis",

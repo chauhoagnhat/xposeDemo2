@@ -25,15 +25,6 @@ public class BaseHook {
     private static final String TAG = "BaseHook";
     public  BaseInfo baseInfo;
     public BaseHook(XC_LoadPackage.LoadPackageParam loadPackageParam){
-
-//        if ( HookShare.boolNew() ){
-//            baseInfo = FackBase.getInstance();
-//            HookShare.WriteBean2Json( baseInfo );
-//            Ut.fileWriterTxt( HookShare.pathNewDeviceOrder,"-1" );
-//        }
-//        if ("".equals( loadPackageParam.packageName ) ) {
-//            return;
-//        }
         hookAll(  baseInfo,loadPackageParam  );
 
     }
@@ -41,12 +32,13 @@ public class BaseHook {
     public void hookMethod(final String className, final ClassLoader classLoader, final String methodName, final String result){
         XposedHelpers.findAndHookMethod(className, classLoader, methodName, new XC_MethodHook() {
             @Override
-            protected void afterHookedMethod(MethodHookParam param) throws Throwable {
-                super.afterHookedMethod(param);
-                param.setResult(result);
-                XposedBridge.log("result is " + result);
+            protected void afterHookedMethod( MethodHookParam param ) throws Throwable {
+                super.afterHookedMethod( param );
+                param.setResult( result );
+                XposedBridge.log("result is " + result  );
             }
         });
+
     }
 
 
@@ -118,7 +110,9 @@ public class BaseHook {
 
             XposedHelpers.findAndHookMethod(Settings.Secure.class, "getString", ContentResolver.class, String.class, new XC_MethodHook() {
                 protected void afterHookedMethod(MethodHookParam param) throws Throwable {
-                    Log.d(TAG, "afterHookedMethod: systemHook="+param.args[1]);
+                    //accessibility_captioning_locale
+                    Log.d(TAG, "afterHookedMethod: systemHook="+param.args[1]
+                    +"result="+param.getResult().toString() );
                     if (param.args[1].equals(Settings.Secure.ANDROID_ID)){
                         Log.d(TAG, "afterHookedMethod: android_id="+jsonObject.get("android_id")  );
                         param.setResult( jsonObject.get("android_id") );

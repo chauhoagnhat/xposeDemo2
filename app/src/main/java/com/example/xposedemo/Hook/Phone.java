@@ -6,6 +6,7 @@ import android.util.Log;
 
 import com.alibaba.fastjson.JSONObject;
 
+import com.example.xposedemo.utils.MyFile;
 import com.example.xposedemo.utils.SharedPref;
 import com.example.xposedemo.utils.Utils;
 
@@ -42,7 +43,6 @@ public class Phone  {
                     }
                     ;
                 });
-
     }
 
     public void query(){
@@ -158,6 +158,13 @@ public class Phone  {
 
         });
 
+
+
+        HookTelephony(android.telephony.TelephonyManager.class.getName(),loadPkgParam,  "getPhoneType" , TelephonyManager.PHONE_TYPE_GSM );
+        HookTelephony(android.telephony.TelephonyManager.class.getName(),loadPkgParam,  "getNetworkType" , TelephonyManager.NETWORK_TYPE_HSPAP);
+        HookTelephony(android.telephony.TelephonyManager.class.getName(),loadPkgParam,  "getSimState" , TelephonyManager.SIM_STATE_READY);
+        HookTelephony(android.telephony.TelephonyManager.class.getName(),loadPkgParam,  "hasIccCard" ,  true );
+
         String fucName="getDeviceSoftwareVersion";
         fucName="getDeviceId";
         HookTelephony(TelePhone, loadPkgParam, fucName,
@@ -205,11 +212,6 @@ public class Phone  {
 //        HookTelephony( TelePhone, loadPkgParam, fucName,
 //                jsonObjectPara.getString( fucName )  ); // List<CellInfo>基站列表信息
 
-        
-        HookTelephony(android.telephony.TelephonyManager.class.getName(),loadPkgParam,  "getPhoneType" , TelephonyManager.PHONE_TYPE_GSM );
-        HookTelephony(android.telephony.TelephonyManager.class.getName(),loadPkgParam,  "getNetworkType" , TelephonyManager.NETWORK_TYPE_HSPAP);
-        HookTelephony(android.telephony.TelephonyManager.class.getName(),loadPkgParam,  "getSimState" , TelephonyManager.SIM_STATE_READY);
-        HookTelephony(android.telephony.TelephonyManager.class.getName(),loadPkgParam,  "hasIccCard" ,  true );
 
 
       /*  XposedBridge.hookAllMethods(findClass("pc.a.b.n", loadPkgParam.classLoader), "b", new XC_MethodHook() {

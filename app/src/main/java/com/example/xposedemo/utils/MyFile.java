@@ -1,11 +1,14 @@
 package com.example.xposedemo.utils;
 
+import android.content.Context;
 import android.util.Log;
 
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
+import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
@@ -62,7 +65,6 @@ public class MyFile {
     }
 
 
-
     /**
      * 执行cmd遍历文件名，需root
      * @param path
@@ -112,6 +114,83 @@ public class MyFile {
 
     }
 
+
+    //http://web.rslnano.com/yhapi.ashx?act=getPhoneCode&token=83f6f31d1c8b6566bbbc8886c04d8406_647&mobile=65330483&iid=3211
+    public static String readAssetsTxt(Context context, String fileName ){
+
+        String text=null;
+        try {
+            InputStream is = context.getAssets().open( fileName );
+            int size = is.available();
+            // Read the entire asset into a local byte buffer.
+            byte[] buffer = new byte[size];
+            is.read(buffer);
+            is.close();
+
+            // Convert the buffer into a string.
+            text = new String(buffer, "GB2312");
+        } catch (IOException e) {
+            // Should never happen!
+            throw new RuntimeException(e);
+        }
+        return text;
+
+
+
+    }
+
+    //http://web.rslnano.com/yhapi.ashx?act=getPhoneCode&token=83f6f31d1c8b6566bbbc8886c04d8406_647&mobile=65330483&iid=3211
+    public static List<String> readAssetsLines(Context context, String fileName ){
+        List<String> list = null;
+        String text=null;
+        try {
+            InputStream is = context.getAssets().open( fileName );
+            BufferedReader bufferedReader = new BufferedReader(  new InputStreamReader (is)  );
+            list = new ArrayList<String>();
+            String str = null;
+            while ((str = bufferedReader.readLine()) != null) {
+                if (str.trim().length() > 2) {
+                    list.add(str);
+                }
+            }
+        } catch (IOException e) {
+            // Should never happen!
+            throw new RuntimeException(e);
+        }
+
+        return  list;
+
+    }
+
+        /**
+         * 获取txt文件内容并按行放入list中
+         */
+        public static List<String> readLines(String path) {
+            List<String> list = null;
+            FileReader fileReader = null;
+            try {
+                fileReader = new FileReader(path);
+                BufferedReader bufferedReader = new BufferedReader(fileReader);
+                list = new ArrayList<String>();
+                String str = null;
+                while ((str = bufferedReader.readLine()) != null) {
+                    if (str.trim().length() > 2) {
+                        list.add(str);
+                    }
+                }
+            } catch (FileNotFoundException e) {
+                e.printStackTrace();
+                Log.d(TAG, "getFileContext: FileNotFoundException");
+            } catch (IOException e) {
+                e.printStackTrace();
+                Log.d(TAG, "getFileContext: IOException");
+            }
+
+            return list;
+        }
+
+
+
     /**
      * 读txt文件内容
      * @param FILE_IN txt路径
@@ -138,6 +217,8 @@ public class MyFile {
         }
         return str;
     }
+
+
 
     /**
      *

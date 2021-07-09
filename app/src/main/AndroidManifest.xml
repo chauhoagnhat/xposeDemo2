@@ -1,6 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="com.example.xposedemo">
+    package="com.example.xposedemo"
+    >
+    <!--android:sharedUserId="android.uid.system"--> >
 
     <uses-permission android:name="android.permission.ACCESS_WIFI_STATE"/>
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
@@ -9,6 +11,7 @@
     <uses-permission android:name="android.permission.READ_PHONE_STATE" />
     <uses-permission android:name="android.permission.KILL_BACKGROUND_PROCESSES"/>
     <uses-permission android:name="android.permission.ACCESS_NOTIFICATION_POLICY"/>
+
     <!-- 接收开机广播权限 -->
     <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
 
@@ -20,7 +23,10 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
+        android:sharedUserId="android.uid.system"
         <!-- 是否是xposed模块，xposed根据这个来判断是否是模块 -->
+        
+        
         <meta-data
             android:name="xposedmodule"
             android:value="true" />
