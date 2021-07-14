@@ -50,7 +50,7 @@ public class AlarmService extends Service {
         final Context context=this.getApplication();
         Log.d(TAG, "onStartCommand: alartSevice is running");
         if ( getJsonWatch() ){
-            scriptRun(context);
+            scriptRun( context );
         }
 
         //通过AlarmManager定时启动广播

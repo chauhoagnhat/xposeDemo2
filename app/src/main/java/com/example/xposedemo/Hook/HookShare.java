@@ -21,7 +21,8 @@ public class HookShare {
     public final static String pathDeviceJson="/sdcard/nk/deviceJson.txt";
     public final static String  pathPackages ="/sdcard/nk/packages.txt";
     public final static String  pathSelectedPackages ="/sdcard/nk/selectedPackages.txt";
-    public final static String getPathPackagesFunction="";
+
+    private static final String TAG ="HookShare" ;
     public static final String PATH_PHONE_DEVICE = "/sdcard/nk/devicePhone.txt";
     public static final String PATH_FUNCTION_PACKAGES="/sdcard/nk/packagesFunction.txt";
     public static final String PATH_BACK_PATH="/sdcard/nk/PATH_BACK_PATH.txt";
@@ -31,6 +32,8 @@ public class HookShare {
     public static final String PATH_DEVICE_PHONE="/sdcard/nk/devicePhone.txt";
     public static final String PATH_UI_SETTING="/sdcard/nk/ui.txt";
     public static final String PATH_SCRIPT_RUNNING="/sdcard/nk/script.txt";
+    public static Context context;
+
 
     static {
         Ut.crFolder( pathNkFolder );
@@ -40,7 +43,14 @@ public class HookShare {
         return "/nk/back/"+packageName+"/"+System.currentTimeMillis();
     }
 
-    private static final String TAG ="HookShare" ;
+    public static String getPathFunctionPackages(){
+        return MyFile.readFileToString( PATH_FUNCTION_PACKAGES );
+    }
+
+    public static Context getCurAppContext(){
+        return  AndroidAppHelper.currentApplication().getApplicationContext();
+    }
+
     public static boolean boolSelectedPackages( XC_LoadPackage.LoadPackageParam loadPackageParam ){
 
         String json= MyFile.readFileToString( HookShare.pathPackages );

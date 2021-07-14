@@ -4,6 +4,8 @@
     >
     <!--android:sharedUserId="android.uid.system"--> >
 
+    <permission android:name="scut.carson_ho.Read" android:protectionLevel="normal" />
+
     <uses-permission android:name="android.permission.ACCESS_WIFI_STATE"/>
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
     <uses-permission android:name="android.permission.READ_PRIVILEGED_PHONE_STATE" />
@@ -76,6 +78,15 @@
             android:enabled="true"
             android:exported="true">
         </provider>
+
+        <provider
+
+            android:name=".MyProvider.MultiprocessSharedPreferences"
+            android:authorities="com.example.xposedmodule.provider"
+            android:exported="true" />
+<!--        ————————————————
+        版权声明：本文为CSDN博主「Hoyn」的原创文章，遵循CC 4.0 BY-SA版权协议，转载请附上原文出处链接及本声明。
+        原文链接：https://blog.csdn.net/adzcsx2/article/details/107087300-->
 
     </application>
 

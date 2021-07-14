@@ -19,7 +19,6 @@ public class MyProvider  extends ContentProvider {
     private static final int UPDATE_MATCHED = 2;
     private static final int DELETE_MATCHED = 3;
 
-
     static
     {
         //给当前的URI匹配器添加一个匹配规则

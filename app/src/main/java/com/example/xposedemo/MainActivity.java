@@ -33,6 +33,7 @@ import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import com.alibaba.fastjson.TypeReference;
 import com.example.xposedemo.Hook.HookShare;
+import com.example.xposedemo.MyProvider.MultiprocessSharedPreferences;
 import com.example.xposedemo.MyProvider.MyOpenHelper;
 import com.example.xposedemo.bean.BaseInfo;
 import com.example.xposedemo.bean.MainActivityData;
@@ -78,7 +79,9 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
        // Ut.stopAppByForce(getApplicationContext(), "com.li" );
         logTextview =(TextView)findViewById( R.id.tv_log );
-        logTextview.setText("version-0708c");
+        logTextview.setText("version-0714c");
+        MultiprocessSharedPreferences.setAuthority("com.example.xposedmodule.provider");
+
 
         FakeBase.randomDevice( getApplicationContext() );
         startWatchService();
