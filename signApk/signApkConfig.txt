@@ -1,0 +1,20 @@
+signingConfigs {
+        release {
+            storeFile file("../signApk/key2.keystore")
+            storePassword '123456'
+            keyAlias 'key2'
+            keyPassword '123456'
+            v1SigningEnabled(true)
+            v2SigningEnabled(true)
+        }
+
+        debug {
+            storeFile file("../signApk/key2.keystore")
+            storePassword '123456'
+            keyAlias 'key2'
+            keyPassword '123456'
+            v1SigningEnabled(true)
+            v2SigningEnabled(true)
+        }
+
+    }

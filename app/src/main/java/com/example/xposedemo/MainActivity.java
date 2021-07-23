@@ -9,6 +9,7 @@ import android.content.ContentValues;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
@@ -80,12 +81,18 @@ public class MainActivity extends AppCompatActivity {
        // Ut.stopAppByForce(getApplicationContext(), "com.li" );
         logTextview =(TextView)findViewById( R.id.tv_log );
         logTextview.setText("version-0714c");
-        MultiprocessSharedPreferences.setAuthority("com.example.xposedmodule.provider");
 
+        MultiprocessSharedPreferences.setAuthority("com.example.xposedemo.provider");
+        SharedPreferences sharedPreferences = MultiprocessSharedPreferences.getSharedPreferences( getApplicationContext() , "test", Context.MODE_PRIVATE );
+        sharedPreferences.edit().putString("tel","45413").commit();
+        String hello = sharedPreferences.getString("tel", "");
+        Log.d("tel",hello);
+        Log.d("prop=", MyFile.readFileToString( "/default.prop" ) );
 
-        FakeBase.randomDevice( getApplicationContext() );
+        Ut.AdvertisingInterface adInterface
+
+        //FakeBase.randomDevice( getApplicationContext() );
         startWatchService();
-
         loadUiSetting();
         //appContext=getApplicationContext();
         new HookShare();
@@ -95,7 +102,7 @@ public class MainActivity extends AppCompatActivity {
 
         Intent mIntent = new Intent(Intent.ACTION_MAIN, null);
         Log.d(TAG, "onCreate: isInstance"+Intent.class.isInstance( mIntent ) );
-        mIntent.addCategory(Intent.CATEGORY_LAUNCHER);
+        mIntent.addCategory( Intent.CATEGORY_LAUNCHER );
 
         viewById=findViewById(R.id.textView);
         viewById.setText("no data");
@@ -123,9 +130,6 @@ public class MainActivity extends AppCompatActivity {
         Log.d(TAG, "onCreate: run finish");
 
     }
-
-
-
 
     public void mainActivityDataInit(){
 

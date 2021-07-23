@@ -1,0 +1,1 @@
+keytool -importkeystore -srckeystore D:\nick\git\xposeDemo2\signApk\key0.jks -destkeystore D:\nick\git\xposeDemo2\signApk\key0.jks -deststoretype pkcs12

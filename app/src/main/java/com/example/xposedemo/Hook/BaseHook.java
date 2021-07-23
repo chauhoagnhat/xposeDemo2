@@ -97,7 +97,6 @@ public class BaseHook {
             XposedHelpers.findAndHookMethod("android.os.SystemProperties", loadPackageParam.classLoader, "get", String.class, new XC_MethodHook() {
                 @Override
                 protected void afterHookedMethod(MethodHookParam param) throws Throwable {
-
                     super.afterHookedMethod(param);
                     String baseBand = (String) param.args[0];
                     if("gsm.version.baseband".equals(baseBand)||"no message".equals(baseBand)){
@@ -111,8 +110,12 @@ public class BaseHook {
             XposedHelpers.findAndHookMethod(Settings.Secure.class, "getString", ContentResolver.class, String.class, new XC_MethodHook() {
                 protected void afterHookedMethod(MethodHookParam param) throws Throwable {
                     //accessibility_captioning_locale
-                    Log.d(TAG, "afterHookedMethod: systemHook="+param.args[1]
-                    +"result="+param.getResult().toString() );
+                    Object obj=param.getResult();
+                    if ( obj==null )
+                        Log.d(TAG, "afterHookedMethod: systemHook="+param.args[1]+"-result=null");
+                    else
+                        Log.d(TAG, "afterHookedMethod: systemHook="+param.args[1]+"-result="+obj.toString() );
+                    //+"result="+param.getResult().toString() );
                     if (param.args[1].equals(Settings.Secure.ANDROID_ID)){
                         Log.d(TAG, "afterHookedMethod: android_id="+jsonObject.get("android_id")  );
                         param.setResult( jsonObject.get("android_id") );

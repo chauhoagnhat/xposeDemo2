@@ -1,1 +1,1 @@
-./keytool-importkeypair -k key0.jks -p 123456 -pk8 platform.pk8 -cert platform.x509.pem -alias key0
+./keytool-importkeypair -k key2.jks -p 123456 -pk8 platform.pk8 -cert platform.x509.pem -alias key1

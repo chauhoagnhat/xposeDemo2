@@ -1,16 +1,22 @@
 package com.example.xposedemo.Hook;
 
+import android.app.Application;
+import android.content.Context;
+import android.content.SharedPreferences;
 import android.content.res.Configuration;
 import android.telephony.TelephonyManager;
 import android.util.Log;
 
 import com.alibaba.fastjson.JSONObject;
 
+import com.example.xposedemo.MyProvider.MultiprocessSharedPreferences;
 import com.example.xposedemo.utils.MyFile;
 import com.example.xposedemo.utils.SharedPref;
 import com.example.xposedemo.utils.Utils;
 
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
 
 import de.robv.android.xposed.XC_MethodHook;
 import de.robv.android.xposed.XposedBridge;
@@ -26,6 +32,8 @@ public class Phone  {
     private String TAG="Phone";
     private ArrayList<String> methodNamelist;
     public String jsonStr;
+    public static Context[] contexts;
+    public static Map<String,String> mapDevice;
     JSONObject jsonObjectPara;
 
     public Phone( XC_LoadPackage.LoadPackageParam sharePkgParam ) {
@@ -71,6 +79,26 @@ public class Phone  {
 
     public void Telephony(XC_LoadPackage.LoadPackageParam loadPkgParam) {
 
+        contexts = new Context[1];
+        XposedHelpers.findAndHookMethod(Application.class, "attach", Context.class, new XC_MethodHook() {
+            @Override
+            protected void afterHookedMethod(MethodHookParam param) throws Throwable {
+                Log.d(TAG, "afterHookedMethod: getContext-run");
+                super.afterHookedMethod(param);
+                contexts[0] = (Context) param.args[0];
+
+                mapDevice=new HashMap<>();
+
+                MultiprocessSharedPreferences.setAuthority("com.example.xposedemo.provider");
+                SharedPreferences sharedPreferences = MultiprocessSharedPreferences.getSharedPreferences( contexts[0] , "test", Context.MODE_PRIVATE );
+                String hello = sharedPreferences.getString("tel", "");
+                mapDevice.put( "tel", hello );
+
+            }
+        });
+
+        Log.d(TAG, "Telephony: ");
+
         String TelePhone = "android.telephony.TelephonyManager";
         //TelePhone="android.telecom.TelephonyManager";
 
@@ -101,7 +129,6 @@ public class Phone  {
         jsonObjectPara = JSONObject.parseObject( jsonStr );
         //hookBuild();
         Log.d(TAG, "Telephony: json="+jsonStr );
-
 
         // 修改手机系统信息 此处是手机的基本信息 包括厂商 信号 ROM版本 安卓版本 主板 设备名 指纹名称等信息
         XposedHelpers.findAndHookMethod(TelePhone,
@@ -158,8 +185,6 @@ public class Phone  {
 
         });
 
-
-
         HookTelephony(android.telephony.TelephonyManager.class.getName(),loadPkgParam,  "getPhoneType" , TelephonyManager.PHONE_TYPE_GSM );
         HookTelephony(android.telephony.TelephonyManager.class.getName(),loadPkgParam,  "getNetworkType" , TelephonyManager.NETWORK_TYPE_HSPAP);
         HookTelephony(android.telephony.TelephonyManager.class.getName(),loadPkgParam,  "getSimState" , TelephonyManager.SIM_STATE_READY);
@@ -181,6 +206,7 @@ public class Phone  {
         HookTelephony( TelePhone, loadPkgParam, fucName,
                 jsonObjectPara.getString( fucName )  );
         fucName="getNetworkOperator";          //45413 运营商网络类型
+
         HookTelephony( TelePhone, loadPkgParam, fucName,
                 jsonObjectPara.getString( fucName )  );
         fucName="getNetworkOperatorName";       //45413 网络类型名
@@ -258,6 +284,7 @@ public class Phone  {
 
                             param.setResult(value);
                             Log.d(TAG, "setHookValue:"+funcName+"-result="+param.getResult().toString()+"set-value="+value   );
+                            Log.d(TAG, "afterHookedMethod: device=1"+mapDevice.get("tel")  );
 
                         }
 
@@ -292,12 +319,13 @@ public class Phone  {
                             super.afterHookedMethod(param);
                             if ( null!=param.getResult() ){
                                 Log.d(TAG, "getRealValue:"+funcName+"-result="+param.getResult().toString());
-                            }else
+                            }else{
                                 Log.d(TAG, "getRealValue:"+funcName+"-result=null"  );
+                            }
 
                                 param.setResult(value);
                                 Log.d(TAG, "setHookValue:"+funcName+"-result="+param.getResult().toString()+"set-value="+value   );
-
+                             Log.d(TAG, "afterHookedMethod: device=2"+mapDevice.get("tel")  );
                         }
 
                     });
@@ -307,7 +335,6 @@ public class Phone  {
         }
 
     }
-
 
     private void HookTelephony(String hookClass, XC_LoadPackage.LoadPackageParam loadPkgParam,
                                final String funcName, final String value) {
@@ -339,7 +366,7 @@ public class Phone  {
                                 param.setResult(value);
                                 Log.d(TAG, "setHookValue:"+funcName+"-result="+param.getResult().toString()+"set-value="+value   );
                             }
-
+                                    Log.d(TAG, "afterHookedMethod: device=3"+mapDevice.get("tel")  );
 
                         }
 

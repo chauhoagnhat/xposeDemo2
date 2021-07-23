@@ -41,6 +41,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.WeakHashMap;
 
+//https://blog.csdn.net/adzcsx2/article/details/107087300
 /**
  * 使用ContentProvider实现多进程SharedPreferences读写;<br>
  * 1、ContentProvider天生支持多进程访问；<br>
@@ -66,6 +67,11 @@ import java.util.WeakHashMap;
  * @author zhangguojun
  * @version	1.0
  * @since JDK1.6
+ *ex:
+ *         SharedPreferences sharedPreferences = MultiprocessSharedPreferences.getSharedPreferences( getApplicationContext() , "test", Context.MODE_PRIVATE );
+ *         sharedPreferences.edit().putString("hello","world").commit();
+ *         String hello = sharedPreferences.getString("hello", "");
+ *         Log.d("hello",hello);
  */
 public class MultiprocessSharedPreferences extends ContentProvider implements SharedPreferences {
 

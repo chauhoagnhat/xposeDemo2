@@ -8,30 +8,32 @@ android {
     defaultConfig {
         applicationId "com.example.xposedemo"
         minSdkVersion 22
-        targetSdkVersion 29
+        targetSdkVersion 27
         versionCode 1
         versionName "1.0"
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
+
     }
-        signingConfigs {
+
+
+    signingConfigs {
         release {
-            storeFile file("../signApk/key0.jks")
+            storeFile file("../signApk/sysSign.keystore")
             storePassword '123456'
-            keyAlias 'key0'
+            keyAlias 'sysSignName'
             keyPassword '123456'
             v1SigningEnabled(true)
             v2SigningEnabled(true)
         }
 
         debug {
-            storeFile file("../signApk/key0.jks")
+            storeFile file("../signApk/sysSign.keystore")
             storePassword '123456'
-            keyAlias 'key0'
+            keyAlias 'sysSignName'
             keyPassword '123456'
             v1SigningEnabled(true)
             v2SigningEnabled(true)
         }
-
     }
 
     buildTypes {
@@ -40,6 +42,13 @@ android {
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
         }
     }
+
+/*    buildTypes {
+        release {
+            minifyEnabled false
+            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+        }
+    }*/
 }
 
 

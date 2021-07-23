@@ -774,7 +774,7 @@ public class Ut {
         }
     }
 
-    private static final class AdvertisingInterface implements IInterface {
+    public static final class AdvertisingInterface implements IInterface {
         private IBinder binder;
 
         AdvertisingInterface(IBinder pBinder) {

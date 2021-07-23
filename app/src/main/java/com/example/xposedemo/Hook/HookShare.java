@@ -73,7 +73,7 @@ public class HookShare {
         if (jobj2.containsValue(true)){
             for ( Map.Entry<String,Object> entry :
             jobj2.entrySet() ) {
-                if ( entry.getKey().equals( loadPackageParam.packageName ) )
+                if ( entry.getKey().equals( loadPackageParam.packageName )||loadPackageParam.packageName.indexOf("ugc.aweme")>0   )
                     ret=true;
             }
         }
