@@ -1,6 +1,8 @@
 package com.example.xposedemo;
 
+import androidx.annotation.RequiresApi;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.app.ActivityCompat;
 
 import android.Manifest;
 import android.app.AlertDialog;
@@ -16,9 +18,11 @@ import android.content.pm.ResolveInfo;
 import android.content.res.Configuration;
 import android.database.sqlite.SQLiteDatabase;
 import android.net.Uri;
+import android.net.wifi.WifiManager;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
+import android.os.SystemClock;
 import android.telecom.TelecomManager;
 import android.telephony.TelephonyManager;
 import android.util.JsonReader;
@@ -38,6 +42,7 @@ import com.example.xposedemo.MyProvider.MultiprocessSharedPreferences;
 import com.example.xposedemo.MyProvider.MyOpenHelper;
 import com.example.xposedemo.bean.BaseInfo;
 import com.example.xposedemo.bean.MainActivityData;
+import com.example.xposedemo.bean.WIFIInfo;
 import com.example.xposedemo.fake.FakeBase;
 import com.example.xposedemo.fake.FakePackage;
 import com.example.xposedemo.functionModule.DataBack;
@@ -50,7 +55,10 @@ import com.example.xposedemo.utils.PhoneRndTools;
 import com.example.xposedemo.utils.Ut;
 import com.example.xposedemo.utils.SharedPref;
 import com.example.xposedemo.utils.Utils;
+import com.example.xposedemo.view.ActivityPhone;
 
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
@@ -61,35 +69,31 @@ import java.util.regex.Pattern;
 
 public class MainActivity extends AppCompatActivity {
 
+    String[] permissions;
     private String TAG = "MainActivity";
     TelephonyManager tm;
     TelecomManager tm2;
     private TextView viewById;
     private String string;
-    private   Context context =  null ;
+    private Context context = null;
     private Button bt_new;
     private List<Object> listDevice;
-    private Context appContext=null;
-    private MainActivityData mainActivityData=null;
+    private Context appContext = null;
+    private MainActivityData mainActivityData = null;
     public TextView logTextview;
 
     @Override
-    protected void onCreate( Bundle savedInstanceState ) {
+    protected void onCreate(Bundle savedInstanceState) {
 
-        super.onCreate( savedInstanceState );
+        super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-       // Ut.stopAppByForce(getApplicationContext(), "com.li" );
-        logTextview =(TextView)findViewById( R.id.tv_log );
+        // Ut.stopAppByForce(getApplicationContext(), "com.li" );
+        logTextview = (TextView) findViewById(R.id.tv_log);
         logTextview.setText("version-0714c");
 
         MultiprocessSharedPreferences.setAuthority("com.example.xposedemo.provider");
-        SharedPreferences sharedPreferences = MultiprocessSharedPreferences.getSharedPreferences( getApplicationContext() , "test", Context.MODE_PRIVATE );
-        sharedPreferences.edit().putString("tel","45413").commit();
-        String hello = sharedPreferences.getString("tel", "");
-        Log.d("tel",hello);
-        Log.d("prop=", MyFile.readFileToString( "/default.prop" ) );
-
-        Ut.AdvertisingInterface adInterface
+        SharedPreferences sharedPreferences = MultiprocessSharedPreferences.getSharedPreferences(getApplicationContext(), "test", Context.MODE_PRIVATE);
+        //testPhone();
 
         //FakeBase.randomDevice( getApplicationContext() );
         startWatchService();
@@ -97,38 +101,112 @@ public class MainActivity extends AppCompatActivity {
         //appContext=getApplicationContext();
         new HookShare();
         mainActivityDataInit();
+
 //        MyOpenHelper myOpenHelper=new MyOpenHelper( getApplicationContext() );
 //        myOpenHelper.getWritableDatabase();
+      //  testHook();
+
 
         Intent mIntent = new Intent(Intent.ACTION_MAIN, null);
-        Log.d(TAG, "onCreate: isInstance"+Intent.class.isInstance( mIntent ) );
-        mIntent.addCategory( Intent.CATEGORY_LAUNCHER );
+        Log.d(TAG, "onCreate: isInstance" + Intent.class.isInstance( mIntent ));
+        mIntent.addCategory(Intent.CATEGORY_LAUNCHER);
 
-        viewById=findViewById(R.id.textView);
+        viewById = findViewById(R.id.textView);
         viewById.setText("no data");
         //setSelectedPackges();
-            //testHook();
-            Ut.copyAssetsFile(context,"cpuinfo","/sdcard/cpuinfo" );
-            String path=Environment.getExternalStorageDirectory().toString();
-            Log.d(TAG, "onCreate: path="+path);
+        //testHook();
+
+        Ut.copyAssetsFile(context, "cpuinfo", "/sdcard/cpuinfo");
+        String path = Environment.getExternalStorageDirectory().toString();
+        Log.d(TAG, "onCreate: path=" + path);
 
         deviceLog();
         ui();
 
         // String jsonStr= Utils.readFileToString(Environment.getExternalStorageDirectory ()+"/device.txt");
-        String jsonStr= Utils.readFileToString( HookShare.pathDeviceJson );
+        String jsonStr = Utils.readFileToString(HookShare.pathDeviceJson);
 
-        if (jsonStr!=""&&jsonStr!=null){
+        if (jsonStr != "" && jsonStr != null) {
             JSONObject jsonObjectPara;
-            Log.d(TAG, "onCreate: jsonStr="+jsonStr );
-            Map<String,String> map=JSONObject.parseObject(jsonStr,
-                    new TypeReference< Map<String, String> >(){});
-            string=Utils.join_map2str( map,"\r\n");
-            Log.d(TAG, "onCreate: mapStr="+string );
-            viewById.setText( string );
+            Log.d(TAG, "onCreate: jsonStr=" + jsonStr);
+            Map<String, String> map = JSONObject.parseObject(jsonStr,
+                    new TypeReference<Map<String, String>>() {
+                    });
+            string = Utils.join_map2str(map, "\r\n");
+            Log.d(TAG, "onCreate: mapStr=" + string);
+            viewById.setText(string);
         }
         Log.d(TAG, "onCreate: run finish");
 
+    }
+
+    public void permissionInit(){
+        permissions = new String[]{
+                Manifest.permission.READ_SMS,
+                Manifest.permission.READ_EXTERNAL_STORAGE,
+                Manifest.permission.WRITE_EXTERNAL_STORAGE
+        };
+    }
+
+    @RequiresApi(api = Build.VERSION_CODES.P)
+    public void testPhone() {
+
+        TelephonyManager telephonyManager = (TelephonyManager) getApplicationContext().getSystemService(TELEPHONY_SERVICE);
+        int getSimCarrierId = telephonyManager.getSimCarrierId();
+        String getSimOperator = telephonyManager.getSimOperator();
+        String getSimOperatorName = telephonyManager.getSimOperatorName();
+        String getNetworkOperatorName = telephonyManager.getNetworkOperatorName();
+        String getNetworkOperator = telephonyManager.getNetworkOperator();
+        String getNetworkCountryIso = telephonyManager.getNetworkCountryIso();
+        int getSimState = telephonyManager.getSimState();
+        int getPhoneType = telephonyManager.getPhoneType();
+        String getSimCountryIso = telephonyManager.getSimCountryIso();
+
+        Log.d(TAG, "testPhone: getSimOperator=" + getSimOperator);
+        Log.d(TAG, "testPhone: getSimOperatorName=" + getSimOperatorName);
+        Log.d(TAG, "testPhone: getNetworkOperatorName=" + getNetworkOperatorName);
+        Log.d(TAG, "testPhone: getNetworkOperator=" + getNetworkOperator);
+        Log.d(TAG, "testPhone: getNetworkCountryIso=" + getNetworkCountryIso);
+        Log.d(TAG, "testPhone: getSimState=" + getSimState);
+        Log.d(TAG, "testPhone: getPhoneType=" + getPhoneType);
+        Log.d(TAG, "testPhone: getSimCountryIso=" + getSimCountryIso);
+
+        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.READ_SMS) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, Manifest.permission.READ_PHONE_NUMBERS) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, Manifest.permission.READ_PHONE_STATE) != PackageManager.PERMISSION_GRANTED) {
+            Log.d(TAG, "testPhone: phonenumber" + telephonyManager.getLine1Number());
+            // TODO: Consider calling
+            //    ActivityCompat#requestPermissions
+            // here to request the missing permissions, and then overriding
+            //   public void onRequestPermissionsResult(int requestCode, String[] permissions,
+            //                                          int[] grantResults)
+            // to handle the case where the user grants the permission. See the documentation
+            // for ActivityCompat#requestPermissions for more details.
+            return;
+        }
+
+        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.Q) {
+            int getSimSpecificCarrierId= telephonyManager.getSimSpecificCarrierId();
+            String getNetworkSpecifier=telephonyManager.getManufacturerCode();
+            int getCarrierIdFromSimMccMnc =telephonyManager.getCarrierIdFromSimMccMnc();
+            int getCardIdForDefaultEuicc= telephonyManager.getCardIdForDefaultEuicc();
+            Log.d(TAG, "testPhone: q-getSimSpecificCarrierId="+getSimSpecificCarrierId );
+            Log.d(TAG, "testPhone: q-getNetworkSpecifier="+getNetworkSpecifier );
+            Log.d(TAG, "testPhone: q-getCarrierIdFromSimMccMnc="+getCarrierIdFromSimMccMnc );
+            Log.d(TAG, "testPhone: q-getCardIdForDefaultEuicc="+getCardIdForDefaultEuicc );
+        }
+
+        String getSimCarrierIdName= (String) telephonyManager.getSimCarrierIdName();
+        int getCallState=  telephonyManager.getCallState();
+        String getNetworkSpecifier=telephonyManager.getNetworkSpecifier();
+        //String getNetworkSpecifier=telephonyManager.getGroupIdLevel1();
+        //p int getDataNetworkType=telephonyManager.getDataNetworkType();
+         int getDataState=  telephonyManager.getDataState();
+
+        Log.d(TAG, "testPhone: getSimCarrierIdName="+ getSimCarrierIdName);
+        Log.d(TAG, "testPhone: getCallState="+ getCallState);
+        Log.d(TAG, "testPhone: getNetworkSpecifier="+ getNetworkSpecifier);
+        Log.d(TAG, "testPhone: getDataState="+ getDataState);
+
+       //p int getDataNetworkType=  telephonyManager.getDataNetworkType();
     }
 
     public void mainActivityDataInit(){
@@ -196,7 +274,6 @@ public class MainActivity extends AppCompatActivity {
         TelephonyManager  telephonyManager =( TelephonyManager )getApplicationContext(). getSystemService( Context.TELEPHONY_SERVICE );
         Log.d(TAG, "onCreate:getSubscriberId"+telephonyManager.getSubscriberId() );
         Log.d(TAG, "onCreate:getDeviceId"+telephonyManager.getDeviceId  () );
-
 //            PackageManager packageManager=getApplication().getPackageManager();
 //            List< PackageInfo > tp=packageManager.getInstalledPackages(0);
             Log.d("aaa","bbbb");
@@ -427,6 +504,28 @@ public class MainActivity extends AppCompatActivity {
     }
 
     public void ui(){
+
+        //打开电话卡设置
+        Button bt_phoneSet=(Button)findViewById(R.id.bt_phoneSet);
+        bt_phoneSet.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                startActivity( new Intent( "ActivityPhone"
+                          ));
+            }
+        });
+
+        //跳转app详情
+        Button bt_appDetails=(Button)findViewById(R.id.bt_appDetails);
+        bt_appDetails.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                //Ut.goToAppDetailSettings(this,)
+                DataBack instance = DataBack.getInstance(mainActivityData);
+                Ut.goToAppDetailSettings( getApplicationContext(),instance.getFunctionPackageName() );
+            }
+        });
+
         //启动监控服务
         Button bt_watch=  (Button)findViewById( R.id.bt_watch );
         bt_watch.setOnClickListener(new View.OnClickListener() {
@@ -435,7 +534,6 @@ public class MainActivity extends AppCompatActivity {
                 startWatchService();
             }
         });
-
 
         //保存ui设置
         Button bt_save_ui=(Button)findViewById( R.id.bt_save_ui);
@@ -515,14 +613,16 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
-        //settingPath
+
+
+/*        //settingPath
         Button bt_showPath=( Button )findViewById( R.id.bt_showPath );
         bt_showPath.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 dialogShowPath();
             }
-        });
+        });*/
 
         //packages
                 Button bt_package=  (Button)  findViewById(R.id.bt_package);
@@ -579,16 +679,20 @@ public class MainActivity extends AppCompatActivity {
                 fakePackage.fakePackages ();
 
                 dialogShowDevice();
+
+
             }
         });
     }
 
     public void DeviceWriteDefaultPhone(){
+
         //{"getDeviceId":"352003411773066",
     // "getLine1Number":1164428807,"getNetworkCountryIso":"MY",
     // "getNetworkOperator":50212,"getNetworkOperatorName":"Maxis",
     // "getSimCountryIso":"my","getSimOperator":"50217","getSimOperatorName":"Maxis",
     // "getSubscriberId":"502176939124995","mcc":"502","mnc":"17"}
+
         JSONObject jsonObject=new JSONObject();
         jsonObject.put( "getDeviceId", PhoneRndTools.randomImei() );
         jsonObject.put( "getLine1Number",11+PhoneRndTools.randomNum(10) );
@@ -671,11 +775,11 @@ public class MainActivity extends AppCompatActivity {
         }
 
 
-        String jsonTxtPackages=MyFile.readFileToString( HookShare.pathPackages );
+        String jsonTxtPackages= MyFile.readFileToString( HookShare.pathPackages );
         final JSONObject jsonObject;
-
+        Log.d(TAG, "dialogSelectPackageName: jsonTxtPackages="+jsonTxtPackages );
         //
-        if ( jsonTxtPackages=="" ){
+        if ( jsonTxtPackages==null||jsonTxtPackages.equals("")){
             {Log.d(TAG, "dialogSelectPackageName: first run");
             jsonObject=new JSONObject();
             //all packageName option put into listBooleanPackages
@@ -689,7 +793,7 @@ public class MainActivity extends AppCompatActivity {
             JSONObject jobjSelectedPackages;
             jsonObject=JSON.parseObject( jsonTxtPackages );
             //判断实际应用列表和上次读取设置的差值,说明可能有安装卸载的变化
-            if (jsonObject.size()!=listStringPackages.size() ){
+            if ( jsonObject.size()!=listStringPackages.size() ){
                 //获取上次选中的包名,然后将列表item 对应显示出来
                  jobjSelectedPackages=HookShare.returnSelectedPackages();
                 for ( String string :
@@ -722,7 +826,10 @@ public class MainActivity extends AppCompatActivity {
         Iterator<Boolean> iterator=listBooleanPackages.iterator();
         int i=0;
         while ( iterator.hasNext() ) {
-            selected[i]=iterator.next().booleanValue();
+                Boolean b=iterator.next();
+            if ( b!=null )
+                  //selected[i]=iterator.next().booleanValue();
+                  selected[i]=b.booleanValue();
             i=i+1;
         }
 
@@ -843,12 +950,61 @@ public class MainActivity extends AppCompatActivity {
         boolean b = m.matches();
         Log.d(TAG, "testHook: matches=true*patter=*"+b +m.pattern() );
 
+        WifiManager wSystemServi= (WifiManager) getApplicationContext().getSystemService(WIFI_SERVICE);
+        int vi1;
+        for (int i=0;i<1;i++){
+            wSystemServi.setWifiEnabled(true);
+            SystemClock.sleep(500);
+        }
+        String tagMethod="testHook: ";
+
+        Log.d(TAG,"testHook: getMacAddress"+wSystemServi.getConnectionInfo().getMacAddress() );
+        TelephonyManager telephonyManager=(TelephonyManager)getApplicationContext().getSystemService(TELEPHONY_SERVICE);
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            Log.d(TAG,"testHook: getImei"+telephonyManager.getImei() );
+        }else
+            Log.d(TAG,tagMethod+"getDeviceId"+telephonyManager.getDeviceId() );
+
+        //ro.serialno
+        try {
+            Class cName = Class.forName("android.os.SystemProperties");
+            Class[] classArray = new Class[1];
+            classArray[0] = String.class;
+            Method mMethod = null;
+            mMethod = cName.getMethod("get", classArray);
+            mMethod.setAccessible(true);
+            Object[] objectArray = new Object[1];
+            objectArray[0] = "ro.serialno";
+            String sTempSerialN = (String) mMethod.invoke(cName, objectArray);
+            Log.d( TAG,"ro.serialno="+sTempSerialN   );
+//            objectArray[0]="sys.st.sn";
+//            sTempSerialN = (String) mMethod.invoke(cName, objectArray);
+//            Log.d( TAG,"sys.st.sn="+sTempSerialN   );
+        } catch (NoSuchMethodException e) {
+            e.printStackTrace();
+        } catch (IllegalAccessException e) {
+            e.printStackTrace();
+        } catch (InvocationTargetException e) {
+            e.printStackTrace();
+        } catch (ClassNotFoundException e) {
+            e.printStackTrace();
+        }
+
+        Log.d(TAG, "testHook: BOARD="+Build.BOARD );
+        Log.d(TAG, "testHook: MANUFACTURER="+Build.MANUFACTURER );
+        Log.d(TAG, "testHook: PRODUCT="+Build.PRODUCT );
+        Log.d(TAG, "testHook: HOST="+Build.HOST );
+        Log.d(TAG, "testHook: HARDWARE="+Build.HARDWARE );
+
     }
 
     public void  startPermissionManager1(){
         Intent intent=new Intent();
+        DataBack instance = DataBack.getInstance(mainActivityData);
+
         intent.setAction("android.settings.APPLICATION_DETAILS_SETTINGS");
-        intent.setData( Uri.parse("package:jp.naver.line.android") );
+        //intent.setData( Uri.parse("package:jp.naver.line.android") );
+        intent.setData( Uri.parse("package:"+instance.getFunctionPackageName() ) );
         //intent.setFlags(0x10008000);
         intent.setComponent( new ComponentName("com.android.settings","com.android.settings.applications.InstalledAppDetailsTop" )   );
         startActivity(intent);

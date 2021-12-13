@@ -10,6 +10,7 @@ import com.example.xposedemo.Hook.CPUHook;
 import com.example.xposedemo.Hook.HookShare;
 import com.example.xposedemo.Hook.PackagesHook;
 import com.example.xposedemo.Hook.Phone;
+import com.example.xposedemo.Hook.SimpleBaseHook;
 import com.example.xposedemo.Hook.WIFIHook;
 import com.example.xposedemo.utils.MyFile;
 import com.example.xposedemo.utils.Ut;
@@ -19,8 +20,8 @@ import de.robv.android.xposed.XC_MethodHook;
 import de.robv.android.xposed.XposedHelpers;
 import de.robv.android.xposed.callbacks.XC_LoadPackage;
 
-public class HookMain  implements IXposedHookLoadPackage   {
 
+public class HookMain  implements IXposedHookLoadPackage   {
     public String TAG="hook";
     /**
      * XposedBridge.log()：以原生logcat的形式写入到/data/user_de/0/de.robv.android.xposed.installer/log/error.log
@@ -31,12 +32,15 @@ public class HookMain  implements IXposedHookLoadPackage   {
         //loadPackageParam.packageName.equals( BuildConfig.APPLICATION_ID
         //String json= MyFile.readFileToString(HookShare.pathSelectedPackages);
 
-        Log.d(TAG, "handleLoadPackage: boolSelectedPackages"+ HookShare.boolSelectedPackages( loadPackageParam ) );
+
+
+//        Log.d(TAG, "handleLoadPackage: boolSelectedPackages"+ HookShare.boolSelectedPackages( loadPackageParam ) );
         if ( HookShare.boolSelectedPackages( loadPackageParam ) ){
 
             new Phone( loadPackageParam  ) ;
             //new CPUHook( loadPackageParam );
-            new BaseHook( loadPackageParam );
+            //new BaseHook( loadPackageParam );
+            new SimpleBaseHook( loadPackageParam );
             new WIFIHook( loadPackageParam );
             //new PackagesHook( loadPackageParam );
 

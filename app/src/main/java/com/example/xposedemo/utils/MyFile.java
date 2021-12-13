@@ -1,6 +1,8 @@
 package com.example.xposedemo.utils;
 
 import android.content.Context;
+import android.text.TextUtils;
+import android.util.Base64;
 import android.util.Log;
 
 import java.io.BufferedReader;
@@ -139,8 +141,45 @@ public class MyFile {
 
     }
 
+
+    /**
+     * 将图片转换成Base64编码的字符串
+     */
+    public static String imageToBase64(String path){
+
+        if( TextUtils.isEmpty(path) ){
+            return null;
+        }
+        InputStream is = null;
+        byte[] data = null;
+        String result = null;
+        try{
+            is = new FileInputStream(path);
+            //创建一个字符流大小的数组。
+            data = new byte[is.available()];
+            //写入数组
+            is.read(data);
+            //用默认的编码格式进行编码
+            result = Base64.encodeToString(data,Base64.NO_CLOSE);
+        }catch (Exception e){
+            e.printStackTrace();
+        }finally {
+            if(null !=is){
+                try {
+                    is.close();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+
+        }
+        return result;
+
+    }
+
     //http://web.rslnano.com/yhapi.ashx?act=getPhoneCode&token=83f6f31d1c8b6566bbbc8886c04d8406_647&mobile=65330483&iid=3211
     public static List<String> readAssetsLines(Context context, String fileName ){
+
         List<String> list = null;
         String text=null;
         try {
@@ -157,9 +196,7 @@ public class MyFile {
             // Should never happen!
             throw new RuntimeException(e);
         }
-
         return  list;
-
     }
 
         /**

@@ -4,6 +4,8 @@ package com.example.xposedemo.fake;
 import android.content.Context;
 import android.util.Log;
 
+import androidx.annotation.NonNull;
+
 import com.example.xposedemo.bean.BaseInfo;
 import com.example.xposedemo.utils.MyFile;
 import com.example.xposedemo.utils.PhoneRndTools;
@@ -20,6 +22,7 @@ import de.robv.android.xposed.XposedHelpers;
 public class FakeBase {
 
     private static final String TAG ="FakeBase" ;
+    public static final BaseInfo baseInfo = new BaseInfo();
 
     public static BaseInfo lg_device(){
 
@@ -139,7 +142,6 @@ public class FakeBase {
         Log.d(TAG, "RandomDevice: device="+device );
         Log.d(TAG, "RandomDevice: model="+model );
 
-        BaseInfo baseInfo = new BaseInfo();
         //baseInfo.setImei( PhoneRndTools.randomNum(15) );
         baseInfo.setImei( PhoneRndTools.randomImei()  );
         baseInfo.setNumber( PhoneRndTools.randomPhoneNum() );
@@ -196,7 +198,9 @@ public class FakeBase {
         Log.d(TAG, "randomDevice: bootLoader="+bootLoader);
         //baseInfo.setBootloader("8996-012001-1711291800");
         baseInfo.setBootloader( bootLoader );
-        String host=Ut.rLetterN(4)+"."+brand+".com";
+        int num2=Ut.r_(1,3);
+        int num1=Ut.r_(1,4);
+        String host=Ut.rLetterN(num1)+brand+Ut.rLetterN(num2);
         Log.d(TAG, "randomDevice: host="+host);
         //baseInfo.setHost("wphs7.hot.corp.google.com");
         baseInfo.setHost(host);
@@ -227,10 +231,144 @@ public class FakeBase {
         //XposedBridge.log( baseInfo.toString() );
 
         return baseInfo;
-        //return Sumsung_device();
-        //return baseInfo;
-        //return lg_device() ;
 
+    }
+
+    @NonNull
+    @Override
+    public String toString() {
+        StringBuilder stringBuilder=new StringBuilder();
+
+        stringBuilder.append("getImei=");
+        stringBuilder.append( baseInfo.getImei() );
+        stringBuilder.append("\r\n");
+
+        stringBuilder.append("getNumber=");
+        stringBuilder.append( baseInfo.getNumber() );
+        stringBuilder.append("\r\n");
+
+        stringBuilder.append("getSimserial=");
+        stringBuilder.append( baseInfo.getSimserial());
+        stringBuilder.append("\r\n");
+
+        stringBuilder.append("getWifimac=");
+        stringBuilder.append( baseInfo.getWifimac());
+        stringBuilder.append("\r\n");
+
+        stringBuilder.append("getBluemac=");
+        stringBuilder.append( baseInfo.getBluemac());
+        stringBuilder.append("\r\n");
+
+        stringBuilder.append("getAndroid_id=");
+        stringBuilder.append( baseInfo.getAndroid_id());
+        stringBuilder.append("\r\n");
+
+        stringBuilder.append("getSerial=");
+        stringBuilder.append( baseInfo.getSerial());
+        stringBuilder.append("\r\n");
+
+        stringBuilder.append("getBrand=");
+        stringBuilder.append( baseInfo.getBrand());
+        stringBuilder.append("\r\n");
+
+        stringBuilder.append("getBaseBand=");
+        stringBuilder.append( baseInfo.getBaseBand());
+        stringBuilder.append("\r\n");
+
+        stringBuilder.append("getRadioVersion=");
+        stringBuilder.append( baseInfo.getRadioVersion());
+        stringBuilder.append("\r\n");
+
+        stringBuilder.append("getBoard=");
+        stringBuilder.append( baseInfo.getBoard());
+        stringBuilder.append("\r\n");
+
+        stringBuilder.append("getCpu_abi=");
+        stringBuilder.append( baseInfo.getCpu_abi());
+        stringBuilder.append("\r\n");
+
+        stringBuilder.append("getCpu_abi2=");
+        stringBuilder.append( baseInfo.getCpu_abi2());
+        stringBuilder.append("\r\n");
+
+        stringBuilder.append("getDevice=");
+        stringBuilder.append( baseInfo.getDevice());
+        stringBuilder.append("\r\n");
+
+        stringBuilder.append("getDisplay=");
+        stringBuilder.append( baseInfo.getDisplay());
+        stringBuilder.append("\r\n");
+
+        stringBuilder.append("getSdk=");
+        stringBuilder.append( baseInfo.getSdk());
+        stringBuilder.append("\r\n");
+
+        stringBuilder.append("getFingerprint=");
+        stringBuilder.append( baseInfo.getFingerprint());
+        stringBuilder.append("\r\n");
+
+        stringBuilder.append("getHardware=");
+        stringBuilder.append( baseInfo.getHardware());
+        stringBuilder.append("\r\n");
+
+        stringBuilder.append("getId=");
+        stringBuilder.append( baseInfo.getId());
+        stringBuilder.append("\r\n");
+
+        stringBuilder.append("getManufacturer=");
+        stringBuilder.append( baseInfo.getManufacturer());
+        stringBuilder.append("\r\n");
+
+        stringBuilder.append("getModel=");
+        stringBuilder.append( baseInfo.getModel());
+        stringBuilder.append("\r\n");
+
+        stringBuilder.append("getProduct=");
+        stringBuilder.append( baseInfo.getProduct());
+        stringBuilder.append("\r\n");
+
+        stringBuilder.append("getBootloader=");
+        stringBuilder.append( baseInfo.getBootloader());
+        stringBuilder.append("\r\n");
+
+        stringBuilder.append("getHost=");
+        stringBuilder.append( baseInfo.getHost());
+        stringBuilder.append("\r\n");
+
+        stringBuilder.append("getTags=");
+        stringBuilder.append( baseInfo.getTags());
+        stringBuilder.append("\r\n");
+
+        stringBuilder.append("getIncremental=");
+        stringBuilder.append( baseInfo.getIncremental());
+        stringBuilder.append("\r\n");
+
+        stringBuilder.append("getRelease=");
+        stringBuilder.append( baseInfo.getRelease());
+        stringBuilder.append("\r\n");
+
+        stringBuilder.append("getRelease=");
+        stringBuilder.append( baseInfo.getRelease());
+        stringBuilder.append("\r\n");
+
+        stringBuilder.append("getCodename=");
+        stringBuilder.append( baseInfo.getCodename());
+        stringBuilder.append("\r\n");
+
+        stringBuilder.append("getBuildtime=");
+        stringBuilder.append( baseInfo.getBuildtime());
+        stringBuilder.append("\r\n");
+
+        stringBuilder.append("getDiscription=");
+        stringBuilder.append( baseInfo.getDiscription());
+        stringBuilder.append("\r\n");
+
+        stringBuilder.append("getDiscription=");
+        stringBuilder.append( baseInfo.getDiscription());
+        stringBuilder.append("\r\n");
+
+
+        return stringBuilder.toString();
     }
 
     public static String[] getSdkVer(){
@@ -317,7 +455,7 @@ public class FakeBase {
         baseInfo.setBaseBand( baseBand  );
         baseInfo.setRadioVersion( baseBand );
         baseInfo.setBoard("CPH1823");
-        baseInfo.setCpu_abi("arm64-v8a");
+        baseInfo.setCpu_abi("arm64-v7a");
         //baseInfo.setCpu_abi2("");
         baseInfo.setDevice("CPH1823");
         baseInfo.setDisplay("PKQ1.190414.001");

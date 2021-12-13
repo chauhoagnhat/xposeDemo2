@@ -53,6 +53,7 @@ public class HookShare {
 
     public static boolean boolSelectedPackages( XC_LoadPackage.LoadPackageParam loadPackageParam ){
 
+
         String json= MyFile.readFileToString( HookShare.pathPackages );
         JSONObject jsonObject= JSON.parseObject(json);
         JSONObject jobj2=new JSONObject();
@@ -73,7 +74,7 @@ public class HookShare {
         if (jobj2.containsValue(true)){
             for ( Map.Entry<String,Object> entry :
             jobj2.entrySet() ) {
-                if ( entry.getKey().equals( loadPackageParam.packageName )||loadPackageParam.packageName.indexOf("ugc.aweme")>0   )
+                if ( entry.getKey().equals( loadPackageParam.packageName )||loadPackageParam.packageName.indexOf("jp.naver.line.android")>0   )
                     ret=true;
             }
         }

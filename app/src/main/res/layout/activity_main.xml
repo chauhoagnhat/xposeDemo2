@@ -39,11 +39,19 @@
             android:layout_height="wrap_content"
             android:orientation="horizontal">
 
-            <Button
+    <!--        <Button
                 android:id="@+id/bt_showPath"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="显示各参数路径"
+                app:layout_constraintTop_toBottomOf="@+id/bt_new"
+                tools:ignore="MissingConstraints" />-->
+
+            <Button
+                android:id="@+id/bt_phoneSet"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="设置电话卡"
                 app:layout_constraintTop_toBottomOf="@+id/bt_new"
                 tools:ignore="MissingConstraints" />
 
@@ -105,6 +113,13 @@
                 android:layout_height="wrap_content"
                 android:text="删除备份"
                 android:id="@+id/bt_delBack">
+            </Button>
+
+            <Button
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="跳转app详情"
+                android:id="@+id/bt_appDetails">
             </Button>
 
         </LinearLayout>

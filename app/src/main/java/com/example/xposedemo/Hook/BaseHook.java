@@ -26,7 +26,6 @@ public class BaseHook {
     public  BaseInfo baseInfo;
     public BaseHook(XC_LoadPackage.LoadPackageParam loadPackageParam){
         hookAll(  baseInfo,loadPackageParam  );
-
     }
 
     public void hookMethod(final String className, final ClassLoader classLoader, final String methodName, final String result){
@@ -103,7 +102,23 @@ public class BaseHook {
                         Log.d(TAG, "afterHookedMethod: baseBand="+jsonObject.get("baseBand")  );
                         param.setResult( jsonObject.get("baseBand") );
                     }
+                    else if (baseBand.equals("ro.serialno")){
+                        Log.d(TAG,"afterHookedMethod: realvalue="+param.getResult().toString() );
+                        Log.d(TAG, "setHook: afterHookedMethod: ro.serialno set="+jsonObject.get("serial")  );
+                        param.setResult(jsonObject.get("serial") );
+                    }
+                }
+            });
 
+
+
+            XposedHelpers.findAndHookMethod(android.net.wifi.WifiInfo.class, "getMacAddress", new XC_MethodHook() {
+                @Override
+                protected void afterHookedMethod(MethodHookParam param) throws Throwable {
+                    super.afterHookedMethod(param);
+                    String result=jsonObject.getString("wifimac");
+                    Log.d(TAG, "setHook: afterHookedMethod: wifi hook="+result );
+                    param.setResult(result);
                 }
             });
 

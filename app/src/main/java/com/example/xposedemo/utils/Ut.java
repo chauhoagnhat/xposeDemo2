@@ -3,6 +3,7 @@ package com.example.xposedemo.utils;
 import android.app.Activity;
 import android.app.ActivityManager;
 import android.app.AlertDialog;
+import android.content.ActivityNotFoundException;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.DialogInterface;
@@ -14,6 +15,7 @@ import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
+import android.net.Uri;
 import android.net.wifi.WifiInfo;
 import android.net.wifi.WifiManager;
 import android.os.IBinder;
@@ -71,14 +73,11 @@ public class Ut {
     private static final String TAG = "DeviceUtils";
     protected static String uuid;
 
-
-//
     public static void getSystemPermission(){
         // android:sharedUserId="android.uid.system"
         //https://www.jianshu.com/p/b26201f2b4bb
         //https://blog.csdn.net/u013491946/article/details/78191591  androidStudio配置
     }
-
 
     public static char rLetter(){
         int c='a'+(int)(Math.random()*26);
@@ -96,6 +95,21 @@ public class Ut {
         String ret=sb.toString();
         Log.d(TAG, "rLetterN: "+ret);
         return  ret;
+
+    }
+
+    //跳转指定app详情
+    public static boolean goToAppDetailSettings(Context context, String packageName) {
+        try {
+            Intent i = new Intent(android.provider.Settings.ACTION_APPLICATION_DETAILS_SETTINGS);
+            i.addCategory(Intent.CATEGORY_DEFAULT);
+            i.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+            i.setData(Uri.parse("package:" + packageName));
+            context.startActivity(i);
+            return true;
+        } catch (ActivityNotFoundException ignored) {
+            return false;
+        }
     }
 
     /**
@@ -251,7 +265,6 @@ public class Ut {
         return sb.toString();
 
 
-
     }
 
     //
@@ -260,6 +273,8 @@ public class Ut {
                 context.getSystemService(Context.ACTIVITY_SERVICE);
         mActivityManager.killBackgroundProcesses(packageName);
     }
+
+
     /**
      * 将得到的int类型的IP转换为String类型
      *
@@ -301,7 +316,6 @@ public class Ut {
             e.printStackTrace();
             Log.d(TAG, "writeLines: IOException" + e);
         }
-
 
     }
 
@@ -681,10 +695,6 @@ public class Ut {
             throw new RuntimeException(e);
         }
         return text;
-
-
-
-
 
     }
 
