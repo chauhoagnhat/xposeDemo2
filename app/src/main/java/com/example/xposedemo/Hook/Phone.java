@@ -1,5 +1,6 @@
 package com.example.xposedemo.Hook;
 
+import android.app.AndroidAppHelper;
 import android.app.Application;
 import android.content.Context;
 import android.content.SharedPreferences;
@@ -12,8 +13,11 @@ import com.alibaba.fastjson.JSONObject;
 import com.example.xposedemo.MyProvider.MultiprocessSharedPreferences;
 import com.example.xposedemo.utils.MyFile;
 import com.example.xposedemo.utils.SharedPref;
+import com.example.xposedemo.utils.Ut;
 import com.example.xposedemo.utils.Utils;
 
+import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
@@ -37,8 +41,10 @@ public class Phone  {
     JSONObject jsonObjectPara;
 
     public Phone( XC_LoadPackage.LoadPackageParam sharePkgParam ) {
+
         methodNamelist=new ArrayList<>();
         Telephony( sharePkgParam );
+
     }
 
     // 联网方式
@@ -77,6 +83,65 @@ public class Phone  {
 
     }
 
+    public boolean hookTest(String className, XC_LoadPackage.LoadPackageParam loadPkgParam){
+
+        final String methodNameb="get";
+        XposedHelpers.findAndHookMethod("android.os.SystemProperties",
+                loadPkgParam.classLoader, "get", String.class, new XC_MethodHook() {
+
+
+            @Override
+            protected void afterHookedMethod(MethodHookParam param) throws Throwable {
+
+                super.afterHookedMethod(param);
+                String para = (String) param.args[0];
+                if("gsm.operator.numeric".equals(para)||"no message".equals(para)) {
+
+                    Log.d(TAG, "hooktest-realvalue: method name="+methodNameb  );
+                    for (int i=0;i<param.args.length;i++ ){
+                        Log.d(TAG, "hooktest-realvalue: para= "+param.args[i]  );
+                    }
+                    Log.d(TAG, "hooktest-realvalue result="+param.getResult() );
+                    Log.d(TAG, "hooktest-realvalue --------------------" );
+
+                }
+
+            }
+        });
+
+        //className="android.telephony.SubscriptionManager";
+        final String methodName="getTelephonyProperty";
+        XposedHelpers.findAndHookMethod(className
+                , loadPkgParam.classLoader
+                ,methodName
+                ,int.class
+                ,String.class
+                ,String.class
+                ,new XC_MethodHook() {
+                    @Override
+                    protected void beforeHookedMethod(MethodHookParam param) throws Throwable {
+                        super.beforeHookedMethod(param);
+                    }
+
+                    @Override
+                    protected void afterHookedMethod(MethodHookParam param) throws Throwable {
+                        super.afterHookedMethod(param);
+
+                        Log.d(TAG, "hooktest-realvalue: method name="+methodName  );
+                        for (int i=0;i<param.args.length;i++ ){
+                            Log.d(TAG, "hooktest-realvalue: para= "+param.args[i]  );
+                        }
+
+                        Log.d(TAG, "hooktest-realvalue result="+param.getResult() );
+                        Log.d(TAG, "hooktest-realvalue --------------------" );
+
+                    }
+                });
+            return true;
+
+    }
+
+
     public void Telephony(XC_LoadPackage.LoadPackageParam loadPkgParam) {
 
         contexts = new Context[1];
@@ -85,7 +150,7 @@ public class Phone  {
             protected void afterHookedMethod(MethodHookParam param) throws Throwable {
                 Log.d(TAG, "afterHookedMethod: getContext-run");
 
-                super.afterHookedMethod(param);
+                super.afterHookedMethod( param );
                 contexts[0] = (Context) param.args[0];
                 mapDevice=new HashMap<>();
                 MultiprocessSharedPreferences.setAuthority("com.example.xposedemo.provider");
@@ -98,6 +163,12 @@ public class Phone  {
 
         Log.d(TAG, "Telephony: " );
         String TelePhone = "android.telephony.TelephonyManager";
+
+//       if (hookTest(TelePhone,loadPkgParam)){
+//           return;
+//        }
+
+
         //TelePhone="android.telecom.TelephonyManager";
 
       /*  try {
@@ -123,14 +194,24 @@ public class Phone  {
         }
 */
        // jsonStr=SharedPref.getXValue("json");
-        jsonStr=Utils.readFileToString(  HookShare.PATH_PHONE_DEVICE );
-        Log.d(TAG, "Telephony: ");
+//        if (ContextGet.context==null)
+//            return;
+
+//        String tmp= Utils.readFileToString( HookShare.PATH_DEVICE_PHONE_DATA );
+//        Log.d(TAG, "Telephony: jsondate="+tmp );
+
+        jsonStr=Utils.readFileToString(  HookShare.PATH_DEVICE_PHONE_DATA );
+//        if ( jsonStr==null ){
+//            return;
+//        }
+
         jsonObjectPara = JSONObject.parseObject( jsonStr );
         //hookBuild();
         Log.d(TAG, "Telephony: json="+jsonStr );
 
+
         // 修改手机系统信息 此处是手机的基本信息 包括厂商 信号 ROM版本 安卓版本 主板 设备名 指纹名称等信息
-        XposedHelpers.findAndHookMethod(TelePhone,
+     /*   XposedHelpers.findAndHookMethod(TelePhone,
                 loadPkgParam.classLoader , "getDeviceId",int.class,
                 new XC_MethodHook() {
 
@@ -148,10 +229,10 @@ public class Phone  {
                         param.setResult( v ) ;
                     }
 
-                });
+                });*/
 
         // imei 修改手机系统信息 此处是手机的基本信息 包括厂商 信号 ROM版本 安卓版本 主板 设备名 指纹名称等信息
-        XposedHelpers.findAndHookMethod(TelePhone,
+/*        XposedHelpers.findAndHookMethod(TelePhone,
                 loadPkgParam.classLoader , "getDeviceId",
                 new XC_MethodHook() {
                     @Override
@@ -161,10 +242,9 @@ public class Phone  {
                         Log.d(TAG, "setHook: getDeviceId-"+v );
                         param.setResult( v ) ;
                     }
-                });
+                });*/
 
-
-        XposedHelpers.findAndHookMethod(TelePhone,
+     /*           XposedHelpers.findAndHookMethod(TelePhone,
                 loadPkgParam.classLoader, "getImei",new XC_MethodHook() {
                     @Override
                     protected void afterHookedMethod(MethodHookParam param) throws Throwable {
@@ -173,9 +253,9 @@ public class Phone  {
                         Log.d(TAG, "setHook: getImei-"+v );
                         param.setResult( v);
                     }
-                });
+                });*/
 
-            XposedHelpers.findAndHookMethod(TelePhone,
+         /*       XposedHelpers.findAndHookMethod(TelePhone,
                 loadPkgParam.classLoader, "getImei",int.class,new XC_MethodHook() {
                     @Override
                     protected void afterHookedMethod(MethodHookParam param) throws Throwable {
@@ -184,19 +264,18 @@ public class Phone  {
                         Log.d(TAG, "setHook: getImei-"+v );
                         param.setResult( v);
                     }
-                });
+                });*/
 
                 // 修改为指定的运营商mnc mcc信息
                 XposedHelpers.findAndHookMethod(android.content.res.Resources.class.getName(), loadPkgParam.classLoader, "getConfiguration", new XC_MethodHook() {
 
                     @Override
                     protected void afterHookedMethod(MethodHookParam param) throws Throwable {
-
                         super.afterHookedMethod(param);
+
                         Configuration configuration = (Configuration) param.getResult();
                         configuration.mcc = Integer.parseInt(jsonObjectPara.getString("mcc"));
                         configuration.mnc = Integer.parseInt(jsonObjectPara.getString("mnc"));
-
                         //configuration.densityDpi=560;
                         //                     configuration.fontScale=1;
                         //                    configuration.hardKeyboardHidden=2;
@@ -214,10 +293,10 @@ public class Phone  {
                         //  Log.d(TAG, "HookTelephony="+methodNamelist.toString() );
                         Log.d(TAG, "setHookValue: " + "getConfiguration" + "-result=" + param.getResult().toString());
                         param.setResult(configuration);
-
                     }
 
                 });
+
 
         HookTelephony(android.telephony.TelephonyManager.class.getName(),loadPkgParam,  "getPhoneType" , TelephonyManager.PHONE_TYPE_GSM );
         HookTelephony(android.telephony.TelephonyManager.class.getName(),loadPkgParam,  "getNetworkType" , TelephonyManager.NETWORK_TYPE_HSPAP);
@@ -225,10 +304,10 @@ public class Phone  {
         HookTelephony(android.telephony.TelephonyManager.class.getName(),loadPkgParam,  "hasIccCard" ,  true );
 
         String fucName="getDeviceSoftwareVersion";
-        fucName="getDeviceId";
-
+/*        fucName="getDeviceId";
         HookTelephony(TelePhone, loadPkgParam, fucName,
-                jsonObjectPara.getString( fucName )  );  //返系统版本
+                jsonObjectPara.getString( fucName )  );  //返系统版本*/
+
         HookTelephony(TelePhone, loadPkgParam, fucName,
                 jsonObjectPara.getString( fucName )  );  //返系统版本
         
@@ -243,6 +322,7 @@ public class Phone  {
         fucName="getSimSerialNumber";          //89860179328595969501 序列号
         HookTelephony( TelePhone, loadPkgParam, fucName,
                 jsonObjectPara.getString( fucName )  );
+
         fucName="getNetworkOperator";          //45413 运营商网络类型
         HookTelephony( TelePhone, loadPkgParam, fucName,
                 jsonObjectPara.getString( fucName )  );
@@ -259,6 +339,8 @@ public class Phone  {
         HookTelephony( TelePhone, loadPkgParam, fucName,
                 jsonObjectPara.getString( fucName )  );
 
+
+
         fucName="getNetworkCountryIso";       //中国联通 国家iso代码
         HookTelephony( TelePhone, loadPkgParam, fucName,
                 jsonObjectPara.getString( fucName )  );
@@ -267,9 +349,9 @@ public class Phone  {
         HookTelephony( TelePhone, loadPkgParam, fucName,
                 jsonObjectPara.getString( fucName )  );
 
-        fucName="getDeviceSoftwareVersion";
+  /*      fucName="getDeviceSoftwareVersion";
         HookTelephony( TelePhone, loadPkgParam, fucName,
-                "100"  );
+                "100"  );*/
 
 //        fucName="getSimSpecificCarrierId";
 //        HookTelephony( TelePhone, loadPkgParam, fucName,
@@ -280,7 +362,7 @@ public class Phone  {
 //        HookTelephony( TelePhone, loadPkgParam, fucName,
 //                "中國移動香港 China Mobile HK"  );
 
-        fucName="getCallState";
+/*        fucName="getCallState";
         HookTelephony( TelePhone, loadPkgParam, fucName,
                 0 );
 
@@ -290,14 +372,14 @@ public class Phone  {
 
         fucName="getDataState";
         HookTelephony( TelePhone, loadPkgParam, fucName,
-                0 );
+                0 );*/
 
         //Log.d(TAG, "testPhone: q-getSimSpecificCarrierId="+getSimSpecificCarrierId );
         //Log.d(TAG, "testPhone: q-getNetworkSpecifier="+getNetworkSpecifier );
         //Log.d(TAG, "testPhone: q-getCarrierIdFromSimMccMnc="+getCarrierIdFromSimMccMnc );
         //Log.d(TAG, "testPhone: q-getCardIdForDefaultEuicc="+ getCardIdForDefaultEuicc );
 
-                fucName="GetNeighboringCellInfo";       //
+ /*       fucName="GetNeighboringCellInfo";       //
         HookTelephony( TelePhone, loadPkgParam, fucName,
                 jsonObjectPara.getString( fucName )  ); // 获取邻近的基站信息，返回的是List<NeighboringCellInfo>基站列表信息
         fucName="getCellLocation";       //
@@ -305,7 +387,7 @@ public class Phone  {
                 jsonObjectPara.getString( fucName )  ); // 获取当前基站信息
         fucName="getAllCellInfo";       //
         HookTelephony( TelePhone, loadPkgParam, fucName,
-                jsonObjectPara.getString( fucName )  ); // List<CellInfo>基站列表信息
+                jsonObjectPara.getString( fucName )  ); // List<CellInfo>基站列表信息*/
 
         
     /*    XposedBridge.hookAllMethods(findClass("pc.a.b.n", loadPkgParam.classLoader), "b", new XC_MethodHook() {

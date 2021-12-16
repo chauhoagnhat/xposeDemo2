@@ -7,6 +7,7 @@ import android.util.Log;
 
 import com.example.xposedemo.Hook.BaseHook;
 import com.example.xposedemo.Hook.CPUHook;
+import com.example.xposedemo.Hook.ContextGet;
 import com.example.xposedemo.Hook.HookShare;
 import com.example.xposedemo.Hook.PackagesHook;
 import com.example.xposedemo.Hook.Phone;
@@ -32,11 +33,10 @@ public class HookMain  implements IXposedHookLoadPackage   {
         //loadPackageParam.packageName.equals( BuildConfig.APPLICATION_ID
         //String json= MyFile.readFileToString(HookShare.pathSelectedPackages);
 
-
-
 //        Log.d(TAG, "handleLoadPackage: boolSelectedPackages"+ HookShare.boolSelectedPackages( loadPackageParam ) );
         if ( HookShare.boolSelectedPackages( loadPackageParam ) ){
 
+            //new ContextGet(loadPackageParam);
             new Phone( loadPackageParam  ) ;
             //new CPUHook( loadPackageParam );
             //new BaseHook( loadPackageParam );

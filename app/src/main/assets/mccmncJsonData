@@ -1,0 +1,19 @@
+{
+	"hk": [
+		{
+			"getDeviceId": "992027816571684",
+			"getSimOperatorName": "Mobile Duck",
+			"mnc": "12",
+			"getNetworkOperator": "46000",
+			"getNetworkOperatorName": "CHINA MOBILE",
+			"getSimCountryIso": "hk",
+			"getSubscriberId": "454121134600090",
+			"getNetworkCountryIso": "hk",
+			"getSimOperator": "45412",
+			"mcc": "454",
+			"getLine1Number": "114348182191"
+		}
+	]
+	
+	
+}

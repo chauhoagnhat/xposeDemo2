@@ -87,30 +87,39 @@ public class MyFile {
     public static ArrayList execCmdsforResult(String[] cmds) {
         ArrayList<String> list = new ArrayList<String>();
         try {
+
             Process process = Runtime.getRuntime().exec("su");
+            Log.d(TAG, "execCmdsforResult: run");
             OutputStream os = process.getOutputStream();
             process.getErrorStream();
             InputStream is = process.getInputStream();
+
             int i = cmds.length;
             for (int j = 0; j < i; j++) {
                 String str = cmds[j];
                 os.write((str + "\n").getBytes());
             }
+
             os.write("exit\n".getBytes());
             os.flush();
             os.close();
             BufferedReader reader = new BufferedReader(new InputStreamReader(is) );
+
             while (true) {
                 String str = reader.readLine();
                 if (str == null)
                     break;
                 list.add(str);
             }
+
             reader.close();
             process.waitFor();
             process.destroy();
+            Log.d(TAG, "execCmdsforResult: end.");
             return list;
-        } catch (Exception localException) {
+
+        } catch (Exception localException){
+
         }
         return list;
 

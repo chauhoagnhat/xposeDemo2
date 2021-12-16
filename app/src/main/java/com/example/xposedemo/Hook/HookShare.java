@@ -16,24 +16,48 @@ import de.robv.android.xposed.callbacks.XC_LoadPackage;
 
 public class HookShare {
 
-    public final static String pathNkFolder="/sdcard/nk";
-    public final static String pathNewDeviceOrder="/sdcard/nk/run.txt";
-    public final static String pathDeviceJson="/sdcard/nk/deviceJson.txt";
-    public final static String  pathPackages ="/sdcard/nk/packages.txt";
-    public final static String  pathSelectedPackages ="/sdcard/nk/selectedPackages.txt";
+
+    public final static String pathDataRoot="/data/local/tmp/";
+    public final static String sdcardRoot="/sdcard/";
+
+    public final static String configPhoneCountryCode="configPhoneCountryCode";
+
+    public final static String pathNkFolder=sdcardRoot+"nk";
+    public final static String pathNewDeviceOrder=sdcardRoot+"nk/run.txt";
+    public final static String pathDeviceJson=sdcardRoot+"nk/deviceJson.txt";
+    public final static String  pathPackages =sdcardRoot+"nk/packages.txt";
+    public final static String  pathSelectedPackages =sdcardRoot+"nk/selectedPackages.txt";
+
+    public final static String pathNkFolderData=pathDataRoot+"nk";
+    public final static String pathNewDeviceOrderData=pathDataRoot+"nk/run.txt";
+    public final static String pathDeviceJsonData=pathDataRoot+"nk/deviceJson.txt";
+    public final static String  pathPackagesData =pathDataRoot+"nk/packages.txt";
+    public final static String  pathSelectedPackagesData =pathDataRoot+"nk/selectedPackages.txt";
 
     private static final String TAG ="HookShare" ;
-    public static final String PATH_PHONE_DEVICE = "/sdcard/nk/devicePhone.txt";
-    public static final String PATH_FUNCTION_PACKAGES="/sdcard/nk/packagesFunction.txt";
-    public static final String PATH_BACK_PATH="/sdcard/nk/PATH_BACK_PATH.txt";
-    public static final String PATH_DATABACK_JSON="/sdcard/nk/PATH_DATABACK_JSON.txt";
-    public static final String PATH_DATABACK_SELECTED_PATH="/sdcard/nk/PATH_DATABACK_SELECTED_PATH.txt";
+    public static final String PATH_PHONE_DEVICE = sdcardRoot+"nk/devicePhone.txt";
+    public static final String PATH_FUNCTION_PACKAGES=sdcardRoot+"nk/packagesFunction.txt";
+    public static final String PATH_BACK_PATH=sdcardRoot+"nk/PATH_BACK_PATH.txt";
+    public static final String PATH_DATABACK_JSON=sdcardRoot+"nk/PATH_DATABACK_JSON.txt";
+    public static final String PATH_DATABACK_SELECTED_PATH=sdcardRoot+"nk/PATH_DATABACK_SELECTED_PATH.txt";
     public static final String PATH_DATA_USER="/data/user/0";
-    public static final String PATH_DEVICE_PHONE="/sdcard/nk/devicePhone.txt";
-    public static final String PATH_UI_SETTING="/sdcard/nk/ui.txt";
-    public static final String PATH_SCRIPT_RUNNING="/sdcard/nk/script.txt";
-    public static Context context;
+    public static final String PATH_DEVICE_PHONE=sdcardRoot+"nk/devicePhone.txt";
+    public static final String PATH_UI_SETTING=sdcardRoot+"nk/ui.txt";
+    public static final String PATH_SCRIPT_RUNNING=sdcardRoot+"nk/script.txt";
 
+
+
+    public static final String PATH_FUNCTION_PACKAGES_DATA =pathDataRoot+"nk/packagesFunction.txt";
+    public static final String PATH_BACK_PATH_DATA =pathDataRoot+"nk/PATH_BACK_PATH.txt";
+    public static final String PATH_DATABACK_JSON_DATA =pathDataRoot+"nk/PATH_DATABACK_JSON.txt";
+    public static final String PATH_DATABACK_SELECTED_PATH_DATA =pathDataRoot+"nk/PATH_DATABACK_SELECTED_PATH.txt";
+     public static final String PATH_DEVICE_PHONE_DATA =pathDataRoot+"nk/devicePhone.txt";
+    //public static final String PATH_DEVICE_PHONE_DATA =pathDataRoot+"devicePhone.txt";
+    public static final String PATH_UI_SETTING_DATA =pathDataRoot+"nk/ui.txt";
+    public static final String PATH_SCRIPT_RUNNING_DATA =pathDataRoot+"nk/script.txt";
+
+
+    public static Context context;
 
     static {
         Ut.crFolder( pathNkFolder );

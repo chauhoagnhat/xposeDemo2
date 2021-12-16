@@ -3,9 +3,25 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
-    <TextView
+    <LinearLayout
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:id="@+id/lvitem_tv_phone_country"/>
+        android:orientation="horizontal">
+
+        <CheckBox
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:id="@+id/checkbox_country"
+            />
+
+        <TextView
+            android:id="@+id/lvitem_tv_phone_country"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="国家"
+            android:textSize="24sp" />
+
+    </LinearLayout>
+
 
 </LinearLayout>

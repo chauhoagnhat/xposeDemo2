@@ -35,6 +35,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.alibaba.fastjson.TypeReference;
 import com.example.xposedemo.Hook.HookShare;
@@ -57,6 +58,8 @@ import com.example.xposedemo.utils.SharedPref;
 import com.example.xposedemo.utils.Utils;
 import com.example.xposedemo.view.ActivityPhone;
 
+import java.io.File;
+import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
@@ -82,24 +85,24 @@ public class MainActivity extends AppCompatActivity {
     private MainActivityData mainActivityData = null;
     public TextView logTextview;
 
+    @RequiresApi(api = Build.VERSION_CODES.P)
     @Override
     protected void onCreate(Bundle savedInstanceState) {
 
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        // Ut.stopAppByForce(getApplicationContext(), "com.li" );
-        logTextview = (TextView) findViewById(R.id.tv_log);
-        logTextview.setText("version-0714c");
 
-        MultiprocessSharedPreferences.setAuthority("com.example.xposedemo.provider");
-        SharedPreferences sharedPreferences = MultiprocessSharedPreferences.getSharedPreferences(getApplicationContext(), "test", Context.MODE_PRIVATE);
-        //testPhone();
+        logTextview = (TextView) findViewById(R.id.tv_log);
+        logTextview.setText("version-1216c");
+
+        testPhone();
 
         //FakeBase.randomDevice( getApplicationContext() );
-        startWatchService();
+        //startWatchService();
+
         loadUiSetting();
         //appContext=getApplicationContext();
-        new HookShare();
+        //new HookShare();
         mainActivityDataInit();
 
 //        MyOpenHelper myOpenHelper=new MyOpenHelper( getApplicationContext() );
@@ -107,20 +110,16 @@ public class MainActivity extends AppCompatActivity {
       //  testHook();
 
 
-        Intent mIntent = new Intent(Intent.ACTION_MAIN, null);
-        Log.d(TAG, "onCreate: isInstance" + Intent.class.isInstance( mIntent ));
-        mIntent.addCategory(Intent.CATEGORY_LAUNCHER);
+//        Intent mIntent = new Intent(Intent.ACTION_MAIN, null);
+//        Log.d(TAG, "onCreate: isInstance" + Intent.class.isInstance( mIntent ));
+//        mIntent.addCategory(Intent.CATEGORY_LAUNCHER);
+        assertInit();
 
         viewById = findViewById(R.id.textView);
         viewById.setText("no data");
         //setSelectedPackges();
         //testHook();
-
-        Ut.copyAssetsFile(context, "cpuinfo", "/sdcard/cpuinfo");
-        String path = Environment.getExternalStorageDirectory().toString();
-        Log.d(TAG, "onCreate: path=" + path);
-
-        deviceLog();
+        //deviceLog();
         ui();
 
         // String jsonStr= Utils.readFileToString(Environment.getExternalStorageDirectory ()+"/device.txt");
@@ -137,6 +136,28 @@ public class MainActivity extends AppCompatActivity {
             viewById.setText(string);
         }
         Log.d(TAG, "onCreate: run finish");
+
+    }
+
+    public void assertInit(){
+        context=getApplicationContext();
+        File nkForder=new File(HookShare.pathNkFolder);
+        if (! nkForder.exists()){
+            Log.d(TAG, "assertInit: 创建nk文件夹"+ nkForder.mkdir()  );
+        }
+        nkForder=new File( HookShare.pathNkFolderData );
+        if (! nkForder.exists()){
+            Log.d(TAG, "assertInit: 创建data/local/tmp/nk" );
+            MyFile.execCmdsforResult(new String[]{"cd /data/local/tmp"
+            ,"mkdir nk"}
+            );
+        }
+
+        Log.d(TAG, "assertInit: run");
+        Ut.copyAssetsFile(context,
+                "cpuinfo", "/sdcard/cpuinfo");
+        Ut.copyAssetsFile(context,
+                "mccmncJsonData", HookShare.pathNkFolder+"/mccmncJsonData" );
 
     }
 
@@ -490,7 +511,6 @@ public class MainActivity extends AppCompatActivity {
                 logTextview.setText( text );
             }
         });
-
     }
 
     public void startWatchService(){
@@ -498,7 +518,7 @@ public class MainActivity extends AppCompatActivity {
         Context context=getApplicationContext();
         Intent serIntent= new Intent( context, AlarmService.class);
         serIntent.addFlags( Intent.FLAG_ACTIVITY_NEW_TASK );
-        context.startService(serIntent);
+        context.startService( serIntent );
         Log.v(TAG, "启动服务.....");
 
     }
@@ -641,13 +661,63 @@ public class MainActivity extends AppCompatActivity {
 
                 DataBack instans=DataBack.getInstance(mainActivityData);
                 Ut.stopAppByKill( getApplicationContext(), instans.getFunctionPackageName() );
-                instans .delCacheByThread();
-
+               // instans.delCacheByThread();
                 //basehook
                 BaseInfo baseInfo = FakeBase.randomDevice(getApplicationContext());
-                JSONObject jsonObject= ( JSONObject) JSONObject.toJSON( baseInfo ) ;
+                JSONObject jsonObject= ( JSONObject) JSONObject.toJSON( baseInfo );
+
+                //安卓id信息
                 HookShare.WriteBean2Json( baseInfo,HookShare.pathDeviceJson );
-                DeviceWriteDefaultPhone();
+                String command = "cp -r "+
+                        HookShare.pathDeviceJson + " " + HookShare.pathDeviceJsonData;
+                MyFile.execCmdsforResult( new String[]{ command,"chmod 666 "+HookShare.pathDeviceJsonData } );
+
+                //DeviceWriteDefaultPhone();
+                SharedPreferences sp=getApplication().getSharedPreferences(
+                        HookShare.configPhoneCountryCode,MODE_PRIVATE
+                );
+                String country=sp.getString(HookShare.configPhoneCountryCode,"");
+                if (!country.equals("")){
+                    String jsonMccmnc=MyFile.readFileToString(
+                            HookShare.pathNkFolder+"/mccmncJsonData" );
+
+                    //解析出mncmcc等所有相关值写入
+                    if (!jsonMccmnc.equals("")){
+                        JSONObject jobjMccmnc=JSON.parseObject(jsonMccmnc);
+                        String jsonStringCountry=jobjMccmnc.getString(country);
+                        JSONArray selectCountryJsonArray=JSONArray.parseArray(jsonStringCountry);
+                        JSONObject jobjFinal=selectCountryJsonArray.getJSONObject( Ut.r_(0,
+                                selectCountryJsonArray.size()-1) );
+                        Log.d(TAG, "onClick: json="+country+"="
+                        +jobjFinal.getString("getSimOperatorName") );
+
+                        JSONObject jobjRet= new JSONObject( );
+                        String key="mnc";
+                        jobjRet.put( key,jobjFinal.getString(key) );
+                         key="mcc";
+                        jobjRet.put( key,jobjFinal.getString(key) );
+                        key="getNetworkOperator";
+                        jobjRet.put( key,jobjFinal.getString(key) );
+                        key="getSimOperator";
+                        jobjRet.put( key,jobjFinal.getString(key) );
+                        key="getNetworkOperatorName";
+                        jobjRet.put( key,jobjFinal.getString(key) );
+                        key="getSimOperatorName";
+                        jobjRet.put( key,jobjFinal.getString(key) );
+                        key="getSimCountryIso";
+                        jobjRet.put( key,jobjFinal.getString(key) );
+                        key="getNetworkCountryIso";
+                        jobjRet.put( key,jobjFinal.getString(key) );
+                        key="getLine1Number";
+                        jobjRet.put( key,jobjFinal.getString(key) );
+                        MyFile.fileWriterTxt( HookShare.PATH_PHONE_DEVICE,jobjRet.toJSONString() );
+                        command = "cp -r "+
+                                HookShare.PATH_PHONE_DEVICE + " " + HookShare.PATH_DEVICE_PHONE_DATA;
+                        MyFile.execCmdsforResult( new String[]{ command,"chmod 666 "+HookShare.PATH_DEVICE_PHONE_DATA  } );
+
+                    }
+                }else
+                    DeviceWriteDefaultPhone();
 
 //{"getDeviceId":"352003411773066",
 // "getLine1Number":1164428807,"getNetworkCountryIso":"MY",
@@ -655,9 +725,9 @@ public class MainActivity extends AppCompatActivity {
 // "getSimCountryIso":"my","getSimOperator":"50217","getSimOperatorName":"Maxis",
 // "getSubscriberId":"502176939124995","mcc":"502","mnc":"17"}
 
+           /*
                 MyOpenHelper myOpenHelper=new MyOpenHelper( getApplicationContext() );
                 SQLiteDatabase db=myOpenHelper.getWritableDatabase();
-
                 for (  Map.Entry<String, Object> entry :
                     jsonObject.entrySet() ) {
                     ContentValues contentValues=new ContentValues();
@@ -672,11 +742,12 @@ public class MainActivity extends AppCompatActivity {
                     Log.d(TAG, "onClick: "+contentValues.toString());
                     db.insert( "base","k",contentValues );
                 }
-                db.close();
+                db.close();*/
                 
                 //hookPackages
-                FakePackage fakePackage = FakePackage.getInstance(getApplicationContext());
-                fakePackage.fakePackages ();
+//                FakePackage fakePackage = FakePackage.getInstance(getApplicationContext());
+//                fakePackage.fakePackages ();
+
 
                 dialogShowDevice();
 
@@ -736,7 +807,6 @@ public class MainActivity extends AppCompatActivity {
         List<Boolean> listBooleanPackages=new ArrayList<>();
 
         PackageManager packageManager = getApplication().getPackageManager();
-
        //  +"\r\n,"+
         List<PackageInfo> listPackageInfos=packageManager.getInstalledPackages(0);
         for ( PackageInfo p :
@@ -1001,7 +1071,6 @@ public class MainActivity extends AppCompatActivity {
     public void  startPermissionManager1(){
         Intent intent=new Intent();
         DataBack instance = DataBack.getInstance(mainActivityData);
-
         intent.setAction("android.settings.APPLICATION_DETAILS_SETTINGS");
         //intent.setData( Uri.parse("package:jp.naver.line.android") );
         intent.setData( Uri.parse("package:"+instance.getFunctionPackageName() ) );
@@ -1010,67 +1079,7 @@ public class MainActivity extends AppCompatActivity {
         startActivity(intent);
     }
 
-    public void insert(String json){
-        //①获取内容解析者
-/*
-        ContentResolver resolver = getContentResolver();
-        Uri url = Uri.parse( Common.URI+"insert" );
-        Log.d(TAG, "insert: =" +Common.URI+"insert" );
-        ContentValues values = new ContentValues();
-        values.put("device",json  );
-        Uri insert = resolver.insert(url, values);
-        System.out.println(insert);
-*/
-    }
 
-    public void query(){
-        //获取内容解析者
-/*        ContentResolver contentResolver = getContentResolver();
-        Uri uri =Uri.parse(Common.URI+"query");
-        Cursor cursor = contentResolver.query(uri, null, null, null, null);
-//	Cursor cursor = database.rawQuery("select * from info", null);
-
-        while(cursor.moveToNext()){
-            String name = cursor.getString(cursor.getColumnIndex("device"));
-            String phone = cursor.getString(cursor.getColumnIndex("json"));
-            System.out.println("name="+name+"phone"+phone);
-        }*/
-
-    }
-
-    public String toastMessage() {
-        Log.d(TAG, "toastMessage: toast-run");
-         return "按钮未被劫持";
-    }
-
-    public  void saveImsi(){
-
-        Log.d(TAG, "saveImsi: ");
-        SharedPref mySP = new SharedPref( getApplicationContext() );
-//    mySP.setSharedPref("IMSI","460017932859596");
-//    mySP.setSharedPref("PhoneNumber","13117511178"); // 手机号码
-//    mySP.setSharedPref("SimSerial", "89860179328595969501"); // 手机卡序列号
-//    mySP.setSharedPref("networktor","46001" ); // 网络运营商类型
-//    mySP.setSharedPref("Carrier","中国联通" );// 网络类型名
-//    mySP.setSharedPref("CarrierCode","46001" ); // 运营商
-//    mySP.setSharedPref("simopename","中国联通" );// 运营商名字
-//    mySP.setSharedPref("gjISO", "cn");// 国家iso代码
-//    mySP.setSharedPref("CountryCode","cn" );// 手机卡国家
-
-        mySP.setSharedPref("IMSI","250127932859596");
-        mySP.setSharedPref("PhoneNumber","13117511178"); // 手机号码
-        mySP.setSharedPref("SimSerial", "89860179328595969501"); // 手机卡序列号
-        mySP.setSharedPref("networktor","25012" ); // 网络运营商类型
-        mySP.setSharedPref("Carrier","China Mobile/Peoples" );// 网络类型名
-        mySP.setSharedPref("CarrierCode","25012" ); // 运营商
-        mySP.setSharedPref("simopename","Baykal Westcom" );// 运营商名字
-        mySP.setSharedPref("gjISO", "ru");// 国家iso代码
-        mySP.setSharedPref("CountryCode","ru" );// 手机卡国家
-        System.out.println( "run-ok" );
-
-
-
-    }
 
 
 }

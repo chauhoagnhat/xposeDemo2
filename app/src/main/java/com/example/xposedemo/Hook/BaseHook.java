@@ -29,24 +29,24 @@ public class BaseHook {
     }
 
     public void hookMethod(final String className, final ClassLoader classLoader, final String methodName, final String result){
+
         XposedHelpers.findAndHookMethod(className, classLoader, methodName, new XC_MethodHook() {
             @Override
             protected void afterHookedMethod( MethodHookParam param ) throws Throwable {
                 super.afterHookedMethod( param );
                 param.setResult( result );
                 XposedBridge.log("result is " + result  );
+
             }
         });
-
     }
-
 
     //public static Field findField(Class<?> clazz, String fieldName)
     /**
      *
      */
     public void findFieldHook(Class<?> clazz, String fieldName, Object obj, Object value ){
-       
+
     }
 
     /**

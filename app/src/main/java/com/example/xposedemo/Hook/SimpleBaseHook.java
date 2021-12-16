@@ -22,25 +22,30 @@ public class SimpleBaseHook {
     private static final String TAG = "SimpleBaseHook" ;
 
     public void hookAll(BaseInfo baseInfo,XC_LoadPackage.LoadPackageParam loadPackageParam){
-        String json= MyFile.readFileToString( HookShare.pathDeviceJson );
+        String json= MyFile.readFileToString( HookShare.pathDeviceJsonData );
         final JSONObject jsonObject= JSON.parseObject  ( json );
 
         XposedHelpers.findAndHookMethod("android.os.SystemProperties", loadPackageParam.classLoader, "get", String.class, new XC_MethodHook() {
 
-
             @Override
             protected void afterHookedMethod(MethodHookParam param) throws Throwable {
                 super.afterHookedMethod(param);
+
                 String baseBand = (String) param.args[0];
                 if("gsm.version.baseband".equals(baseBand)||"no message".equals(baseBand)){
+
                     Log.d(TAG, "afterHookedMethod: baseBand="+jsonObject.get("baseBand")  );
                     param.setResult( jsonObject.get("baseBand") );
+
                 }
                 else if (baseBand.equals("ro.serialno")){
+
                     Log.d(TAG,"afterHookedMethod: realvalue="+param.getResult().toString() );
                     Log.d(TAG, "setHook: afterHookedMethod: ro.serialno set="+jsonObject.get("serial")  );
-                    param.setResult(jsonObject.get("serial") );
+                    param.setResult( jsonObject.get("serial") );
+
                 }
+
             }
         });
 
@@ -51,6 +56,7 @@ public class SimpleBaseHook {
                 String result=jsonObject.getString("wifimac");
                 Log.d(TAG, "setHook: afterHookedMethod: wifi hook="+result );
                 param.setResult(result);
+
             }
         });
 

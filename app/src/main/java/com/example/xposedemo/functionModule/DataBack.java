@@ -142,7 +142,6 @@ public class DataBack {
                 delCache();
             }
         };
-
         curThread=new Thread( runnable );
         threadWaitting();
         curThread.start();
