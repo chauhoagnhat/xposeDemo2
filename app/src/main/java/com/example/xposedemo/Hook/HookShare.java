@@ -21,6 +21,7 @@ public class HookShare {
     public final static String sdcardRoot="/sdcard/";
 
     public final static String configPhoneCountryCode="configPhoneCountryCode";
+    //public final static String configCountry="configPhoneCountryCode";
 
     public final static String pathNkFolder=sdcardRoot+"nk";
     public final static String pathNewDeviceOrder=sdcardRoot+"nk/run.txt";
@@ -45,13 +46,13 @@ public class HookShare {
     public static final String PATH_UI_SETTING=sdcardRoot+"nk/ui.txt";
     public static final String PATH_SCRIPT_RUNNING=sdcardRoot+"nk/script.txt";
 
-
+    public static final String PATH_PHONE_DEVICE_DATA = pathDataRoot+"nk/devicePhone.txt";
 
     public static final String PATH_FUNCTION_PACKAGES_DATA =pathDataRoot+"nk/packagesFunction.txt";
     public static final String PATH_BACK_PATH_DATA =pathDataRoot+"nk/PATH_BACK_PATH.txt";
     public static final String PATH_DATABACK_JSON_DATA =pathDataRoot+"nk/PATH_DATABACK_JSON.txt";
     public static final String PATH_DATABACK_SELECTED_PATH_DATA =pathDataRoot+"nk/PATH_DATABACK_SELECTED_PATH.txt";
-     public static final String PATH_DEVICE_PHONE_DATA =pathDataRoot+"nk/devicePhone.txt";
+    public static final String PATH_DEVICE_PHONE_DATA =pathDataRoot+"nk/devicePhone.txt";
     //public static final String PATH_DEVICE_PHONE_DATA =pathDataRoot+"devicePhone.txt";
     public static final String PATH_UI_SETTING_DATA =pathDataRoot+"nk/ui.txt";
     public static final String PATH_SCRIPT_RUNNING_DATA =pathDataRoot+"nk/script.txt";
@@ -78,7 +79,7 @@ public class HookShare {
     public static boolean boolSelectedPackages( XC_LoadPackage.LoadPackageParam loadPackageParam ){
 
 
-        String json= MyFile.readFileToString( HookShare.pathPackages );
+        String json= MyFile.readFileToString( HookShare.pathPackagesData );
         JSONObject jsonObject= JSON.parseObject(json);
         JSONObject jobj2=new JSONObject();
 

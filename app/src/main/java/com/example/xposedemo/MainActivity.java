@@ -23,6 +23,7 @@ import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
 import android.os.SystemClock;
+import android.provider.ContactsContract;
 import android.telecom.TelecomManager;
 import android.telephony.TelephonyManager;
 import android.util.JsonReader;
@@ -95,6 +96,8 @@ public class MainActivity extends AppCompatActivity {
         logTextview = (TextView) findViewById(R.id.tv_log);
         logTextview.setText("version-1216c");
 
+
+
         testPhone();
 
         //FakeBase.randomDevice( getApplicationContext() );
@@ -140,6 +143,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     public void assertInit(){
+
         context=getApplicationContext();
         File nkForder=new File(HookShare.pathNkFolder);
         if (! nkForder.exists()){
@@ -154,10 +158,48 @@ public class MainActivity extends AppCompatActivity {
         }
 
         Log.d(TAG, "assertInit: run");
-        Ut.copyAssetsFile(context,
+
+    Ut.copyAssetsFile(context,
                 "cpuinfo", "/sdcard/cpuinfo");
-        Ut.copyAssetsFile(context,
-                "mccmncJsonData", HookShare.pathNkFolder+"/mccmncJsonData" );
+
+    Ut.copyAssetsFile(context,
+                "mccmncJsonData",
+            HookShare.pathNkFolder+"/mccmncJsonData" );
+/*    File file=new File( HookShare.pathNkFolderData
+    +"mccmncJsonData" );*/
+
+       String command = "cp -r -f "+
+                HookShare.pathNkFolder+""
+               + "/mccmncJsonData" + " "
+               + HookShare.pathNkFolderData
+               +"/mccmncJsonData" ;
+
+        MyFile.execCmdsforResult(
+                new String[]{ command,"chmod 666 "
+                  +HookShare.pathNkFolderData
+                        +"/mccmncJsonData"  }
+                );
+
+        File f=new File( HookShare.PATH_DEVICE_PHONE );
+        if ( !f.exists() ) {
+            try {
+                f.createNewFile();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+
+        command = "cp -r -f "
+                +HookShare.PATH_DEVICE_PHONE
+                +" "+HookShare.PATH_DEVICE_PHONE_DATA;
+
+        MyFile.execCmdsforResult(
+                new String[]{ command,"chmod 666 "
+                        +HookShare.PATH_DEVICE_PHONE_DATA
+                }
+        );
+
+
 
     }
 
@@ -192,7 +234,12 @@ public class MainActivity extends AppCompatActivity {
         Log.d(TAG, "testPhone: getPhoneType=" + getPhoneType);
         Log.d(TAG, "testPhone: getSimCountryIso=" + getSimCountryIso);
 
-        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.READ_SMS) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, Manifest.permission.READ_PHONE_NUMBERS) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, Manifest.permission.READ_PHONE_STATE) != PackageManager.PERMISSION_GRANTED) {
+        if (ActivityCompat.checkSelfPermission(
+                this, Manifest.permission.READ_SMS)
+                != PackageManager.PERMISSION_GRANTED
+                && ActivityCompat.checkSelfPermission(
+                        this,
+                Manifest.permission.READ_PHONE_NUMBERS) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, Manifest.permission.READ_PHONE_STATE) != PackageManager.PERMISSION_GRANTED) {
             Log.d(TAG, "testPhone: phonenumber" + telephonyManager.getLine1Number());
             // TODO: Consider calling
             //    ActivityCompat#requestPermissions
@@ -254,8 +301,6 @@ public class MainActivity extends AppCompatActivity {
         }
         Ut.fileWriterTxt( HookShare.pathSelectedPackages,jobj2.toJSONString() );
     }
-
-
 
     public void Permission() {
         boolean isGranted = true;
@@ -494,7 +539,6 @@ public class MainActivity extends AppCompatActivity {
         JSONObject jsonObject=new JSONObject();
         jsonObject.put( "et_path",et_path.getText() );
         jsonObject.put("sw_script_watch", sw_script_watch.isChecked() );
-
         MyFile.fileWriterTxt( HookShare.PATH_UI_SETTING,jsonObject.toJSONString() );
         logUi("保存完成");
 
@@ -668,10 +712,11 @@ public class MainActivity extends AppCompatActivity {
 
                 //安卓id信息
                 HookShare.WriteBean2Json( baseInfo,HookShare.pathDeviceJson );
-                String command = "cp -r "+
+                String command = "cp -r -f "+
                         HookShare.pathDeviceJson + " " + HookShare.pathDeviceJsonData;
                 MyFile.execCmdsforResult( new String[]{ command,"chmod 666 "+HookShare.pathDeviceJsonData } );
 
+                /*
                 //DeviceWriteDefaultPhone();
                 SharedPreferences sp=getApplication().getSharedPreferences(
                         HookShare.configPhoneCountryCode,MODE_PRIVATE
@@ -683,14 +728,16 @@ public class MainActivity extends AppCompatActivity {
 
                     //解析出mncmcc等所有相关值写入
                     if (!jsonMccmnc.equals("")){
+
                         JSONObject jobjMccmnc=JSON.parseObject(jsonMccmnc);
                         String jsonStringCountry=jobjMccmnc.getString(country);
                         JSONArray selectCountryJsonArray=JSONArray.parseArray(jsonStringCountry);
+
                         JSONObject jobjFinal=selectCountryJsonArray.getJSONObject( Ut.r_(0,
                                 selectCountryJsonArray.size()-1) );
+
                         Log.d(TAG, "onClick: json="+country+"="
                         +jobjFinal.getString("getSimOperatorName") );
-
                         JSONObject jobjRet= new JSONObject( );
                         String key="mnc";
                         jobjRet.put( key,jobjFinal.getString(key) );
@@ -711,13 +758,13 @@ public class MainActivity extends AppCompatActivity {
                         key="getLine1Number";
                         jobjRet.put( key,jobjFinal.getString(key) );
                         MyFile.fileWriterTxt( HookShare.PATH_PHONE_DEVICE,jobjRet.toJSONString() );
-                        command = "cp -r "+
+                        command = "cp -r -f "+
                                 HookShare.PATH_PHONE_DEVICE + " " + HookShare.PATH_DEVICE_PHONE_DATA;
                         MyFile.execCmdsforResult( new String[]{ command,"chmod 666 "+HookShare.PATH_DEVICE_PHONE_DATA  } );
 
                     }
                 }else
-                    DeviceWriteDefaultPhone();
+                    DeviceWriteDefaultPhone();*/
 
 //{"getDeviceId":"352003411773066",
 // "getLine1Number":1164428807,"getNetworkCountryIso":"MY",
@@ -858,6 +905,8 @@ public class MainActivity extends AppCompatActivity {
                 listBooleanPackages.add(false);
             }
             Ut.fileWriterTxt( HookShare.pathPackages ,jsonObject.toJSONString() );}
+
+
         }else {
             Log.d(TAG, "dialogSelectPackageName: read last");
             JSONObject jobjSelectedPackages;
@@ -928,6 +977,9 @@ public class MainActivity extends AppCompatActivity {
                 @Override
                 public void onClick(DialogInterface dialog, int which) {
                     Ut.fileWriterTxt( HookShare.pathPackages,jsonObject.toJSONString() );
+                    String command = "cp -r -f "+
+                            HookShare.pathPackages + " " + HookShare.pathPackagesData ;
+                    MyFile.execCmdsforResult( new String[]{ command,"chmod 666 "+HookShare.pathPackagesData } );
                     dialog.dismiss();
                     //Toast.makeText(MainActivity.this, "确定", Toast.LENGTH_SHORT).show();
                     //android会自动根据你选择的改变selected数组的值。
@@ -985,7 +1037,10 @@ public class MainActivity extends AppCompatActivity {
 
     private void dialogShowPath(){
 
-        final String items[]= { "phone:sdcard/yztc/device.txt","Base:/sdcard/deviceJson.txt","/sdcard/packages.txt" };
+        final String items[]= { "phone:sdcard/yztc/device.txt"
+                ,"Base:/sdcard/deviceJson.txt"
+                ,"/sdcard/packages.txt" };
+
         //dialog参数设置
         AlertDialog.Builder builder=new AlertDialog.Builder(MainActivity.this);  //先得到构造器
         builder.setTitle("settingPath"); //设置标题
@@ -1037,6 +1092,7 @@ public class MainActivity extends AppCompatActivity {
 
         //ro.serialno
         try {
+
             Class cName = Class.forName("android.os.SystemProperties");
             Class[] classArray = new Class[1];
             classArray[0] = String.class;
@@ -1069,6 +1125,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     public void  startPermissionManager1(){
+
         Intent intent=new Intent();
         DataBack instance = DataBack.getInstance(mainActivityData);
         intent.setAction("android.settings.APPLICATION_DETAILS_SETTINGS");
@@ -1077,6 +1134,7 @@ public class MainActivity extends AppCompatActivity {
         //intent.setFlags(0x10008000);
         intent.setComponent( new ComponentName("com.android.settings","com.android.settings.applications.InstalledAppDetailsTop" )   );
         startActivity(intent);
+
     }
 
 

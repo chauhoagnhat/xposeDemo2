@@ -7,16 +7,16 @@
 
     <ListView
         android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_weight="0.7"
+        android:layout_height="match_parent"
+        android:layout_weight="0.1"
         android:id="@+id/listview_phone_country"
         ></ListView>
 
-    <ListView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_weight="0.3"
-        android:id="@+id/listview_phone_para"
-        ></ListView>
+<!--    <ListView-->
+<!--        android:layout_width="wrap_content"-->
+<!--        android:layout_height="wrap_content"-->
+<!--        android:layout_weight="0.7"-->
+<!--        android:id="@+id/listview_phone_para"-->
+<!--        ></ListView>-->
 
 </LinearLayout>

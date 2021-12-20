@@ -29,7 +29,9 @@ public class ActivityPhone extends AppCompatActivity {
         super.onCreate(savedInstanceState);
 
         context=getApplicationContext();
+        listCountry.add("不改");
         listCountry.add("hk");
+        listCountry.add("us");
         setContentView(R.layout.layout_phone );
 
         ListView listViewCountry=(ListView)findViewById( R.id.listview_phone_country );

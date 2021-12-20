@@ -34,6 +34,8 @@ public class HookMain  implements IXposedHookLoadPackage   {
         //String json= MyFile.readFileToString(HookShare.pathSelectedPackages);
 
 //        Log.d(TAG, "handleLoadPackage: boolSelectedPackages"+ HookShare.boolSelectedPackages( loadPackageParam ) );
+
+        Log.d(TAG, "handleLoadPackage: "+HookShare.boolSelectedPackages(loadPackageParam) );
         if ( HookShare.boolSelectedPackages( loadPackageParam ) ){
 
             //new ContextGet(loadPackageParam);

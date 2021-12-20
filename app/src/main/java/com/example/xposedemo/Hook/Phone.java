@@ -144,12 +144,11 @@ public class Phone  {
 
     public void Telephony(XC_LoadPackage.LoadPackageParam loadPkgParam) {
 
-        contexts = new Context[1];
+     /*   contexts = new Context[1];
         XposedHelpers.findAndHookMethod(Application.class, "attach", Context.class, new XC_MethodHook() {
             @Override
             protected void afterHookedMethod(MethodHookParam param) throws Throwable {
                 Log.d(TAG, "afterHookedMethod: getContext-run");
-
                 super.afterHookedMethod( param );
                 contexts[0] = (Context) param.args[0];
                 mapDevice=new HashMap<>();
@@ -159,7 +158,7 @@ public class Phone  {
                 mapDevice.put( "tel", hello );
 
             }
-        });
+        });*/
 
         Log.d(TAG, "Telephony: " );
         String TelePhone = "android.telephony.TelephonyManager";
@@ -201,9 +200,10 @@ public class Phone  {
 //        Log.d(TAG, "Telephony: jsondate="+tmp );
 
         jsonStr=Utils.readFileToString(  HookShare.PATH_DEVICE_PHONE_DATA );
-//        if ( jsonStr==null ){
-//            return;
-//        }
+        Log.d(TAG, "Telephony: json="+ jsonStr);
+        if ( jsonStr==null||jsonStr.equals("") ){
+            return;
+        }
 
         jsonObjectPara = JSONObject.parseObject( jsonStr );
         //hookBuild();
@@ -291,7 +291,7 @@ public class Phone  {
 //                        configuration.navigationHidden=2;
 //                        configuration.touchscreen=3;
                         //  Log.d(TAG, "HookTelephony="+methodNamelist.toString() );
-                        Log.d(TAG, "setHookValue: " + "getConfiguration" + "-result=" + param.getResult().toString());
+                        //Log.d(TAG, "setHookValue: " + "getConfiguration" + "-result=" + param.getResult().toString());
                         param.setResult(configuration);
                     }
 
@@ -300,17 +300,56 @@ public class Phone  {
 
         HookTelephony(android.telephony.TelephonyManager.class.getName(),loadPkgParam,  "getPhoneType" , TelephonyManager.PHONE_TYPE_GSM );
         HookTelephony(android.telephony.TelephonyManager.class.getName(),loadPkgParam,  "getNetworkType" , TelephonyManager.NETWORK_TYPE_HSPAP);
-        HookTelephony(android.telephony.TelephonyManager.class.getName(),loadPkgParam,  "getSimState" , TelephonyManager.SIM_STATE_READY);
+        //HookTelephony(android.telephony.TelephonyManager.class.getName(),loadPkgParam,  "getSimState" , TelephonyManager.SIM_STATE_READY);
+
+        //HookTelephony(android.telephony.TelephonyManager.class.getName(),loadPkgParam,  "getSimStateIncludingLoaded" , TelephonyManager.SIM_STATE_READY);
+        //com.android.internal.telephony.ISub
+
         HookTelephony(android.telephony.TelephonyManager.class.getName(),loadPkgParam,  "hasIccCard" ,  true );
 
-        String fucName="getDeviceSoftwareVersion";
-/*        fucName="getDeviceId";
+        //simstate
+        XposedHelpers.findAndHookMethod("android.telephony.SubscriptionManager"
+                , loadPkgParam.classLoader,
+                "getSimStateForSlotIndex", int.class, new XC_MethodHook() {
+
+            @Override
+            protected void afterHookedMethod(MethodHookParam param) throws Throwable {
+                super.afterHookedMethod(param);
+                int ret = (int) param.args[0];
+                param.setResult(10);
+                Log.d(TAG, "afterHookedMethod: " +
+                        "getSimStateForSlotIndex para="+ret );
+                Log.d(TAG,
+                        "afterHookedMethod: getSimStateForSlotIndex result="+param.getResult() );
+
+            }
+        });
+
+
+        //carrierNameId
+      /*  XposedHelpers.findAndHookMethod(
+                "com.android.phone.PhoneInterfaceManager"
+                , loadPkgParam.classLoader,
+                "getSubscriptionCarrierName",int.class,
+                new XC_MethodHook() {
+
+                    @Override
+                    protected void afterHookedMethod(MethodHookParam param) throws Throwable {
+                        super.afterHookedMethod(param);
+                        //int ret = (int) param.args[0];
+                        Log.d(TAG,
+                                "afterHookedMethod: getSubscriptionCarrierName result="+param.getResult() );
+
+                    }
+                });*/
+
+        //package
+
+   /*     String fucName="getDeviceSoftwareVersion";
         HookTelephony(TelePhone, loadPkgParam, fucName,
                 jsonObjectPara.getString( fucName )  );  //返系统版本*/
 
-        HookTelephony(TelePhone, loadPkgParam, fucName,
-                jsonObjectPara.getString( fucName )  );  //返系统版本
-        
+        String fucName;
         fucName="getSubscriberId";          //460017932859596 imsi
         HookTelephony(TelePhone, loadPkgParam, fucName,
                 jsonObjectPara.getString( fucName )  );
@@ -515,7 +554,7 @@ public class Phone  {
 
                             if(null!=value&&""!=value){
                                 param.setResult(value);
-                                Log.d(TAG, "setHookValue:"+funcName+"-result="+param.getResult().toString()+"set-value="+value   );
+                                Log.d(TAG, "setHookValue:HookTelephony"+funcName+"-result="+param.getResult().toString()+"set-value="+value   );
                             }
                                     Log.d(TAG, "afterHookedMethod: device=3"+value+"-functionName="+funcName );
 
