@@ -10,8 +10,14 @@ import com.example.xposedemo.utils.MyUi;
 public class ScriptControl {
 
     public static void setVolDown(){
-      MyFile.execCmdsforResult( new String[]{ "sendevent /dev/input/event2 1 114 1","sendevent /dev/input/event2 0 0 0","sendevent /dev/input/event2 1 114 0",
+        MyFile.execCmdsforResult( new String[]{ "sendevent /dev/input/event2 1 114 1","sendevent /dev/input/event2 0 0 0","sendevent /dev/input/event2 1 114 0",
                 "sendevent /dev/input/event2 0 0 0" } );
+
+        MyFile.execCmdsforResult( new String[]{ "sendevent /dev/input/event4 1 114 1","sendevent /dev/input/event4 0 0 0","sendevent /dev/input/event4 1 114 0",
+                "sendevent /dev/input/event4 0 0 0" } );
+
+        MyFile.execCmdsforResult( new String[]{ "sendevent /dev/input/event0 1 114 1","sendevent /dev/input/event0 0 0 0","sendevent /dev/input/event0 1 114 0",
+                "sendevent /dev/input/event0 0 0 0" } );
     }
 
 

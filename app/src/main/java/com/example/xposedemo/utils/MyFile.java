@@ -145,9 +145,6 @@ public class MyFile {
             throw new RuntimeException(e);
         }
         return text;
-
-
-
     }
 
 
@@ -242,7 +239,8 @@ public class MyFile {
      * @param FILE_IN txt路径
      * @return  读出的string
      */
-    public static String readFileToString ( String FILE_IN ) {
+    public static String readFileToString ( String FILE_IN )   {
+
         String str="";
         File file=new File( FILE_IN );
 

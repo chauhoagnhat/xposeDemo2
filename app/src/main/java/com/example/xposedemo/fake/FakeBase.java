@@ -70,7 +70,6 @@ public class FakeBase {
         return baseInfo;
 
     }
-
     public static BaseInfo getInstance(){
 
         BaseInfo baseInfo = new BaseInfo();
@@ -173,8 +172,13 @@ public class FakeBase {
 
         Log.d(TAG, "randomDevice: sdknum,sdkver="+sdkNum+","+sdkVer );
 
-        String fingerprint=brand+"/"+device+"/"+device+":"+sdkVer+"/"+display+"/"+Ut.r_num_n(7,0,9)
-                +":user/release-keys";
+        List<String> listFinger= MyFile.readAssetsLines(context,"finger.txt");
+        int n=Ut.r_(0,listFinger.size()-1);
+        String fingerprint=listFinger.get(n);
+//        String fingerprint=brand+"/"+device+"/"+device+":"+sdkVer+"/"+display+"/"+Ut.r_num_n(7,0,9)
+//                +":user/release-keys";
+
+
         Log.d(TAG, "randomDevice: fingerprint"+fingerprint);
         //baseInfo.setFingerprint("google/sailfish/sailfish:8.1.0/OPM4.171019.021.P1/4820305:user/release-keys");
         baseInfo.setFingerprint(fingerprint);
@@ -200,6 +204,7 @@ public class FakeBase {
         baseInfo.setBootloader( bootLoader );
         int num2=Ut.r_(1,3);
         int num1=Ut.r_(1,4);
+
         String host=Ut.rLetterN(num1)+brand+Ut.rLetterN(num2);
         Log.d(TAG, "randomDevice: host="+host);
         //baseInfo.setHost("wphs7.hot.corp.google.com");

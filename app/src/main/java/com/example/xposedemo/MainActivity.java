@@ -22,8 +22,10 @@ import android.net.wifi.WifiManager;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
+import android.os.Looper;
 import android.os.SystemClock;
 import android.provider.ContactsContract;
+import android.provider.Settings;
 import android.telecom.TelecomManager;
 import android.telephony.TelephonyManager;
 import android.util.JsonReader;
@@ -85,6 +87,8 @@ public class MainActivity extends AppCompatActivity {
     private Context appContext = null;
     private MainActivityData mainActivityData = null;
     public TextView logTextview;
+    private EditText et_scriptPackageName;
+    private Switch sw_scriptBootedRun;
 
     @RequiresApi(api = Build.VERSION_CODES.P)
     @Override
@@ -95,51 +99,168 @@ public class MainActivity extends AppCompatActivity {
 
         logTextview = (TextView) findViewById(R.id.tv_log);
         logTextview.setText("version-1216c");
-
-
+        init_findViewById();
 
         testPhone();
-
-        //FakeBase.randomDevice( getApplicationContext() );
-        //startWatchService();
+        Log.d(TAG, "onCreate: finger"+Build.FINGERPRINT );
 
         loadUiSetting();
         //appContext=getApplicationContext();
         //new HookShare();
         mainActivityDataInit();
 
+ //       ScriptControl.setVolDown();
 //        MyOpenHelper myOpenHelper=new MyOpenHelper( getApplicationContext() );
 //        myOpenHelper.getWritableDatabase();
       //  testHook();
 
-
 //        Intent mIntent = new Intent(Intent.ACTION_MAIN, null);
 //        Log.d(TAG, "onCreate: isInstance" + Intent.class.isInstance( mIntent ));
 //        mIntent.addCategory(Intent.CATEGORY_LAUNCHER);
-        assertInit();
 
-        viewById = findViewById(R.id.textView);
+        assertInit();
+        viewById = findViewById( R.id.textView );
         viewById.setText("no data");
         //setSelectedPackges();
-        //testHook();
+        testHook();
         //deviceLog();
         ui();
 
         // String jsonStr= Utils.readFileToString(Environment.getExternalStorageDirectory ()+"/device.txt");
-        String jsonStr = Utils.readFileToString(HookShare.pathDeviceJson);
+//        String jsonStr = Utils.readFileToString(HookShare.pathDeviceJson);
+//        if (jsonStr != "" && jsonStr != null) {
+//            JSONObject jsonObjectPara;
+//            Log.d(TAG, "onCreate: jsonStr=" + jsonStr);
+//            Map<String, String> map = JSONObject.parseObject(jsonStr,
+//                    new TypeReference<Map<String, String>>() {
+//                    });
+//            string = Utils.join_map2str(map, "\r\n");
+//            Log.d(TAG, "onCreate: mapStr=" + string);
+//            viewById.setText(string);
+//        }
+//        Log.d(TAG, "onCreate: run finish");
+        boolStartScript();
+        //scriptRun(getApplicationContext());
 
-        if (jsonStr != "" && jsonStr != null) {
-            JSONObject jsonObjectPara;
-            Log.d(TAG, "onCreate: jsonStr=" + jsonStr);
-            Map<String, String> map = JSONObject.parseObject(jsonStr,
-                    new TypeReference<Map<String, String>>() {
-                    });
-            string = Utils.join_map2str(map, "\r\n");
-            Log.d(TAG, "onCreate: mapStr=" + string);
-            viewById.setText(string);
+    }
+
+    public void init_findViewById(){
+        et_scriptPackageName=
+                (EditText)findViewById(R.id.et_scriptPackageName) ;
+        sw_scriptBootedRun=
+                (Switch)findViewById(R.id.sw_scriptBootedRun);
+    }
+
+    public void boolStartScript(){
+       if( sw_scriptBootedRun.isChecked() ){
+           SharedPreferences sharedPreferences=context.getSharedPreferences(
+                   HookShare.BootBroadcastReceiver ,Context.MODE_PRIVATE);
+           int state= sharedPreferences.getInt( HookShare.BootBroadcastReceiverState,0 );
+           if (state==HookShare.BootBroadcastReceiverBooted ){
+               SharedPreferences.Editor editor=sharedPreferences.edit();
+               editor.putInt(HookShare.BootBroadcastReceiverState
+                       ,HookShare.BootBroadcastReceiverDefault);
+               editor.commit();
+               scriptRun( this, et_scriptPackageName.getText().toString() );
+           }
+       }
+
+    }
+
+    public void  scriptRun(final Context context, final String packageName ){
+        Toast.makeText( context,"检测脚本是否运行",Toast.LENGTH_LONG );
+        //这里模拟后台操作
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+
+                synchronized ( this ){
+                    Looper.prepare();
+                    Log.d(TAG, "run: loop");
+                    MyFile.fileWriterTxt( HookShare.PATH_SCRIPT_RUNNING,"0" );
+                    try {
+                        Thread.sleep(10*1000);
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
+                    }
+                    String tp= MyFile.readFileToString(HookShare.PATH_SCRIPT_RUNNING);
+                    if (Integer.parseInt(tp)!=1){
+                        for (int i=0;i<4;i++) {
+                            boolean boolSuc=false;
+
+                            try {
+                                Log.d(TAG, "run: stop-app"+i);
+                                Ut.stopAppByForce(context,packageName);
+                                Ut.stopAppByForce(context,"com.tunnelworkshop.postern");
+
+                                Thread.sleep(1000);
+                                Ut.startApplicationWithPackageName("com.apple", context);
+
+                                for (int j=0;j<6;j++){
+
+                                    Thread.sleep(8000);
+                                    ScriptControl.setVolDown();
+                                    Log.d(TAG, "run: set vol down"+j);
+                                    Thread.sleep(6000);
+                                    tp = MyFile.readFileToString(HookShare.PATH_SCRIPT_RUNNING);
+
+                                    if (Integer.parseInt(tp) == 1) {
+
+                                        boolSuc=true;
+                                        Toast.makeText(context, "启动成功", Toast.LENGTH_SHORT);
+                                        Log.d(TAG, "run: 启动成功");
+
+                                        //再次确认启动成功
+                                        MyFile.fileWriterTxt( HookShare.PATH_SCRIPT_RUNNING,"0" );
+                                        Thread.sleep(10000);
+                                        tp = MyFile.readFileToString(HookShare.PATH_SCRIPT_RUNNING);
+                                        if (Integer.parseInt(tp) == 1) {
+                                            Log.d(TAG, "run: 再次确认启动成功");
+                                            break;
+                                        }else {
+                                            Log.d(TAG, "run: 再次确认启动失败");
+                                            boolSuc=false;
+                                        }
+
+                                    }else{
+                                        Log.d(TAG, "run: 判断脚本失败 readtxt="+Integer.parseInt(tp) );
+                                    }
+
+
+                                }
+                            } catch (InterruptedException e) {
+                                e.printStackTrace();
+                            }
+                            if (boolSuc)
+                                break;
+//                            if (!getJsonWatch()) {
+//                                Log.d(TAG, "run: not need watch was set");
+//                                break;
+//                            }
+                        }
+
+                    }else {
+                        Log.d(TAG, "run: 脚本已启动无需启动");
+                    }
+
+                    Looper.loop ();
+                }
+
+            }
+        }).start();
+
+    }
+
+    public boolean getJsonWatch(){
+        String uiJson=MyFile.readFileToString( HookShare.PATH_UI_SETTING );
+        JSONObject jsonObject=null;
+        Log.d(TAG, "getJsonWatch");
+        if (uiJson!=""){
+            jsonObject= JSON.parseObject(uiJson);
+            if (jsonObject.containsKey("sw_script_watch"))
+                return jsonObject.getBoolean ("sw_script_watch") ;
         }
-        Log.d(TAG, "onCreate: run finish");
-
+        return false;
     }
 
     public void assertInit(){
@@ -157,7 +278,37 @@ public class MainActivity extends AppCompatActivity {
             );
         }
 
+
+//        MyFile.execCmdsforResult(
+//                new String[]{"chmod 666 /data"
+//
+//                }
+//        );
+//
+//
+//
+/*List aa=MyFile.execCmdsforResult( new String[]{
+        "cat /data/local/tmp/nk/mccmncJsonData"
+} );
+        for ( Object s :
+           aa  ) {
+            Log.d(TAG, "cat=: "+s  );
+        }*/
+        //Log.d(TAG, "cat="+aa.get(0)  );
+
+//        MyFile.execCmdsforResult(
+//                new String[]{"chmod 666 /data/local/tmp"
+//
+//                }
+//        );
+
         Log.d(TAG, "assertInit: run");
+        MyFile.execCmdsforResult(
+                new String[]{"chmod 777 "
+                        +HookShare.pathNkFolderData
+                         }
+        );
+
 
     Ut.copyAssetsFile(context,
                 "cpuinfo", "/sdcard/cpuinfo");
@@ -174,8 +325,10 @@ public class MainActivity extends AppCompatActivity {
                + HookShare.pathNkFolderData
                +"/mccmncJsonData" ;
 
+
+
         MyFile.execCmdsforResult(
-                new String[]{ command,"chmod 666 "
+                new String[]{ command,"chmod 777 "
                   +HookShare.pathNkFolderData
                         +"/mccmncJsonData"  }
                 );
@@ -193,14 +346,14 @@ public class MainActivity extends AppCompatActivity {
                 +HookShare.PATH_DEVICE_PHONE
                 +" "+HookShare.PATH_DEVICE_PHONE_DATA;
 
-        MyFile.execCmdsforResult(
-                new String[]{ command,"chmod 666 "
-                        +HookShare.PATH_DEVICE_PHONE_DATA
-                }
-        );
-
-
-
+        File fileData=new File(HookShare.PATH_DEVICE_PHONE_DATA);
+        if (!fileData.exists()){
+            MyFile.execCmdsforResult(
+                    new String[]{ command,"chmod 666 "
+                            +HookShare.PATH_DEVICE_PHONE_DATA
+                    }
+            );
+        }
     }
 
     public void permissionInit(){
@@ -512,15 +665,23 @@ public class MainActivity extends AppCompatActivity {
             //if (jsonObject.containsKey( "et_path" ));
             jsonObject= setUiDefault( jsonObject,"et_path","/sdcard/Download" );
             jsonObject= setUiDefault( jsonObject,"sw_script_watch",false );
+            jsonObject= setUiDefault( jsonObject,"sw_scriptBootedRun",true );
+            jsonObject= setUiDefault( jsonObject,"et_scriptPackageName","com.apple" );
         }else
         {
             //defult value
             jsonObject=new JSONObject();
             jsonObject.put( "et_path","/sdcard/Download" );
             jsonObject.put( "sw_script_watch", false );
+            jsonObject.put( "sw_scriptBootedRun", true );
+            jsonObject.put( "et_scriptPackageName", "com.apple" );
         }
+
         et_path.setText( jsonObject.get( "et_path" ).toString() )  ;
+        et_scriptPackageName.setText( jsonObject.get( "et_scriptPackageName" ).toString() )  ;
+        sw_scriptBootedRun.setChecked( jsonObject.getBoolean("sw_scriptBootedRun") );
         sw_script_watch.setChecked( jsonObject.getBoolean( "sw_script_watch" )  );
+
 //        MyFile.fileWriterTxt( HookShare.PATH_UI_SETTING,jsonObject.toJSONString() );
 
     }
@@ -535,10 +696,15 @@ public class MainActivity extends AppCompatActivity {
 
         EditText et_path=( EditText )  findViewById( R.id.et_path );
         Switch sw_script_watch = ( Switch ) findViewById( R.id.sw_script_watch );
+        Switch sw_scriptBootedRun=( Switch )findViewById(R.id.sw_scriptBootedRun);
+        EditText et_scriptPackageName=( EditText )findViewById(R.id.et_scriptPackageName);
 
         JSONObject jsonObject=new JSONObject();
         jsonObject.put( "et_path",et_path.getText() );
         jsonObject.put("sw_script_watch", sw_script_watch.isChecked() );
+        jsonObject.put("sw_scriptBootedRun", sw_scriptBootedRun.isChecked() );
+        jsonObject.put("et_scriptPackageName", et_scriptPackageName.getText () );
+
         MyFile.fileWriterTxt( HookShare.PATH_UI_SETTING,jsonObject.toJSONString() );
         logUi("保存完成");
 
@@ -660,13 +826,13 @@ public class MainActivity extends AppCompatActivity {
         );
 
         //测试获取
-        Button bt_test=(Button) findViewById(R.id.bt_test);
+ /*       Button bt_test=(Button) findViewById(R.id.bt_test);
         bt_test.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 MyUi.dialogShow( listDevice.toArray( new String[listDevice.size() ] ),MainActivity.this ) ;
             }
-        });
+        });*/
 
         //
         Button bt_permission=(Button) findViewById(R.id.bt_permission);
@@ -715,6 +881,11 @@ public class MainActivity extends AppCompatActivity {
                 String command = "cp -r -f "+
                         HookShare.pathDeviceJson + " " + HookShare.pathDeviceJsonData;
                 MyFile.execCmdsforResult( new String[]{ command,"chmod 666 "+HookShare.pathDeviceJsonData } );
+
+                 command = "cp -r -f "+
+                        HookShare.pathPackages + " " + HookShare.pathPackagesData;
+                MyFile.execCmdsforResult( new String[]{ command,"chmod 666 "+HookShare.pathPackagesData } );
+
 
                 /*
                 //DeviceWriteDefaultPhone();
@@ -1092,7 +1263,7 @@ public class MainActivity extends AppCompatActivity {
 
         //ro.serialno
         try {
-
+            //Settings.Secure.class, "getString",
             Class cName = Class.forName("android.os.SystemProperties");
             Class[] classArray = new Class[1];
             classArray[0] = String.class;

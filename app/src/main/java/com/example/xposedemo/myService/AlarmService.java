@@ -98,11 +98,11 @@ public class AlarmService extends Service {
 
                             try {
                                Log.d(TAG, "run: stop-app"+i);
-                               Ut.stopAppByForce(context,"com.li");
+                               Ut.stopAppByForce(context,"com.apple");
                                Ut.stopAppByForce(context,"com.tunnelworkshop.postern");
 
                                Thread.sleep(1000);
-                               Ut.startApplicationWithPackageName("com.li", context);
+                               Ut.startApplicationWithPackageName("com.apple", context);
 
                                for (int j=0;j<4;j++){
 

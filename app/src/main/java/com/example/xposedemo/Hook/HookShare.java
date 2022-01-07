@@ -10,6 +10,7 @@ import com.example.xposedemo.utils.MyFile;
 import com.example.xposedemo.utils.Ut;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
+import java.util.List;
 import java.util.Map;
 
 import de.robv.android.xposed.callbacks.XC_LoadPackage;
@@ -19,6 +20,10 @@ public class HookShare {
 
     public final static String pathDataRoot="/data/local/tmp/";
     public final static String sdcardRoot="/sdcard/";
+    public final static String BootBroadcastReceiver="BootBroadcastReceiver";
+    public final static String BootBroadcastReceiverState="state";
+    public final static int BootBroadcastReceiverBooted=1;
+    public final static int BootBroadcastReceiverDefault=0;
 
     public final static String configPhoneCountryCode="configPhoneCountryCode";
     //public final static String configCountry="configPhoneCountryCode";
@@ -78,8 +83,30 @@ public class HookShare {
 
     public static boolean boolSelectedPackages( XC_LoadPackage.LoadPackageParam loadPackageParam ){
 
+        String json=MyFile.readFileToString( pathPackagesData );
+        Log.d(TAG, "boolSelectedPackages: read="
+        +json);
 
-        String json= MyFile.readFileToString( HookShare.pathPackagesData );
+  /*      List aa=MyFile.execCmdsforResult( new String[]{
+                "cat "+HookShare.pathPackagesData
+        } );
+        StringBuilder stringBuilder=new StringBuilder();
+        for ( Object str :
+                aa ) {
+            Log.d(TAG, "Telephony: cat="+str );
+            stringBuilder.append(str);
+        }
+        if ( aa==null){
+            Log.d(TAG, "Telephony: cat= aa=null" );
+            return false;
+        }
+
+        else
+            json=stringBuilder.toString();*/
+
+        Log.d(TAG, "boolSelectedPackages: "+json );
+
+        //json= MyFile.readFileToString( HookShare.pathPackagesData );
         JSONObject jsonObject= JSON.parseObject(json);
         JSONObject jobj2=new JSONObject();
 

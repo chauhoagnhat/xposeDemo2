@@ -48,6 +48,15 @@
                 app:layout_constraintTop_toBottomOf="@+id/bt_new"
                 tools:ignore="MissingConstraints" />-->
 
+
+            <Button
+                android:id="@+id/bt_hookset"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="随机设置"
+                app:layout_constraintTop_toBottomOf="@+id/bt_new"
+                tools:ignore="MissingConstraints" />
+
             <Button
                 android:id="@+id/bt_phoneSet"
                 android:layout_width="wrap_content"
@@ -56,17 +65,18 @@
                 app:layout_constraintTop_toBottomOf="@+id/bt_new"
                 tools:ignore="MissingConstraints" />
 
+
             <Button
                 android:id="@+id/bt_permission"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="打开权限管理" />
 
-            <Button
-                android:id="@+id/bt_test"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="实际获取到参数" />
+<!--            <Button-->
+<!--                android:id="@+id/bt_test"-->
+<!--                android:layout_width="wrap_content"-->
+<!--                android:layout_height="wrap_content"-->
+<!--                android:text="实际获取到参数" />-->
 
         </LinearLayout>
 
@@ -126,30 +136,55 @@
         </LinearLayout>
 
         <LinearLayout
+
             android:layout_width="wrap_content"
             android:layout_height="wrap_content">
+
             <Switch
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="监控脚本运行"
                 android:id="@+id/sw_script_watch">
-
             </Switch>
 
             <Button
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="启动监控"
+                android:height="10dp"
                 android:id="@+id/bt_watch">
-
             </Button>
 
+
         </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="wrap_content"
+        android:layout_height="50dp">
+
+        <Switch
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="开机启动脚本"
+            android:checked="true"
+            android:id="@+id/sw_scriptBootedRun">
+        </Switch>
+
+        <EditText
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="脚本包名"
+            android:text="com.apple"
+            android:id="@+id/et_scriptPackageName"></EditText>
+
+
+    </LinearLayout>
+
 
         <Button
             android:id="@+id/bt_save_ui"
             android:layout_width="match_parent"
-            android:layout_height="37dp"
+            android:layout_height="wrap_content"
             android:text="保存设置">
         </Button>
 
@@ -157,7 +192,6 @@
             android:id="@+id/tv_log"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_gravity="center_vertical"
             android:background="#FF1C1B1B"
             android:text="Log"
             android:textAlignment="center"

@@ -20,6 +20,7 @@ import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import de.robv.android.xposed.XC_MethodHook;
@@ -55,7 +56,6 @@ public class Phone  {
                         super.afterHookedMethod(param);
                         param.setResult(  SharedPref.getintXValue("getType") );
                     }
-                    ;
                 });
     }
 
@@ -167,7 +167,6 @@ public class Phone  {
 //           return;
 //        }
 
-
         //TelePhone="android.telecom.TelephonyManager";
 
       /*  try {
@@ -199,7 +198,31 @@ public class Phone  {
 //        String tmp= Utils.readFileToString( HookShare.PATH_DEVICE_PHONE_DATA );
 //        Log.d(TAG, "Telephony: jsondate="+tmp );
 
-        jsonStr=Utils.readFileToString(  HookShare.PATH_DEVICE_PHONE_DATA );
+//        try {
+//            jsonStr=Utils.readFileToString(  HookShare.PATH_DEVICE_PHONE_DATA );
+//        } catch (Exception e) {
+//
+//            Log.d(TAG, "exception Telephony: readFileToString"+e.toString() );
+//            e.printStackTrace();
+
+        jsonStr=MyFile.readFileToString(HookShare.PATH_DEVICE_PHONE_DATA);
+
+        /*      List aa=MyFile.execCmdsforResult( new String[]{
+                    "cat "+HookShare.PATH_DEVICE_PHONE_DATA
+            } );
+            StringBuilder stringBuilder=new StringBuilder();
+            for ( Object str :
+                    aa ) {
+                Log.d(TAG, "Telephony: cat="+str );
+                stringBuilder.append(str);
+            }
+            if ( aa==null)
+                return;
+            else
+                jsonStr=stringBuilder.toString();*/
+      //  }
+
+
         Log.d(TAG, "Telephony: json="+ jsonStr);
         if ( jsonStr==null||jsonStr.equals("") ){
             return;
