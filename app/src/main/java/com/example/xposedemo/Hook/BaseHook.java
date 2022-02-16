@@ -55,12 +55,13 @@ public class BaseHook {
      */
     private void hookAll(final BaseInfo baseInfo, XC_LoadPackage.LoadPackageParam loadPackageParam) {
 
-        String json= MyFile.readFileToString( HookShare.pathDeviceJson );
+        String json= MyFile.readFileToString( HookShare.pathDeviceJsonData );
         final JSONObject jsonObject= JSON.parseObject  ( json );
 
         hookMethod("android.bluetooth.BluetoothAdapter", loadPackageParam.classLoader,"getAddress", String.valueOf(jsonObject.get("bluemac")) );
         hookMethod("android.bluetooth.BluetoothDevice", loadPackageParam.classLoader,"getAddress", (String)(jsonObject.get("bluemac"))  );
         hookMethod("android.os.Build", loadPackageParam.classLoader,"getRadioVersion", (String) jsonObject.get("radioVersion"));
+
         //修改field值
         try {
             XposedHelpers.findField(Build.class,"BOARD").set(null,jsonObject.get( "board" ) );

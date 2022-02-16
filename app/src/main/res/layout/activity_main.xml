@@ -170,12 +170,22 @@
             android:id="@+id/sw_scriptBootedRun">
         </Switch>
 
+        <Switch
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="修改参数生效"
+            android:checked="false"
+            android:id="@+id/sw_enable_para">
+        </Switch>
+
         <EditText
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:hint="脚本包名"
             android:text="com.apple"
-            android:id="@+id/et_scriptPackageName"></EditText>
+            android:id="@+id/et_scriptPackageName">
+        </EditText>
+
 
 
     </LinearLayout>

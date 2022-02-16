@@ -31,7 +31,6 @@ public class BootBroadcastReceiver extends BroadcastReceiver {
         if(intent.getAction().equals(ACTION_BOOT_COMPLETED)){
 
             // 后边的XXX.class就是要启动的服务
-
             SharedPreferences sharedPreferences=context.getSharedPreferences(
                     HookShare.BootBroadcastReceiver ,Context.MODE_PRIVATE);
             SharedPreferences.Editor editor=sharedPreferences.edit();
@@ -46,6 +45,9 @@ public class BootBroadcastReceiver extends BroadcastReceiver {
             context.startActivity(actIntent);
             Log.d(TAG, "onReceive: 接受到开机广播" );
             Log.v(TAG, "开机自动服务自动启动.....");
+
+
+
             // 启动应用，参数为需要自动启动的应用的包名
  /*           Intent serIntent= new Intent(context,  AlarmService.class);
             serIntent.addFlags( Intent.FLAG_ACTIVITY_NEW_TASK );

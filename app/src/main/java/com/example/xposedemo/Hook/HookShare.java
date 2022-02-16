@@ -16,8 +16,7 @@ import java.util.Map;
 import de.robv.android.xposed.callbacks.XC_LoadPackage;
 
 public class HookShare {
-
-
+    
     public final static String pathDataRoot="/data/local/tmp/";
     public final static String sdcardRoot="/sdcard/";
     public final static String BootBroadcastReceiver="BootBroadcastReceiver";
@@ -35,10 +34,12 @@ public class HookShare {
     public final static String  pathSelectedPackages =sdcardRoot+"nk/selectedPackages.txt";
 
     public final static String pathNkFolderData=pathDataRoot+"nk";
+    public final static String  pathUiSettingData =pathDataRoot+"nk/ui.txt";
     public final static String pathNewDeviceOrderData=pathDataRoot+"nk/run.txt";
     public final static String pathDeviceJsonData=pathDataRoot+"nk/deviceJson.txt";
     public final static String  pathPackagesData =pathDataRoot+"nk/packages.txt";
     public final static String  pathSelectedPackagesData =pathDataRoot+"nk/selectedPackages.txt";
+
 
     private static final String TAG ="HookShare" ;
     public static final String PATH_PHONE_DEVICE = sdcardRoot+"nk/devicePhone.txt";

@@ -5,6 +5,7 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
 
 import android.Manifest;
+import android.app.ActivityManager;
 import android.app.AlertDialog;
 import android.content.ComponentName;
 import android.content.ContentValues;
@@ -65,6 +66,8 @@ import java.io.File;
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.security.SecureRandom;
+import java.security.Security;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
@@ -89,6 +92,7 @@ public class MainActivity extends AppCompatActivity {
     public TextView logTextview;
     private EditText et_scriptPackageName;
     private Switch sw_scriptBootedRun;
+    private Switch sw_enable_para;
 
     @RequiresApi(api = Build.VERSION_CODES.P)
     @Override
@@ -101,14 +105,15 @@ public class MainActivity extends AppCompatActivity {
         logTextview.setText("version-1216c");
         init_findViewById();
 
-        testPhone();
+        //testPhone();
         Log.d(TAG, "onCreate: finger"+Build.FINGERPRINT );
 
         loadUiSetting();
+
         //appContext=getApplicationContext();
         //new HookShare();
         mainActivityDataInit();
-
+        
  //       ScriptControl.setVolDown();
 //        MyOpenHelper myOpenHelper=new MyOpenHelper( getApplicationContext() );
 //        myOpenHelper.getWritableDatabase();
@@ -149,6 +154,8 @@ public class MainActivity extends AppCompatActivity {
                 (EditText)findViewById(R.id.et_scriptPackageName) ;
         sw_scriptBootedRun=
                 (Switch)findViewById(R.id.sw_scriptBootedRun);
+        sw_enable_para=(Switch)findViewById(R.id.sw_enable_para );
+
     }
 
     public void boolStartScript(){
@@ -164,6 +171,21 @@ public class MainActivity extends AppCompatActivity {
                scriptRun( this, et_scriptPackageName.getText().toString() );
            }
        }
+
+    }
+
+    public void stopApp(){
+
+//        ActivityManager am = (ActivityManager)getSystemService(Context.ACTIVITY_SERVICE);
+//
+//        List infos = am.getRunningAppProcesses();
+//        for( ActivityManager.RunningAppProcessInfo info : infos ) {
+//            Log.i("---","aa" );
+//            if("com.test.br2".equals( info.processName )){
+//                Log.i(TAG, info.processName+"---"+info.pid);
+//              //  killProcess( info.pid );
+//                break;
+//            }
 
     }
 
@@ -252,15 +274,17 @@ public class MainActivity extends AppCompatActivity {
     }
 
     public boolean getJsonWatch(){
+
         String uiJson=MyFile.readFileToString( HookShare.PATH_UI_SETTING );
         JSONObject jsonObject=null;
         Log.d(TAG, "getJsonWatch");
         if (uiJson!=""){
             jsonObject= JSON.parseObject(uiJson);
-            if (jsonObject.containsKey("sw_script_watch"))
+            if (jsonObject.containsKey( "sw_script_watch" ) )
                 return jsonObject.getBoolean ("sw_script_watch") ;
         }
         return false;
+
     }
 
     public void assertInit(){
@@ -273,7 +297,7 @@ public class MainActivity extends AppCompatActivity {
         nkForder=new File( HookShare.pathNkFolderData );
         if (! nkForder.exists()){
             Log.d(TAG, "assertInit: 创建data/local/tmp/nk" );
-            MyFile.execCmdsforResult(new String[]{"cd /data/local/tmp"
+            MyFile.execCmdsforResult( new String[]{"cd /data/local/tmp"
             ,"mkdir nk"}
             );
         }
@@ -667,6 +691,7 @@ public class MainActivity extends AppCompatActivity {
             jsonObject= setUiDefault( jsonObject,"sw_script_watch",false );
             jsonObject= setUiDefault( jsonObject,"sw_scriptBootedRun",true );
             jsonObject= setUiDefault( jsonObject,"et_scriptPackageName","com.apple" );
+            jsonObject= setUiDefault( jsonObject,"sw_enable_para",false );
         }else
         {
             //defult value
@@ -675,12 +700,15 @@ public class MainActivity extends AppCompatActivity {
             jsonObject.put( "sw_script_watch", false );
             jsonObject.put( "sw_scriptBootedRun", true );
             jsonObject.put( "et_scriptPackageName", "com.apple" );
+            jsonObject.put( "sw_enable_para", false );
+
         }
 
         et_path.setText( jsonObject.get( "et_path" ).toString() )  ;
         et_scriptPackageName.setText( jsonObject.get( "et_scriptPackageName" ).toString() )  ;
         sw_scriptBootedRun.setChecked( jsonObject.getBoolean("sw_scriptBootedRun") );
         sw_script_watch.setChecked( jsonObject.getBoolean( "sw_script_watch" )  );
+        sw_enable_para.setChecked( jsonObject.getBoolean( "sw_enable_para" )  );
 
 //        MyFile.fileWriterTxt( HookShare.PATH_UI_SETTING,jsonObject.toJSONString() );
 
@@ -704,6 +732,18 @@ public class MainActivity extends AppCompatActivity {
         jsonObject.put("sw_script_watch", sw_script_watch.isChecked() );
         jsonObject.put("sw_scriptBootedRun", sw_scriptBootedRun.isChecked() );
         jsonObject.put("et_scriptPackageName", et_scriptPackageName.getText () );
+        jsonObject.put("sw_enable_para",sw_enable_para.isChecked() );
+
+        String command = "cp -r -f "+
+                HookShare.PATH_UI_SETTING+
+                " "
+                + HookShare.pathUiSettingData;
+
+        MyFile.execCmdsforResult(
+                new String[]{  command,"chmod 777 "
+                        +HookShare.pathUiSettingData
+                          }
+        );
 
         MyFile.fileWriterTxt( HookShare.PATH_UI_SETTING,jsonObject.toJSONString() );
         logUi("保存完成");
@@ -1304,7 +1344,7 @@ public class MainActivity extends AppCompatActivity {
         intent.setData( Uri.parse("package:"+instance.getFunctionPackageName() ) );
         //intent.setFlags(0x10008000);
         intent.setComponent( new ComponentName("com.android.settings","com.android.settings.applications.InstalledAppDetailsTop" )   );
-        startActivity(intent);
+        startActivity( intent );
 
     }
 

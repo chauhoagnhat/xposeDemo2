@@ -5,6 +5,8 @@ import android.app.Application;
 import android.content.Context;
 import android.util.Log;
 
+import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.JSONObject;
 import com.example.xposedemo.Hook.BaseHook;
 import com.example.xposedemo.Hook.CPUHook;
 import com.example.xposedemo.Hook.ContextGet;
@@ -37,13 +39,17 @@ public class HookMain  implements IXposedHookLoadPackage   {
 
         Log.d(TAG, "handleLoadPackage: "+HookShare.boolSelectedPackages(loadPackageParam) );
         if ( HookShare.boolSelectedPackages( loadPackageParam ) ){
-
             //new ContextGet(loadPackageParam);
             new Phone( loadPackageParam  ) ;
             //new CPUHook( loadPackageParam );
-            //new BaseHook( loadPackageParam );
-            new SimpleBaseHook( loadPackageParam );
-            new WIFIHook( loadPackageParam );
+            Log.d(TAG, "handleLoadPackage: ");
+
+            if (getUiChecked( "sw_enable_para" )){
+                Log.d(TAG, "handleLoadPackage: enable BaseHook" );
+                new BaseHook( loadPackageParam );
+            }
+            //new SimpleBaseHook( loadPackageParam );
+            //new WIFIHook( loadPackageParam );
             //new PackagesHook( loadPackageParam );
 
         }
@@ -61,6 +67,20 @@ public class HookMain  implements IXposedHookLoadPackage   {
                 }
             });
         }*/
+
+    }
+
+    public boolean getUiChecked( String key ){
+        String uiJson=MyFile.readFileToString( HookShare.pathUiSettingData );
+        Log.d(TAG, "getUiChecked: "+uiJson);
+        JSONObject jsonObject = null;
+
+        if (uiJson!=""){
+            jsonObject= JSON.parseObject( uiJson );
+            return jsonObject.getBoolean( key  );
+        }else{
+            return false;
+        }
 
     }
 
