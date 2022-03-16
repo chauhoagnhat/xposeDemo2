@@ -18,8 +18,8 @@ import com.example.xposedemo.myService.BootService;
 import com.example.xposedemo.utils.MyFile;
 import com.example.xposedemo.utils.Ut;
 
-public class BootBroadcastReceiver extends BroadcastReceiver {
 
+public class BootBroadcastReceiver extends BroadcastReceiver {
 //    版权声明：本文为CSDN博主「Rick-Lu」的原创文章，遵循CC 4.0 BY-SA版权协议，转载请附上原文出处链接及本声明。
 //    原文链接：https://blog.csdn.net/u010947098/article/details/44862539
 //
@@ -28,12 +28,14 @@ public class BootBroadcastReceiver extends BroadcastReceiver {
 
     @Override
     public void onReceive(Context context, Intent intent) {
+        Log.d( TAG,intent.getAction() );
         if(intent.getAction().equals(ACTION_BOOT_COMPLETED)){
 
             // 后边的XXX.class就是要启动的服务
             SharedPreferences sharedPreferences=context.getSharedPreferences(
                     HookShare.BootBroadcastReceiver ,Context.MODE_PRIVATE);
             SharedPreferences.Editor editor=sharedPreferences.edit();
+
             editor.putInt( HookShare.BootBroadcastReceiverState,
                     HookShare.BootBroadcastReceiverBooted );
             editor.commit();

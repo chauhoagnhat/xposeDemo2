@@ -15,6 +15,7 @@ import androidx.annotation.Nullable;
 
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
+import com.example.xposedemo.Hook.Hook;
 import com.example.xposedemo.Hook.HookShare;
 import com.example.xposedemo.MainActivity;
 import com.example.xposedemo.functionModule.ScriptControl;
@@ -25,7 +26,7 @@ import com.example.xposedemo.utils.Ut;
 
 public class AlarmService extends Service {
 
-    private static final int ONE_Miniute=60*5*1000;
+    private static final int ONE_Miniute=40*1*1000;
     private static final int PENDING_REQUEST=0;
     private static final String TAG = "AlarmService";
 
@@ -85,44 +86,59 @@ public class AlarmService extends Service {
                 synchronized ( this ){
                     Looper.prepare();
                     Log.d(TAG, "run: loop");
+                    Toast.makeText(context,"判断脚本是否运行",Toast.LENGTH_LONG);
                     MyFile.fileWriterTxt( HookShare.PATH_SCRIPT_RUNNING,"0" );
                     try {
                         Thread.sleep(10*1000);
                     } catch (InterruptedException e) {
                         e.printStackTrace();
+                        return;
                     }
+
                     String tp= MyFile.readFileToString(HookShare.PATH_SCRIPT_RUNNING);
                     if (Integer.parseInt(tp)!=1){
                         for (int i=0;i<4;i++) {
                             boolean boolSuc=false;
 
                             try {
+
                                Log.d(TAG, "run: stop-app"+i);
-                               Ut.stopAppByForce(context,"com.apple");
-                               Ut.stopAppByForce(context,"com.tunnelworkshop.postern");
+                               Ut.stopAppByCmd("com.apple");
+                               Ut.stopAppByCmd("com.tunnelworkshop.postern");
+                               Ut.stopAppByCmd(HookShare.packageSurboard);
 
-                               Thread.sleep(1000);
-                               Ut.startApplicationWithPackageName("com.apple", context);
+                                Intent actIntent = new Intent(context.getApplicationContext(), MainActivity.class);
+                                //启动xposedDemo
+                                actIntent.setAction("android.intent.action.MAIN");
+                                actIntent.addCategory("android.intent.category.LAUNCHER");
+                                actIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                                context.startActivity(actIntent);
 
-                               for (int j=0;j<4;j++){
+                                Ut.restartApp ( context,"com.apple" );
+                                Toast.makeText(context,"等待脚本加载10秒",Toast.LENGTH_LONG);
+                               Thread.sleep(8000);
 
-                                   Thread.sleep(8000);
+                               for (int j=0;j<3;j++){
+
                                    ScriptControl.setVolDown();
                                    Log.d(TAG, "run: set vol down"+j);
                                    Thread.sleep(6000);
+
                                    tp = MyFile.readFileToString(HookShare.PATH_SCRIPT_RUNNING);
                                    if (Integer.parseInt(tp) == 1) {
 
                                        boolSuc=true;
-                                       Toast.makeText(context, "启动成功", Toast.LENGTH_SHORT);
+                                       Toast.makeText(context, "启动成功", Toast.LENGTH_SHORT );
                                        Log.d(TAG, "run: 启动成功");
 
                                        //再次确认启动成功
                                        MyFile.fileWriterTxt( HookShare.PATH_SCRIPT_RUNNING,"0" );
                                        Thread.sleep(10000);
-                                       tp = MyFile.readFileToString(HookShare.PATH_SCRIPT_RUNNING);
+                                       tp = MyFile.readFileToString( HookShare.PATH_SCRIPT_RUNNING );
+
                                        if (Integer.parseInt(tp) == 1) {
                                            Log.d(TAG, "run: 再次确认启动成功");
+
                                            break;
                                        }else {
                                            Log.d(TAG, "run: 再次确认启动失败");
@@ -148,6 +164,7 @@ public class AlarmService extends Service {
                     }
 
                     Looper.loop ();
+
                 }
 
             }

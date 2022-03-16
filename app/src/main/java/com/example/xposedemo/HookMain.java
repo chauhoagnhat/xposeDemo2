@@ -44,10 +44,11 @@ public class HookMain  implements IXposedHookLoadPackage   {
             //new CPUHook( loadPackageParam );
             Log.d(TAG, "handleLoadPackage: ");
 
-            if (getUiChecked( "sw_enable_para" )){
+            if ( getUiChecked( "sw_enable_para" ) ){
                 Log.d(TAG, "handleLoadPackage: enable BaseHook" );
                 new BaseHook( loadPackageParam );
             }
+
             //new SimpleBaseHook( loadPackageParam );
             //new WIFIHook( loadPackageParam );
             //new PackagesHook( loadPackageParam );

@@ -31,6 +31,7 @@ import android.telecom.TelecomManager;
 import android.telephony.TelephonyManager;
 import android.util.JsonReader;
 import android.util.Log;
+import android.view.KeyEvent;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
@@ -53,6 +54,7 @@ import com.example.xposedemo.fake.FakePackage;
 import com.example.xposedemo.functionModule.DataBack;
 import com.example.xposedemo.MyInterface.DialogCallBack;
 import com.example.xposedemo.functionModule.ScriptControl;
+import com.example.xposedemo.myBroadcast.VolumeChangeObserver;
 import com.example.xposedemo.myService.AlarmService;
 import com.example.xposedemo.utils.MyFile;
 import com.example.xposedemo.utils.MyUi;
@@ -71,6 +73,7 @@ import java.security.Security;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -102,71 +105,81 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
 
         logTextview = (TextView) findViewById(R.id.tv_log);
-        logTextview.setText("version-1216c");
+        logTextview.setText("version-20220308");
         init_findViewById();
 
         //testPhone();
         Log.d(TAG, "onCreate: finger"+Build.FINGERPRINT );
-
         loadUiSetting();
 
-        //appContext=getApplicationContext();
-        //new HookShare();
+        new VolumeChangeObserver( getApplicationContext() ).registerReceiver();
         mainActivityDataInit();
-        
- //       ScriptControl.setVolDown();
-//        MyOpenHelper myOpenHelper=new MyOpenHelper( getApplicationContext() );
-//        myOpenHelper.getWritableDatabase();
-      //  testHook();
 
-//        Intent mIntent = new Intent(Intent.ACTION_MAIN, null);
-//        Log.d(TAG, "onCreate: isInstance" + Intent.class.isInstance( mIntent ));
-//        mIntent.addCategory(Intent.CATEGORY_LAUNCHER);
+        getLanguages();
 
         assertInit();
         viewById = findViewById( R.id.textView );
         viewById.setText("no data");
         //setSelectedPackges();
         testHook();
-        //deviceLog();
         ui();
 
-        // String jsonStr= Utils.readFileToString(Environment.getExternalStorageDirectory ()+"/device.txt");
-//        String jsonStr = Utils.readFileToString(HookShare.pathDeviceJson);
-//        if (jsonStr != "" && jsonStr != null) {
-//            JSONObject jsonObjectPara;
-//            Log.d(TAG, "onCreate: jsonStr=" + jsonStr);
-//            Map<String, String> map = JSONObject.parseObject(jsonStr,
-//                    new TypeReference<Map<String, String>>() {
-//                    });
-//            string = Utils.join_map2str(map, "\r\n");
-//            Log.d(TAG, "onCreate: mapStr=" + string);
-//            viewById.setText(string);
-//        }
-//        Log.d(TAG, "onCreate: run finish");
+        MyFile.execCmdsforResult( new String[]{ "am force-stop com.tunnelworkshop.postern" } );
         boolStartScript();
-        //scriptRun(getApplicationContext());
+
 
     }
 
+    @Override
+    public boolean onKeyDown(int keyCode, KeyEvent event) {
+        switch (keyCode) {
+            case KeyEvent.KEYCODE_VOLUME_UP:
+                Log.d(TAG, "onKeyDown: vol-up" );
+                return false;
+            case KeyEvent.KEYCODE_VOLUME_DOWN:
+                //音量键down
+                return false;
+            default:
+                break;
+        }
+        return super.onKeyDown(keyCode, event);
+    }
+    
     public void init_findViewById(){
         et_scriptPackageName=
-                (EditText)findViewById(R.id.et_scriptPackageName) ;
+                (EditText)findViewById( R.id.et_scriptPackageName ) ;
         sw_scriptBootedRun=
-                (Switch)findViewById(R.id.sw_scriptBootedRun);
-        sw_enable_para=(Switch)findViewById(R.id.sw_enable_para );
+                (Switch)findViewById( R.id.sw_scriptBootedRun );
+        sw_enable_para=(Switch)findViewById( R.id.sw_enable_para );
 
     }
+
+
+    private List<String> getLanguages(){
+        List<String> list=new ArrayList<>();
+        Locale[] lg = Locale.getAvailableLocales();
+        for(Locale language:lg){
+            String name=language.getDisplayLanguage();
+            Log.d(TAG, "getLanguages: "+language.toString());
+            //去掉重复的语言
+            if (!list.contains(name)){
+                list.add(name);
+                Log.d(TAG, "getLanguages: " );
+            }
+        }
+        return list;
+    }
+
 
     public void boolStartScript(){
        if( sw_scriptBootedRun.isChecked() ){
            SharedPreferences sharedPreferences=context.getSharedPreferences(
                    HookShare.BootBroadcastReceiver ,Context.MODE_PRIVATE);
            int state= sharedPreferences.getInt( HookShare.BootBroadcastReceiverState,0 );
-           if (state==HookShare.BootBroadcastReceiverBooted ){
+           if (state == HookShare.BootBroadcastReceiverBooted ){
                SharedPreferences.Editor editor=sharedPreferences.edit();
                editor.putInt(HookShare.BootBroadcastReceiverState
-                       ,HookShare.BootBroadcastReceiverDefault);
+                       ,HookShare.BootBroadcastReceiverDefault );
                editor.commit();
                scriptRun( this, et_scriptPackageName.getText().toString() );
            }
@@ -190,6 +203,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     public void  scriptRun(final Context context, final String packageName ){
+
         Toast.makeText( context,"检测脚本是否运行",Toast.LENGTH_LONG );
         //这里模拟后台操作
         new Thread(new Runnable() {
@@ -197,6 +211,7 @@ public class MainActivity extends AppCompatActivity {
             public void run() {
 
                 synchronized ( this ){
+
                     Looper.prepare();
                     Log.d(TAG, "run: loop");
                     MyFile.fileWriterTxt( HookShare.PATH_SCRIPT_RUNNING,"0" );
@@ -205,22 +220,25 @@ public class MainActivity extends AppCompatActivity {
                     } catch (InterruptedException e) {
                         e.printStackTrace();
                     }
+
                     String tp= MyFile.readFileToString(HookShare.PATH_SCRIPT_RUNNING);
                     if (Integer.parseInt(tp)!=1){
                         for (int i=0;i<4;i++) {
-                            boolean boolSuc=false;
 
+                            boolean boolSuc=false;
                             try {
                                 Log.d(TAG, "run: stop-app"+i);
-                                Ut.stopAppByForce(context,packageName);
-                                Ut.stopAppByForce(context,"com.tunnelworkshop.postern");
 
+                                Ut.stopAppByCmd( HookShare.packagePostern );
+                                Ut.stopAppByCmd( HookShare.packageSurboard );
                                 Thread.sleep(1000);
-                                Ut.startApplicationWithPackageName("com.apple", context);
+                                //Ut.startApplicationWithPackageName("com.apple", context);
 
+                                Ut.restartApp( context,packageName );
+
+                                Thread.sleep(8000 );
                                 for (int j=0;j<6;j++){
 
-                                    Thread.sleep(8000);
                                     ScriptControl.setVolDown();
                                     Log.d(TAG, "run: set vol down"+j);
                                     Thread.sleep(6000);
@@ -278,6 +296,7 @@ public class MainActivity extends AppCompatActivity {
         String uiJson=MyFile.readFileToString( HookShare.PATH_UI_SETTING );
         JSONObject jsonObject=null;
         Log.d(TAG, "getJsonWatch");
+
         if (uiJson!=""){
             jsonObject= JSON.parseObject(uiJson);
             if (jsonObject.containsKey( "sw_script_watch" ) )

@@ -23,6 +23,8 @@ public class HookShare {
     public final static String BootBroadcastReceiverState="state";
     public final static int BootBroadcastReceiverBooted=1;
     public final static int BootBroadcastReceiverDefault=0;
+    public final static String packagePostern= "com.tunnelworkshop.postern" ;
+    public final static String packageSurboard="com.getsurfboard";
 
     public final static String configPhoneCountryCode="configPhoneCountryCode";
     //public final static String configCountry="configPhoneCountryCode";
