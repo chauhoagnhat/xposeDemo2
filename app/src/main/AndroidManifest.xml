@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="com.example.xposedemo">
-    <!-- android:sharedUserId="android.uid.system" -->
+
     <application
         android:allowBackup="true"
         android:icon="@mipmap/ic_launcher"
@@ -9,8 +9,9 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
-
-
+        <activity
+            android:name=".Activity_packageShow"
+            android:exported="true" />
         <!-- 是否是xposed模块，xposed根据这个来判断是否是模块 -->
         <activity android:name=".MainActivity">
             <intent-filter>
@@ -18,17 +19,15 @@
 
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
-        </activity>
-        <!-- 模块描述，显示在xposed模块列表那里第二行 -->
-
+        </activity> <!-- 模块描述，显示在xposed模块列表那里第二行 -->
         <activity android:name=".view.ActivityPhone">
             <intent-filter>
-                <action android:name="ActivityPhone"/>
-                <category android:name="android.intent.category.DEFAULT"/>
-                <category android:name="Phone"/>
+                <action android:name="ActivityPhone" />
+
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="Phone" />
             </intent-filter>
         </activity>
-6
 
         <meta-data
             android:name="xposedmodule"
@@ -36,7 +35,6 @@
         <meta-data
             android:name="xposeddescription"
             android:value="This is a Xposed Module Demo" />
-
         <meta-data
             android:name="xposedminversion"
             android:value="82" /> <!-- 添加接收开机启动广播 -->
@@ -44,12 +42,12 @@
             android:name=".MyProvider.MyProvider"
             android:authorities="com.example.xposedemo.MyProvider"
             android:enabled="true"
-            android:exported="true"></provider>
-
+            android:exported="true" />
         <provider
             android:name=".MyProvider.MultiprocessSharedPreferences"
             android:authorities="com.example.xposedemo.provider"
             android:exported="true" />
+
         <receiver android:name=".myBroadcast.BootBroadcastReceiver">
             <intent-filter>
                 <action android:name="android.intent.action.BOOT_COMPLETED" />
@@ -57,7 +55,6 @@
                 <category android:name="android.intent.category.HOME" />
             </intent-filter>
         </receiver>
-
         <receiver android:name=".myBroadcast.AlarmReceive" />
 
         <service android:name=".myService.BootService" />
@@ -69,14 +66,14 @@
 
     <permission
         android:name="scut.carson_ho.Read"
-        android:protectionLevel="normal" />
-    <uses-permission android:name="android.permission.ACCESS_WIFI_STATE" /> <!-- <uses-permission android:name="android.permission.READ_PRIVILEGED_PHONE_STATE" /> -->
+        android:protectionLevel="normal" /> <!-- <uses-permission android:name="android.permission.READ_PRIVILEGED_PHONE_STATE" /> -->
+    <uses-permission android:name="android.permission.ACCESS_WIFI_STATE" />
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
     <uses-permission android:name="android.permission.READ_PRIVILEGED_PHONE_STATE" />
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
     <uses-permission android:name="android.permission.READ_PHONE_STATE" />
-    <uses-permission android:name="android.permission.KILL_BACKGROUND_PROCESSES" />
-    <uses-permission android:name="android.permission.ACCESS_NOTIFICATION_POLICY" /> <!-- 接收开机广播权限 -->
+    <uses-permission android:name="android.permission.KILL_BACKGROUND_PROCESSES" /> <!-- 接收开机广播权限 -->
+    <uses-permission android:name="android.permission.ACCESS_NOTIFICATION_POLICY" />
     <uses-permission android:name="android.permission.CHANGE_WIFI_STATE" />
 
     <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />

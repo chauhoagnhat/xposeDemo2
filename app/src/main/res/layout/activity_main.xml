@@ -21,13 +21,11 @@
             android:layout_height="wrap_content"
             android:text="一键新机" />
 
-
         <Button
             android:id="@+id/bt_package"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:text="参数生效应用列表" />
-
 
         <Button
             android:id="@+id/bt_run_function"
