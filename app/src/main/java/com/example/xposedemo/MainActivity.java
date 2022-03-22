@@ -918,7 +918,9 @@ public class MainActivity extends AppCompatActivity {
                 bt_package.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick( View v ) {
-                        dialogSelectPackageName();
+                        //dialogSelectPackageName();
+                        startActivity( new Intent( "Activity_packageShow"
+                        ));
             }
         });
 

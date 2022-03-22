@@ -18,8 +18,9 @@ public class AppAdapter extends BaseAdapter {
     Context mContext;
     private List<AppInfo> data;
 
-    public AppAdapter(Context context) {
+    public AppAdapter(Context context,List<AppInfo> data) {
         mContext=context;
+        this.data=data;
     }
 
     @Override
