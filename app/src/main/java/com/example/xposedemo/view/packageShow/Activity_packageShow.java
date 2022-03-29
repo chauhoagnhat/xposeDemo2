@@ -2,23 +2,33 @@ package com.example.xposedemo.view.packageShow;
 
 import androidx.appcompat.app.AppCompatActivity;
 
+import android.annotation.SuppressLint;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
+import android.graphics.Color;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ListView;
+import android.widget.TextView;
 import android.widget.Toast;
 
+import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.JSONObject;
+import com.example.xposedemo.Hook.HookShare;
 import com.example.xposedemo.R;
+import com.example.xposedemo.utils.MyFile;
+import com.example.xposedemo.utils.Ut;
 
 import java.util.ArrayList;
 import java.util.List;
 
 public class Activity_packageShow extends AppCompatActivity implements AdapterView.OnItemLongClickListener {
 
+    private static final String TAG = ClassLoader.class.getName();
     private ListView lv_package_show;
     private List<AppInfo> data;
     private AppAdapter adapter;
@@ -41,13 +51,15 @@ public class Activity_packageShow extends AppCompatActivity implements AdapterVi
              * view : 当前行的item视图对象
              * position : 当前行的下标
              */
+            @SuppressLint("WrongConstant")
             @Override
             public void onItemClick(AdapterView<?> parent, View view,
                                     int position, long id) {
                 //提示当前行的应用名称
                 String appName = data.get(position).getAppName();
-                //提示
-                Toast.makeText(Activity_packageShow.this, appName, 0).show();
+
+
+
             }
         });
 
@@ -93,8 +105,40 @@ public class Activity_packageShow extends AppCompatActivity implements AdapterVi
     }
 
     @Override
-    public boolean onItemLongClick(AdapterView<?> parent, View view, int position, long id) {
-        return false;
+    public boolean onItemLongClick(AdapterView<?> parent, View view,
+                                   int position, long id) {
+        //删除当前行
+        //删除当前行的数据
+        //data.remove(position);
+
+        //更新列表
+        //lv_main.setAdapter(adapter);//显示列表, 不会使用缓存的item的视图对象
+
+        //adapter.notifyDataSetChanged();//通知更新列表, 使用全部缓存的item的视图对象
+        //提示
+        //Toast.makeText(Activity_packageShow.this, appName, 0).show();
+        TextView textView=(TextView)view.findViewById( R.id.tv_item_name );
+        Log.d( TAG, "onItemLongClick: run..");
+        String jsonTxt= MyFile.readFileToString(HookShare.pathPackages );
+        JSONObject jsonObject= JSON.parseObject(jsonTxt);
+
+        String key=data.get( position ).getPackageName();
+        if ( jsonObject.getBoolean(key) ){
+                view.setBackgroundColor(Color.WHITE);
+                textView.setTextColor(Color.BLACK);
+                jsonObject.put(key,false);
+
+        }else{
+                jsonObject.put(key,true);
+                view.setBackgroundColor(Color.BLUE);
+                textView.setTextColor(Color.WHITE);
+
+        }
+
+        Ut.fileWriterTxt( HookShare.pathPackages,jsonObject.toJSONString() );
+       adapter.notifyDataSetChanged();
+        return true;
     }
+
 
 }

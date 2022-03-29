@@ -130,6 +130,8 @@ public class MainActivity extends AppCompatActivity {
 
     }
 
+
+
     @Override
     public boolean onKeyDown(int keyCode, KeyEvent event) {
         switch (keyCode) {
@@ -524,11 +526,21 @@ public class MainActivity extends AppCompatActivity {
 
     @Override
     protected void onStop() {
-        Log.d(TAG, "onStop: " );
-        if ( HookShare.boolIsPackageEmpty()!=true )
-         MyUi.dialogShow( new String[]{ "未指定app" },MainActivity.this );
-        super.onStop();
+//        Log.d(TAG, "onStop: " );
+//        //if ( HookShare.boolIsPackageEmpty()!=true )
+//         if (HookShare.returnSelectedPackages()==null)
+//            MyUi.dialogShow( new String[]{ "未指定app" },MainActivity.this );
+           super.onStop();
 
+    }
+
+    @Override
+    protected void onResume() {
+                Log.d(TAG, "onResume: " );
+        //if ( HookShare.boolIsPackageEmpty()!=true )
+         if (HookShare.returnSelectedPackages()==null)
+            MyUi.dialogShow( new String[]{ "未指定app" },MainActivity.this );
+        super.onResume();
     }
 
     private void deviceLog() {
@@ -919,8 +931,11 @@ public class MainActivity extends AppCompatActivity {
                     @Override
                     public void onClick( View v ) {
                         //dialogSelectPackageName();
-                        startActivity( new Intent( "Activity_packageShow"
-                        ));
+                        Intent intent= new Intent( "Activity_packageShow"
+                        );
+                        //intent.putExtra(  )
+                        startActivity( intent );
+
             }
         });
 
@@ -1069,6 +1084,7 @@ public class MainActivity extends AppCompatActivity {
         List<String> android=new ArrayList<>();
         List<String> other=new ArrayList<>();
 
+        //
         for ( String str :
            listStringPackages  ) {
             if(str.indexOf( "com.google." )!=-1)
@@ -1138,7 +1154,6 @@ public class MainActivity extends AppCompatActivity {
             }
             Ut.fileWriterTxt( HookShare.pathPackages ,jsonObject.toJSONString() );}
 
-
         }else {
             Log.d(TAG, "dialogSelectPackageName: read last");
             JSONObject jobjSelectedPackages;
@@ -1165,6 +1180,7 @@ public class MainActivity extends AppCompatActivity {
                     Log.d(TAG, "dialogSelectPackageName: k,v="+string+","+jsonObject.getBoolean( string )  );
                     listBooleanPackages.add ( jsonObject.getBoolean (string) );
                 }
+
             }
 
         }

@@ -3,11 +3,12 @@
     android:layout_height="fill_parent"
     android:orientation="vertical" >
 
+
     <TextView
 
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
-        android:background="#c610ef"
+        android:background="#FF0000FF"
         android:gravity="center"
         android:padding="5dp"
         android:text="全部应用"
