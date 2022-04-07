@@ -29,18 +29,21 @@ public class AppAdapter extends BaseAdapter {
     Context mContext;
     private List<AppInfo> data;
     public JSONObject jobjSelectedPackages;
+    public String pathPackageJsonTxt;
 
     private final static int FIRST_RUN=0;
     //private final  static int firstRunOver=1;
     private static int  runTimes;
 
-    public AppAdapter(Context context,List<AppInfo> data) {
+    public AppAdapter( Context context,List<AppInfo> data,String pathPackageJsonTxt  ) {
+
         mContext=context;
         this.data=data;
+        this.pathPackageJsonTxt=pathPackageJsonTxt;
 
         List<String>listStringPackages;
         List<Boolean> listBooleanPackages=new ArrayList<>();
-        String jsonTxtPackages= MyFile.readFileToString( HookShare.pathPackages );
+        String jsonTxtPackages= MyFile.readFileToString( pathPackageJsonTxt );
         final JSONObject jsonObject;
         //Log.d(TAG, "dialogSelectPackageName: jsonTxtPackages="+jsonTxtPackages );
         Log.d(TAG, "dialogSelectPackageName: constructor run" );
@@ -50,6 +53,7 @@ public class AppAdapter extends BaseAdapter {
         //包名写本地初始化
         if ( jsonTxtPackages==null||jsonTxtPackages.equals("")) {
             {
+
                 Log.d(TAG, "dialogSelectPackageName: first run");
                 jsonObject = new JSONObject();
                 //all packageName option put into listBooleanPackages
@@ -57,7 +61,8 @@ public class AppAdapter extends BaseAdapter {
                     jsonObject.put( appInfo.getPackageName(), false );
                     listBooleanPackages.add( false );
                 }
-                Ut.fileWriterTxt( HookShare.pathPackages, jsonObject.toJSONString() );
+                Ut.fileWriterTxt( pathPackageJsonTxt, jsonObject.toJSONString() );
+
             }
         }else {
             Log.d(TAG, "AppAdapter: get-jobjSelectedPackages" );
@@ -96,19 +101,21 @@ public class AppAdapter extends BaseAdapter {
         }
 
         //2. 获得当前行数据对象
-        AppInfo appInfo = data.get(position);
+        AppInfo appInfo = data.get( position );
         //3. 获得当前行须要更新的子View对象
         ImageView imageView = (ImageView) convertView.findViewById(R.id.iv_item_icon);
         TextView textView = (TextView) convertView.findViewById(R.id.tv_item_name);
         //4. 给视图设置数据
-        imageView.setImageDrawable(appInfo.getIcon());
-        textView.setText(appInfo.getAppName());
+        imageView.setImageDrawable( appInfo.getIcon() );
+        textView.setText( appInfo.getAppName() );
         String packageName=appInfo.getPackageName();
         //CheckBox checkBox=(CheckBox)convertView.findViewById( R.id.ck_package );
         Log.d(TAG, "getView: runtime="+runTimes );
-        //if (runTimes==FIRST_RUN){
-            runTimes++;
-            jobjSelectedPackages = HookShare.returnSelectedPackages();
+        runTimes++;
+
+        //if (runTimes< data.size() ){
+            //runTimes++;
+            jobjSelectedPackages = HookShare.returnSelectedPackages( pathPackageJsonTxt );
             if (jobjSelectedPackages!=null){
                 if ( jobjSelectedPackages.containsKey( packageName ) ){
                     textView.setTextColor ( Color.WHITE );
@@ -119,11 +126,11 @@ public class AppAdapter extends BaseAdapter {
                     textView.setTextColor ( Color.BLACK );
                     convertView.setBackgroundColor(Color.WHITE);
                 }
-            }
-
-        //}
+          //  }
+      }
 
         //返回convertView
         return convertView;
+
     }
 }

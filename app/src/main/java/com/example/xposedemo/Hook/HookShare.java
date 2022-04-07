@@ -25,6 +25,10 @@ public class HookShare {
     public final static int BootBroadcastReceiverDefault=0;
     public final static String packagePostern= "com.tunnelworkshop.postern" ;
     public final static String packageSurboard="com.getsurfboard";
+    public final static String intentExtraPackageShowPath="intentExtraPackageShowPath";
+
+    //public final static String intentExtraKey="intentExtraKey";
+
 
     public final static String configPhoneCountryCode="configPhoneCountryCode";
     //public final static String configCountry="configPhoneCountryCode";
@@ -145,9 +149,9 @@ public class HookShare {
      * 返回已经选择的包名
      * @return
      */
-    public static JSONObject returnSelectedPackages( ) {
+    public static JSONObject returnSelectedPackages( String pathPackages ) {
 
-        String json= Ut.readFileToString( HookShare.pathPackages );
+        String json= Ut.readFileToString( pathPackages );
         JSONObject jsonObject= JSON.parseObject(json);
         JSONObject jobj2=null;
 

@@ -498,6 +498,7 @@ public class MainActivity extends AppCompatActivity {
             }
         }
         Ut.fileWriterTxt( HookShare.pathSelectedPackages,jobj2.toJSONString() );
+
     }
 
     public void Permission() {
@@ -538,7 +539,7 @@ public class MainActivity extends AppCompatActivity {
     protected void onResume() {
                 Log.d(TAG, "onResume: " );
         //if ( HookShare.boolIsPackageEmpty()!=true )
-         if (HookShare.returnSelectedPackages()==null)
+         if (HookShare.returnSelectedPackages( HookShare.pathPackages )==null)
             MyUi.dialogShow( new String[]{ "未指定app" },MainActivity.this );
         super.onResume();
     }
@@ -891,7 +892,14 @@ public class MainActivity extends AppCompatActivity {
                 new View.OnClickListener() {
                     @Override
                     public void onClick( View v ) {
-                        dialogShowFunctionPackage();
+                       // dialogShowFunctionPackage();
+                        //HookShare.PATH_FUNCTION_PACKAGES
+                        Intent intent= new Intent( "Activity_packageShow"
+                        );
+                        //intent.putExtra(  )
+                        intent.putExtra( HookShare.intentExtraPackageShowPath, HookShare.PATH_FUNCTION_PACKAGES );
+                        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                        startActivity( intent );
                     }
                 }
         );
@@ -934,6 +942,7 @@ public class MainActivity extends AppCompatActivity {
                         Intent intent= new Intent( "Activity_packageShow"
                         );
                         //intent.putExtra(  )
+                        intent.putExtra( HookShare.intentExtraPackageShowPath, HookShare.pathPackages );
                         startActivity( intent );
 
             }
@@ -1041,8 +1050,6 @@ public class MainActivity extends AppCompatActivity {
                 //hookPackages
 //                FakePackage fakePackage = FakePackage.getInstance(getApplicationContext());
 //                fakePackage.fakePackages ();
-
-
                 dialogShowDevice();
 
 
@@ -1161,7 +1168,7 @@ public class MainActivity extends AppCompatActivity {
             //判断实际应用列表和上次读取设置的差值,说明可能有安装卸载的变化
             if ( jsonObject.size()!=listStringPackages.size() ){
                 //获取上次选中的包名,然后将列表item 对应显示出来
-                 jobjSelectedPackages=HookShare.returnSelectedPackages();
+                 jobjSelectedPackages=HookShare.returnSelectedPackages( HookShare.pathPackages );
                 for ( String string :
                         listStringPackages  ) {
                     //listBooleanPackages.add ( false );

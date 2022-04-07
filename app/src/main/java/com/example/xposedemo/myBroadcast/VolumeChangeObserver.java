@@ -94,12 +94,23 @@ public class VolumeChangeObserver {
 
         @Override
         public void onReceive(Context context, Intent intent) {
+
             //媒体音量改变才通知
             Log.d(TAG, "onReceive: "+intent.getAction() );
             AudioManager am=(AudioManager)context.getSystemService(Context.AUDIO_SERVICE);
-            am.adjustStreamVolume (AudioManager.STREAM_MUSIC, AudioManager.ADJUST_LOWER, AudioManager.FLAG_SHOW_UI);
-            am.adjustStreamVolume (AudioManager.STREAM_MUSIC, AudioManager.ADJUST_LOWER, AudioManager.FLAG_SHOW_UI);
 
+            int max = am.getStreamMaxVolume( AudioManager.STREAM_MUSIC );
+            int current = am.getStreamVolume( AudioManager.STREAM_MUSIC );
+
+            Log.d(TAG, "onReceive: max="+max);
+            Log.d(TAG, "onReceive: current="+current );
+
+            if (current>=max-2){
+                am.adjustStreamVolume (AudioManager.STREAM_MUSIC, AudioManager.ADJUST_LOWER, AudioManager.FLAG_SHOW_UI);
+                am.adjustStreamVolume (AudioManager.STREAM_MUSIC, AudioManager.ADJUST_LOWER, AudioManager.FLAG_SHOW_UI);
+            }
+
+            Log.d(TAG, "onReceive: intent.getAction="+intent.getAction() );
             if (VOLUME_CHANGED_ACTION.equals(intent.getAction())
                     && (intent.getIntExtra(EXTRA_VOLUME_STREAM_TYPE, -1) == AudioManager.STREAM_MUSIC)) {
                 VolumeChangeObserver observer = mObserverWeakReference.get();

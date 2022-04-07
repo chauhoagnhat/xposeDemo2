@@ -28,19 +28,25 @@ import java.util.List;
 
 public class Activity_packageShow extends AppCompatActivity implements AdapterView.OnItemLongClickListener {
 
-    private static final String TAG = ClassLoader.class.getName();
+    private static final String TAG = Activity_packageShow.class.getName();
     private ListView lv_package_show;
     private List<AppInfo> data;
     private AppAdapter adapter;
+    public String pathExtra;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
         setContentView(R.layout.activity_package_show);
+
         //初始化成员变量
         lv_package_show = (ListView) findViewById( R.id.lv_package_show );
         data = getAllAppInfos();
-        adapter = new AppAdapter( Activity_packageShow.this,data );
+
+        pathExtra = getIntent().getStringExtra( HookShare.intentExtraPackageShowPath );
+        adapter = new AppAdapter( Activity_packageShow.this, data, pathExtra);
+        Log.d(TAG, "onCreate: run-extra="+pathExtra  );
         //显示列表
         lv_package_show.setAdapter(adapter);
 
@@ -56,18 +62,47 @@ public class Activity_packageShow extends AppCompatActivity implements AdapterVi
             public void onItemClick(AdapterView<?> parent, View view,
                                     int position, long id) {
                 //提示当前行的应用名称
-                String appName = data.get(position).getAppName();
+                //String appName = data.get(position).getAppName();
+                TextView textView=(TextView)view.findViewById( R.id.tv_item_name );
+                Log.d( TAG, "setOnItemClickListener: run..");
+                String jsonTxt= MyFile.readFileToString( pathExtra );
+                JSONObject jsonObject= JSON.parseObject(jsonTxt);
 
+                String key=data.get( position ).getPackageName();
+                if ( jsonObject.getBoolean(key) ){
 
+                    Log.d(TAG, "onItemClick: unselected");
+                    view.setBackgroundColor(Color.WHITE);
+                    textView.setTextColor(Color.BLACK);
+                    jsonObject.put(key,false);
 
+                }else{
+
+                    Log.d(TAG, "onItemClick: selected");
+                    jsonObject.put(key,true);
+                    view.setBackgroundColor(Color.BLUE);
+                    textView.setTextColor(Color.WHITE);
+
+                }
+
+                Log.d(TAG, "onItemClick: ="+pathExtra );
+                Ut.fileWriterTxt( pathExtra ,jsonObject.toJSONString() );
+               adapter.notifyDataSetChanged();
+                //return true;
             }
         });
 
         //给LitView设置Item的长按监听
-        lv_package_show.setOnItemLongClickListener(this);
+        lv_package_show.setOnItemLongClickListener( this );
 
     }
 
+    @Override
+    protected void onStop() {
+        Log.d(TAG, "onStop: run");
+        super.onStop();
+        finish();
+    }
 
     /*
      * 获得手机中全部应用信息的列表
@@ -117,27 +152,9 @@ public class Activity_packageShow extends AppCompatActivity implements AdapterVi
         //adapter.notifyDataSetChanged();//通知更新列表, 使用全部缓存的item的视图对象
         //提示
         //Toast.makeText(Activity_packageShow.this, appName, 0).show();
-        TextView textView=(TextView)view.findViewById( R.id.tv_item_name );
-        Log.d( TAG, "onItemLongClick: run..");
-        String jsonTxt= MyFile.readFileToString(HookShare.pathPackages );
-        JSONObject jsonObject= JSON.parseObject(jsonTxt);
 
-        String key=data.get( position ).getPackageName();
-        if ( jsonObject.getBoolean(key) ){
-                view.setBackgroundColor(Color.WHITE);
-                textView.setTextColor(Color.BLACK);
-                jsonObject.put(key,false);
-
-        }else{
-                jsonObject.put(key,true);
-                view.setBackgroundColor(Color.BLUE);
-                textView.setTextColor(Color.WHITE);
-
-        }
-
-        Ut.fileWriterTxt( HookShare.pathPackages,jsonObject.toJSONString() );
-       adapter.notifyDataSetChanged();
         return true;
+
     }
 
 
