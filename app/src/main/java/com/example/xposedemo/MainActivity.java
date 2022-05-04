@@ -96,6 +96,7 @@ public class MainActivity extends AppCompatActivity {
     private EditText et_scriptPackageName;
     private Switch sw_scriptBootedRun;
     private Switch sw_enable_para;
+    public  static VolumeChangeObserver volumeChangeObserver;
 
     @RequiresApi(api = Build.VERSION_CODES.P)
     @Override
@@ -112,41 +113,46 @@ public class MainActivity extends AppCompatActivity {
         Log.d(TAG, "onCreate: finger"+Build.FINGERPRINT );
         loadUiSetting();
 
-        new VolumeChangeObserver( getApplicationContext() ).registerReceiver();
+        volumeChangeObserver=
+                new VolumeChangeObserver( getApplicationContext() ) ;
+        volumeChangeObserver.registerReceiver();
         mainActivityDataInit();
-
-        getLanguages();
-
+        //getLanguages();
         assertInit();
+
         viewById = findViewById( R.id.textView );
         viewById.setText("no data");
         //setSelectedPackges();
-        testHook();
+        //testHook();
         ui();
-
         MyFile.execCmdsforResult( new String[]{ "am force-stop com.tunnelworkshop.postern" } );
-        boolStartScript();
 
+        if ( getIntent()
+                .getBooleanExtra( HookShare.mainActivityExtra,false ) ){
+            getIntent().putExtra(HookShare.mainActivityExtra,false);
+            Ut.restartApp( getApplicationContext(),et_scriptPackageName.getText().toString() );
+            Log.d(TAG,"启动app，退出");
+            return;
+        }
+
+        startWatchService();
+        //boolStartScript();
 
     }
 
 
 
     @Override
-    public boolean onKeyDown(int keyCode, KeyEvent event) {
-        switch (keyCode) {
-            case KeyEvent.KEYCODE_VOLUME_UP:
-                Log.d(TAG, "onKeyDown: vol-up" );
-                return false;
-            case KeyEvent.KEYCODE_VOLUME_DOWN:
-                //音量键down
-                return false;
-            default:
-                break;
-        }
-        return super.onKeyDown(keyCode, event);
+    protected void onDestroy() {
+        Log.d(TAG, "onDestroy: run");
+        //volumeChangeObserver.unregisterReceiver();
+       // volumeChangeObserver.unregisterReceiver();
+        super.finish();
+        super.onDestroy();
+
+
     }
-    
+
     public void init_findViewById(){
         et_scriptPackageName=
                 (EditText)findViewById( R.id.et_scriptPackageName ) ;
@@ -176,7 +182,7 @@ public class MainActivity extends AppCompatActivity {
     public void boolStartScript(){
        if( sw_scriptBootedRun.isChecked() ){
            SharedPreferences sharedPreferences=context.getSharedPreferences(
-                   HookShare.BootBroadcastReceiver ,Context.MODE_PRIVATE);
+                   HookShare.BootBroadcastReceiver,Context.MODE_PRIVATE);
            int state= sharedPreferences.getInt( HookShare.BootBroadcastReceiverState,0 );
            if (state == HookShare.BootBroadcastReceiverBooted ){
                SharedPreferences.Editor editor=sharedPreferences.edit();
@@ -798,10 +804,23 @@ public class MainActivity extends AppCompatActivity {
     public void startWatchService(){
 
         Context context=getApplicationContext();
-        Intent serIntent= new Intent( context, AlarmService.class);
-        serIntent.addFlags( Intent.FLAG_ACTIVITY_NEW_TASK );
-        context.startService( serIntent );
-        Log.v(TAG, "启动服务.....");
+        if ( Ut.isServiceRunning( context,AlarmService.class.getName())==false ){
+            Log.d(TAG, "startWatchService: AlarmService not run.start..");
+            Intent serIntent= new Intent( context, AlarmService.class);
+            serIntent.addFlags( Intent.FLAG_ACTIVITY_NEW_TASK );
+            serIntent.addFlags( Intent.FLAG_ACTIVITY_CLEAR_TASK );
+            if(Build.VERSION.SDK_INT>=Build.VERSION_CODES.O){
+                Log.d(TAG, "startWatchService: startForegroundService" );
+                context.startForegroundService(serIntent);
+            }else{
+                context.startService(serIntent);
+            }
+            //context.startService( serIntent );
+            Log.v(TAG, "启动服务.....");
+        }else{
+            Log.d(TAG, "startWatchService: AlarmService already run.");
+        }
+
 
     }
 
@@ -835,6 +854,7 @@ public class MainActivity extends AppCompatActivity {
             public void onClick(View v) {
                 startWatchService();
             }
+
         });
 
         //保存ui设置

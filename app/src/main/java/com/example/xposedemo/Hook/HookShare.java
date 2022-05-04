@@ -26,6 +26,8 @@ public class HookShare {
     public final static String packagePostern= "com.tunnelworkshop.postern" ;
     public final static String packageSurboard="com.getsurfboard";
     public final static String intentExtraPackageShowPath="intentExtraPackageShowPath";
+    public final static String mainActivityExtra="startApp";
+
 
     //public final static String intentExtraKey="intentExtraKey";
 

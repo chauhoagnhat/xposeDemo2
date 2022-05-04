@@ -19,11 +19,17 @@
                 <category android:name="Activity_packageShow" />
             </intent-filter>
         </activity>
+
+        <activity android:name=".ActivityFunction">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+            </intent-filter>
+        </activity>
+
         <!-- 是否是xposed模块，xposed根据这个来判断是否是模块 -->
         <activity android:name=".MainActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
-
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity> <!-- 模块描述，显示在xposed模块列表那里第二行 -->
@@ -68,7 +74,11 @@
         <service
             android:name=".myService.AlarmService"
             android:enabled="true"
-            android:exported="true" />
+            android:exported="true" >
+            <intent-filter>
+                <action android:name="com.example.xposedemo.myService.AlarmService.java"/>
+            </intent-filter>
+        </service>
     </application>
 
     <permission
@@ -82,7 +92,6 @@
     <uses-permission android:name="android.permission.KILL_BACKGROUND_PROCESSES" /> <!-- 接收开机广播权限 -->
     <uses-permission android:name="android.permission.ACCESS_NOTIFICATION_POLICY" />
     <uses-permission android:name="android.permission.CHANGE_WIFI_STATE" />
-
     <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
 
 </manifest>

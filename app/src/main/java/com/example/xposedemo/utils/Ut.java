@@ -73,6 +73,38 @@ public class Ut {
     private static final String TAG = "DeviceUtils";
     protected static String uuid;
 
+
+    /**
+     * 判断某服务是否在运行
+     * @param context
+     * @param SeviceName MyService.class.getName()
+     * @return
+     */
+    public static boolean isServiceRunning(Context context,String SeviceName) {
+        boolean isRunning = false;
+        ActivityManager activityManager = (ActivityManager) context
+                .getSystemService(Context.ACTIVITY_SERVICE);
+        List<ActivityManager.RunningServiceInfo> serviceList = activityManager
+                .getRunningServices(Integer.MAX_VALUE);
+
+        if (serviceList == null || serviceList.size() == 0) {
+            return false;
+        }
+
+
+        for (int i = 0; i < serviceList.size(); i++) {
+            if (serviceList.get(i).service.getClassName().equals( SeviceName )) {
+                isRunning = true;
+                break;
+            }
+        }
+        return isRunning;
+    }
+
+//————————————————
+//    版权声明：本文为CSDN博主「胡小牧」的原创文章，遵循CC 4.0 BY-SA版权协议，转载请附上原文出处链接及本声明。
+//    原文链接：https://blog.csdn.net/qq_33210042/article/details/117811395
+
     public static void getSystemPermission(){
         // android:sharedUserId="android.uid.system"
         //https://www.jianshu.com/p/b26201f2b4bb
