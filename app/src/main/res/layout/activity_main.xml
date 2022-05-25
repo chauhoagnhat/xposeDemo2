@@ -97,6 +97,14 @@
                 android:hint="保存路径"
                 android:text="/sdcard/nk"></EditText>
 
+      <!--      <EditText
+                android:id="@+id/et_pkgName"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:hint="保存路径"
+                android:text="com.rf.icon"></EditText>-->
+
+
         </LinearLayout>
 
         <LinearLayout
@@ -141,6 +149,7 @@
                 android:layout_height="wrap_content"
                 android:text="监控脚本运行"></Switch>
 
+
             <Button
                 android:id="@+id/bt_watch"
                 android:layout_width="wrap_content"
@@ -149,7 +158,17 @@
                 android:text="启动监控"></Button>
 
 
+            <EditText
+                android:layout_width="wrap_content"
+                android:id="@+id/et_pkgName"
+                android:text="com.rf.icon"
+                android:layout_height="wrap_content">
+            </EditText>
+
+
         </LinearLayout>
+
+
 
         <LinearLayout
             android:layout_width="wrap_content"
@@ -169,13 +188,42 @@
                 android:checked="false"
                 android:text="修改参数生效"></Switch>
 
-            <EditText
-                android:id="@+id/et_scriptPackageName"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:hint="脚本包名"
-                android:text="com.apple"></EditText>
+        </LinearLayout>
 
+
+ <!--       <EditText
+            android:id="@+id/et_pkgName"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="com.rf.icon"
+            android:hint="脚本包名"
+            >
+        </EditText>-->
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            >
+            <Button
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:id="@+id/contact_adds"
+                android:text="导入通讯录">
+            </Button>
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="tel.txt放入sdcard"
+                android:id="@+id/contact_log"
+                android:textColor="@color/cardview_dark_background"
+                />
+            <Button
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:id="@+id/contactDelete"
+                android:text="清空通讯录"/>
 
         </LinearLayout>
 

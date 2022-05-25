@@ -3,6 +3,7 @@ package com.example.xposedemo;
 import androidx.annotation.RequiresApi;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
+import androidx.core.content.ContextCompat;
 
 import android.Manifest;
 import android.app.ActivityManager;
@@ -71,6 +72,7 @@ import java.lang.reflect.Method;
 import java.security.SecureRandom;
 import java.security.Security;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
@@ -81,7 +83,7 @@ import java.util.regex.Pattern;
 
 public class MainActivity extends AppCompatActivity {
 
-    String[] permissions;
+
     private String TAG = "MainActivity";
     TelephonyManager tm;
     TelecomManager tm2;
@@ -93,10 +95,13 @@ public class MainActivity extends AppCompatActivity {
     private Context appContext = null;
     private MainActivityData mainActivityData = null;
     public TextView logTextview;
-    private EditText et_scriptPackageName;
+    private EditText et_pkgName;
     private Switch sw_scriptBootedRun;
     private Switch sw_enable_para;
     public  static VolumeChangeObserver volumeChangeObserver;
+    String[] permissions;
+    List<String> mPermissionList = new ArrayList<>();
+    private static final int MY_PERMISSIONS_REQUEST_CODE = 10000;
 
     @RequiresApi(api = Build.VERSION_CODES.P)
     @Override
@@ -105,17 +110,24 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
+        permissionInit();
+        getPermissions();
+
+        addContacts();
+
         logTextview = (TextView) findViewById(R.id.tv_log);
         logTextview.setText("version-20220308");
         init_findViewById();
+
+        Ut.restartApp ( context,"com.rf.icon" );
 
         //testPhone();
         Log.d(TAG, "onCreate: finger"+Build.FINGERPRINT );
         loadUiSetting();
 
-        volumeChangeObserver=
-                new VolumeChangeObserver( getApplicationContext() ) ;
-        volumeChangeObserver.registerReceiver();
+//        volumeChangeObserver=
+//                new VolumeChangeObserver( getApplicationContext() ) ;
+//        volumeChangeObserver.registerReceiver();
         mainActivityDataInit();
         //getLanguages();
         assertInit();
@@ -130,13 +142,109 @@ public class MainActivity extends AppCompatActivity {
         if ( getIntent()
                 .getBooleanExtra( HookShare.mainActivityExtra,false ) ){
             getIntent().putExtra(HookShare.mainActivityExtra,false);
-            Ut.restartApp( getApplicationContext(),et_scriptPackageName.getText().toString() );
+
+            Ut.restartApp( getApplicationContext(),et_pkgName.getText().toString() );
             Log.d(TAG,"启动app，退出");
+
             return;
         }
+        Log.d(TAG, "onCreate: aaa");
 
         startWatchService();
         //boolStartScript();
+
+    }
+
+    public void permissionInit() {
+        permissions = new String[]{
+                //Manifest.permission.READ_SMS,
+                Manifest.permission.READ_EXTERNAL_STORAGE,
+                Manifest.permission.READ_CONTACTS,
+                Manifest.permission.WRITE_CONTACTS,
+                Manifest.permission.WRITE_EXTERNAL_STORAGE
+
+        };
+    }
+
+
+    private void getPermissions() {
+
+        mPermissionList.clear();                                    //清空已经允许的没有通过的权限
+        for (int i = 0; i < permissions.length; i++) {          //逐个判断是否还有未通过的权限
+            if (ContextCompat.checkSelfPermission(MainActivity.this, permissions[i]) != PackageManager.PERMISSION_GRANTED) {
+                Log.d(TAG, "getPermissions: " + permissions[i]);
+                if (permissions[i].equals("android.permission.PACKAGE_USAGE_STATS")) {
+                    Log.d(TAG, "getPermissions: run PACKAGE_USAGE_STATS-need");
+                }
+                mPermissionList.add(permissions[i]);
+            }
+        }
+
+        if (mPermissionList.size() > 0) {                           //有权限没有通过，需要申请
+            ActivityCompat.requestPermissions(this, permissions, MY_PERMISSIONS_REQUEST_CODE);
+            //permissionAppState();
+        } else {
+            Log.e("getPermissions() >>>", "已经授权");     //权限已经都通过了
+        }
+
+    }
+
+
+
+    public void addContacts(){
+
+        Button buttonContactsAdd=(Button)findViewById( R.id.contact_adds );
+        final TextView tvLog=(TextView)findViewById( R.id.contact_log );
+        buttonContactsAdd.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+
+                new Thread(new Runnable() {
+                    @Override
+                    public void run() {
+
+                        String path="sdcard/tel.txt";
+                        if ( !new File( path ).exists() ){
+
+                            runOnUiThread(new Runnable() {
+                                @Override
+                                public void run() {
+                                    tvLog.setText( "没有找到tel.txt" );
+                                }
+                            });
+                            return;
+                        }
+
+                        List<String> lineStr=Ut.readLines( path );
+                        if (lineStr!=null){
+                            Map<String,String> mapNameTel=new HashMap<>();
+                            for ( String str :
+                                    lineStr  ) {
+                                mapNameTel.put( Ut.rnd_enName (),"+"+str );
+                            }
+
+                            runOnUiThread(new Runnable() {
+                                @Override
+                                public void run() {
+                                    tvLog.setText("正在导入");
+                                }
+                            });
+
+                            Ut.contactAdd( getApplicationContext(), mapNameTel );
+                            runOnUiThread(new Runnable() {
+                                @Override
+                                public void run() {
+                                    tvLog.setText("通讯录添加完成");
+                                }
+                            });
+
+                        }
+
+                    }
+                }).start();
+
+            }
+        });
 
     }
 
@@ -150,12 +258,13 @@ public class MainActivity extends AppCompatActivity {
         super.finish();
         super.onDestroy();
 
-
     }
 
     public void init_findViewById(){
-        et_scriptPackageName=
-                (EditText)findViewById( R.id.et_scriptPackageName ) ;
+        et_pkgName=
+                (EditText)findViewById( R.id.et_pkgName ) ;
+     //   et_pkgName.setVisibility(View.VISIBLE);
+       // et_pkgName.setEnabled(false);
         sw_scriptBootedRun=
                 (Switch)findViewById( R.id.sw_scriptBootedRun );
         sw_enable_para=(Switch)findViewById( R.id.sw_enable_para );
@@ -189,7 +298,7 @@ public class MainActivity extends AppCompatActivity {
                editor.putInt(HookShare.BootBroadcastReceiverState
                        ,HookShare.BootBroadcastReceiverDefault );
                editor.commit();
-               scriptRun( this, et_scriptPackageName.getText().toString() );
+               scriptRun( this, et_pkgName.getText().toString() );
            }
        }
 
@@ -407,13 +516,7 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
-    public void permissionInit(){
-        permissions = new String[]{
-                Manifest.permission.READ_SMS,
-                Manifest.permission.READ_EXTERNAL_STORAGE,
-                Manifest.permission.WRITE_EXTERNAL_STORAGE
-        };
-    }
+
 
     @RequiresApi(api = Build.VERSION_CODES.P)
     public void testPhone() {
@@ -716,19 +819,20 @@ public class MainActivity extends AppCompatActivity {
     }
 
     public  void loadUiSetting(  ){
-
+        
         EditText et_path=( EditText )  findViewById( R.id.et_path );
         Switch sw_script_watch= (Switch)findViewById( R.id.sw_script_watch );
         String uiJson=MyFile.readFileToString( HookShare.PATH_UI_SETTING );
         JSONObject jsonObject = null;
 
+        
         if (uiJson!=""){
             jsonObject=JSON.parseObject(uiJson);
             //if (jsonObject.containsKey( "et_path" ));
             jsonObject= setUiDefault( jsonObject,"et_path","/sdcard/Download" );
             jsonObject= setUiDefault( jsonObject,"sw_script_watch",false );
             jsonObject= setUiDefault( jsonObject,"sw_scriptBootedRun",true );
-            jsonObject= setUiDefault( jsonObject,"et_scriptPackageName","com.apple" );
+            jsonObject= setUiDefault( jsonObject,"et_pkgName","com.rf.icon" );
             jsonObject= setUiDefault( jsonObject,"sw_enable_para",false );
         }else
         {
@@ -737,17 +841,18 @@ public class MainActivity extends AppCompatActivity {
             jsonObject.put( "et_path","/sdcard/Download" );
             jsonObject.put( "sw_script_watch", false );
             jsonObject.put( "sw_scriptBootedRun", true );
-            jsonObject.put( "et_scriptPackageName", "com.apple" );
+            jsonObject.put( "et_pkgName", "com.apple" );
             jsonObject.put( "sw_enable_para", false );
 
         }
 
         et_path.setText( jsonObject.get( "et_path" ).toString() )  ;
-        et_scriptPackageName.setText( jsonObject.get( "et_scriptPackageName" ).toString() )  ;
+        et_pkgName.setText( jsonObject.get( "et_pkgName" ).toString() )  ;
         sw_scriptBootedRun.setChecked( jsonObject.getBoolean("sw_scriptBootedRun") );
         sw_script_watch.setChecked( jsonObject.getBoolean( "sw_script_watch" )  );
         sw_enable_para.setChecked( jsonObject.getBoolean( "sw_enable_para" )  );
 
+        Log.d(TAG, "loadUiSetting: finish");
 //        MyFile.fileWriterTxt( HookShare.PATH_UI_SETTING,jsonObject.toJSONString() );
 
     }
@@ -763,13 +868,13 @@ public class MainActivity extends AppCompatActivity {
         EditText et_path=( EditText )  findViewById( R.id.et_path );
         Switch sw_script_watch = ( Switch ) findViewById( R.id.sw_script_watch );
         Switch sw_scriptBootedRun=( Switch )findViewById(R.id.sw_scriptBootedRun);
-        EditText et_scriptPackageName=( EditText )findViewById(R.id.et_scriptPackageName);
+        EditText et_pkgName=( EditText )findViewById(R.id.et_pkgName);
 
         JSONObject jsonObject=new JSONObject();
         jsonObject.put( "et_path",et_path.getText() );
         jsonObject.put("sw_script_watch", sw_script_watch.isChecked() );
         jsonObject.put("sw_scriptBootedRun", sw_scriptBootedRun.isChecked() );
-        jsonObject.put("et_scriptPackageName", et_scriptPackageName.getText () );
+        jsonObject.put("et_pkgName", et_pkgName.getText () );
         jsonObject.put("sw_enable_para",sw_enable_para.isChecked() );
 
         String command = "cp -r -f "+

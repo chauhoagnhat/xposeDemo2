@@ -57,6 +57,7 @@ dependencies {
     implementation 'androidx.navigation:navigation-fragment:2.3.5'
     implementation 'androidx.navigation:navigation-ui:2.3.5'
     implementation 'org.jetbrains:annotations-java5:15.0'
+    implementation files('libs\\simplename-20170918.jar')
 
 
     //implementation fileTree(dir: 'libs', include: ['*.jar'])

@@ -31,7 +31,7 @@ import com.example.xposedemo.utils.Ut;
 
 public class AlarmService extends Service {
 
-    private static final int ONE_Miniute=10*1*1000;
+    private static final int ONE_Miniute=1*60*1000;
     private static final int PENDING_REQUEST=0;
     private static final String TAG = "AlarmService";
     public static boolean watchRun =true;
@@ -100,12 +100,16 @@ public class AlarmService extends Service {
      */
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
+        Log.d(TAG, "onStartCommand: ");
         //serviceNoti();
         final Context context=this.getApplication();
 
-        if ( watchRun ==false ){
-            return super.onStartCommand(intent, flags, startId);
-        }
+        //通过AlarmManager定时启动广播
+        alarmManager = (AlarmManager) getSystemService(ALARM_SERVICE);
+
+//        if ( watchRun ==false ){
+//            return super.onStartCommand(intent, flags, startId);
+//        }
 
 
         Intent i=new Intent(this, AlarmReceive.class);
@@ -114,14 +118,18 @@ public class AlarmService extends Service {
         Log.d(TAG, "onStartCommand: alartSevice is running");
         if ( getJsonWatch() ){
             scriptRun( context );
+        }else{
+            Log.d(TAG, "onStartCommand-run: awake-setting");
+            triggerAtTime = SystemClock.elapsedRealtime()+ONE_Miniute;
+            alarmManager.set(AlarmManager.ELAPSED_REALTIME_WAKEUP,triggerAtTime, pIntent);
         }
+
 
         if ( watchRun ==false ){
             return super.onStartCommand(intent, flags, startId);
         }
 
-        //通过AlarmManager定时启动广播
-        alarmManager = (AlarmManager) getSystemService(ALARM_SERVICE);
+
         //从开机到现在的毫秒书（手机睡眠(sleep)的时间也包括在内
 //        triggerAtTime = SystemClock.elapsedRealtime()+ONE_Miniute;
 
@@ -160,11 +168,11 @@ public class AlarmService extends Service {
                  synchronized ( this ){
                      scriptRunSub(context);
                      Log.d(TAG, "run: watch-run="+watchRun);
-                     if (watchRun){
+                     //if (watchRun){
                          Log.d(TAG, "run: awake-setting");
                          triggerAtTime = SystemClock.elapsedRealtime()+ONE_Miniute;
                          alarmManager.set(AlarmManager.ELAPSED_REALTIME_WAKEUP,triggerAtTime, pIntent);
-                     }
+                    // }
                  }
              }
          });
@@ -185,28 +193,41 @@ public class AlarmService extends Service {
     public void scriptRunSub(Context context){
 
         Looper.prepare();
+        if (!getJsonWatch())
+            return;
         Log.d(TAG, "run: loop");
         Toast.makeText(context,"判断脚本是否运行",Toast.LENGTH_LONG);
         Log.d(TAG, "scriptRunSub: 判断脚本是否运行");
         MyFile.fileWriterTxt( HookShare.PATH_SCRIPT_RUNNING,"0" );
         try {
-            //hread.sleep(10*1000);
-            Thread.sleep(500);
+            Thread.sleep(10*1000);
+            //Thread.sleep(500);
         } catch (InterruptedException e) {
             e.printStackTrace();
             return;
         }
 
+       // String pkgName="com.rf.icon";
+        String uiJson=MyFile.readFileToString( HookShare.PATH_UI_SETTING );
+        JSONObject jobjUi=JSON.parseObject ( uiJson );
+        String pkgName=jobjUi.getString("et_pkgName");
+        if (pkgName == null) {
+            return;
+        }else{
+            Log.d(TAG, "scriptRunSub: "+pkgName );
+        }
+            
+
         String tp= MyFile.readFileToString(HookShare.PATH_SCRIPT_RUNNING);
         if (Integer.parseInt(tp)!=1){
             Log.d(TAG, "scriptRunSub: script not running,beginning..");
-            for (int i=0;i<1;i++) {
+            for (int i=0;i<3;i++) {
                 boolean boolSuc=false;
 
                 try {
 
                     Intent intentMain = new Intent(context,MainActivity.class);
-                    //Intent intentMain = new Intent(context, ActivityFunction.class);
+
                     intentMain.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
                     //intentMain.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK);
                     intentMain.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
@@ -215,7 +236,7 @@ public class AlarmService extends Service {
                     context.startActivity( intentMain );
 
                     Log.d(TAG, "run: stop-app"+i);
-                    Ut.stopAppByCmd("com.apple");
+                    Ut.stopAppByCmd(pkgName);
                     Ut.stopAppByCmd("com.tunnelworkshop.postern");
                     Ut.stopAppByCmd(HookShare.packageSurboard);
                     Log.d(TAG, "run: stop-app2");
@@ -226,16 +247,20 @@ public class AlarmService extends Service {
                     actIntent.addCategory("android.intent.category.LAUNCHER");
                     //actIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
                     context.startActivity(actIntent);
-                    //Thread.sleep(1000);
-                    //Ut.restartApp ( context,"com.apple" );*/
+                    //Thread.sleep(1000);;*/
+                    Log.d(TAG, "scriptRunSub: 启动app"+pkgName );
+                    Ut.restartApp ( context,pkgName );
                     Toast.makeText(context,"等待脚本加载10秒",Toast.LENGTH_LONG);
-                    Thread.sleep(1000 );
+                    Thread.sleep(8000 );
 
-                    for (int j=0;j<2;j++){
+                    for (int j=0;j<4;j++){
 
+                        if ( !getJsonWatch() ) {
+                            return;
+                        }
                         ScriptControl.setVolDown();
                         Log.d(TAG, "run: set vol down"+j);
-                        Thread.sleep(1000 );
+                        Thread.sleep(7000 );
 
                         tp = MyFile.readFileToString(HookShare.PATH_SCRIPT_RUNNING);
                         if (Integer.parseInt(tp) == 1) {
@@ -243,8 +268,8 @@ public class AlarmService extends Service {
                             boolSuc=true;
                             Toast.makeText(context, "启动成功", Toast.LENGTH_SHORT );
                             Log.d(TAG, "run: 启动成功");
-
-                            //再次确认启动成功
+                            break;
+                     /*       //再次确认启动成功
                             MyFile.fileWriterTxt( HookShare.PATH_SCRIPT_RUNNING,"0" );
                             Thread.sleep(10000);
                             tp = MyFile.readFileToString( HookShare.PATH_SCRIPT_RUNNING );
@@ -257,7 +282,7 @@ public class AlarmService extends Service {
                                 Log.d(TAG, "run: 再次确认启动失败");
                                 boolSuc=false;
                                 break;
-                            }
+                            }*/
 
                         }
                     }

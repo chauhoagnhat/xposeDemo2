@@ -5,6 +5,9 @@ import android.app.ActivityManager;
 import android.app.AlertDialog;
 import android.content.ActivityNotFoundException;
 import android.content.ComponentName;
+import android.content.ContentResolver;
+import android.content.ContentUris;
+import android.content.ContentValues;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -13,6 +16,7 @@ import android.content.SharedPreferences;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
+import android.database.Cursor;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.net.Uri;
@@ -23,6 +27,7 @@ import android.os.IInterface;
 import android.os.Looper;
 import android.os.Parcel;
 import android.os.RemoteException;
+import android.provider.ContactsContract;
 import android.provider.Settings;
 import android.telephony.TelephonyManager;
 import android.util.Log;
@@ -33,6 +38,9 @@ import com.alibaba.fastjson.JSONObject;
 import com.example.xposedemo.Hook.HookShare;
 import com.example.xposedemo.MainActivity;
 import com.example.xposedemo.R;
+import com.lu.sn.Language;
+import com.lu.sn.NameType;
+import com.lu.sn.RandomNameTool;
 
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
@@ -143,6 +151,63 @@ public class Ut {
             return false;
         }
     }
+
+
+    //插入数据到手机通讯录
+    public static void contactAdd( Context context, Map<String,String> mapContacts ){
+
+       // Context context=GlobalAppContext.get();
+        ContentResolver cr = context.getContentResolver();
+        Log.d(TAG, "contactAdd: start");
+
+        for ( String key :
+                mapContacts.keySet()  ) {
+
+            //通过字段_id在raw_contacts表中查询目前通讯录含有多少条联系人，然后在已有的联系人数目上+1就是要插入联系人的_id.
+            Cursor cursor=cr.query(Uri.parse("content://com.android.contacts/raw_contacts"), new String[]{"_id"}, null, null, null);
+            int num=1;
+            if (cursor.moveToLast()) {
+                int id=cursor.getColumnIndex("_id");
+                num=id+1;
+            }
+
+            ContentValues values = new ContentValues();
+            Uri rawContactUri = cr.insert(ContactsContract.RawContacts.CONTENT_URI, values);
+            long rawContactId = ContentUris.parseId(rawContactUri);
+            values.clear();
+            values.put(ContactsContract.Data.RAW_CONTACT_ID, rawContactId);
+            // 内容类型
+            values.put(ContactsContract.Data.MIMETYPE, ContactsContract.CommonDataKinds.StructuredName.CONTENT_ITEM_TYPE);
+            // 联系人名字
+            String name=key;
+            values.put(ContactsContract.CommonDataKinds.StructuredName.GIVEN_NAME, name);
+            // 向联系人URI添加联系人名字
+            cr.insert(ContactsContract.Data.CONTENT_URI, values);
+            values.clear();
+
+            values.put(ContactsContract.Data.RAW_CONTACT_ID, rawContactId);
+            values.put(ContactsContract.Data.MIMETYPE, ContactsContract.CommonDataKinds.Phone.CONTENT_ITEM_TYPE);
+            // 联系人的电话号码
+            String phoneNumber=mapContacts.get( key );
+            values.put(ContactsContract.CommonDataKinds.Phone.NUMBER, phoneNumber);
+            // 电话类型
+            values.put(ContactsContract.CommonDataKinds.Phone.TYPE, ContactsContract.CommonDataKinds.Phone.TYPE_MOBILE);
+            // 向联系人电话号码URI添加电话号码
+            cr.insert(ContactsContract.Data.CONTENT_URI, values);
+            values.clear();
+
+        /*    values.put(Data.RAW_CONTACT_ID, rawContactId);
+            values.put(Data.MIMETYPE, Email.CONTENT_ITEM_TYPE);
+            // 联系人的Email地址
+            values.put(Email.DATA, "zhangphil@xxx.com");
+            // 电子邮件的类型
+            values.put(Email.TYPE, Email.TYPE_WORK);
+            // 向联系人Email URI添加Email数据
+            getContentResolver().insert(Data.CONTENT_URI, values);*/
+        }
+        Log.d(TAG, "contactAdd: finish");
+    }
+
 
     /**
      * 检测服务是否开启
@@ -465,6 +530,30 @@ public class Ut {
     }
 
 
+    public static String rnd_chName(){
+        String chineseName = RandomNameTool.getName(Language.zh,
+                NameType.FULL_NAME);
+        return chineseName;
+    }
+
+    public static String rnd_name(){
+
+        int i=r_(0,1);
+        if (i==0)
+            return rnd_chName();
+        else
+            return rnd_enName();
+
+    }
+
+
+    public static String rnd_enName(){
+
+        String englishName = RandomNameTool.getName(
+                Language.en, NameType.FULL_NAME);
+
+        return englishName;
+    }
 
     /**
      * 获取txt文件内容并按行放入list中
