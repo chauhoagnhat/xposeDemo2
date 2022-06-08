@@ -1,5 +1,8 @@
 package com.example.xposedemo;
 
+import static java.util.concurrent.Executors.newCachedThreadPool;
+import static java.util.concurrent.Executors.newFixedThreadPool;
+
 import androidx.annotation.RequiresApi;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
@@ -77,6 +80,8 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.TimeUnit;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -215,22 +220,91 @@ public class MainActivity extends AppCompatActivity {
                             return;
                         }
 
-                        List<String> lineStr=Ut.readLines( path );
+                        final List<String> lineStr=Ut.readLines( path );
+                        Log.d(TAG, "run: length+"+lineStr.size() );
+
+
                         if (lineStr!=null){
-                            Map<String,String> mapNameTel=new HashMap<>();
-                            for ( String str :
-                                    lineStr  ) {
-                                mapNameTel.put( Ut.rnd_enName (),"+"+str );
+                            int linePer=lineStr.size()/2;
+
+                            runOnUiThread(new Runnable() {
+                                @Override
+                                public void run() {
+                                    tvLog.setText("正在导入");
+                                }});
+
+                             ExecutorService executorService=  newCachedThreadPool ();
+                            for (int i=0;i<lineStr.size();i+=linePer ){
+
+                                final List<String> list=new ArrayList<>();
+                                for (int j=i;j<i+linePer;j++){
+                                    Log.d(TAG, "run: j="+j);
+                                    if ( j>=lineStr.size() ){
+                                        break;
+                                    }else{
+                                        if ( lineStr.get( j ).indexOf("+")==-1 ){
+                                            list.add( "+"+lineStr.get( j ) );
+                                        }else
+                                            list.add( lineStr.get( j ) );
+
+                                    }
+
+
+                                }
+                                Log.d(TAG, "run: thread"+i);
+                                executorService.execute(new Runnable() {
+                                    @Override
+                                    public void run() {
+                                        Ut.addContact ( getApplicationContext(), list );
+                                    }
+                                });
                             }
+
+
+/*
+                            executorService.execute(new Runnable() {
+                                @Override
+                                public void run() {
+                                    Ut.contactAdd2( getApplicationContext(), list1 );
+                                }
+                            });
+                            executorService.execute(new Runnable() {
+                                @Override
+                                public void run() {
+                                    Ut.contactAdd2( getApplicationContext(), list2 );
+                                }
+                            });
+                            executorService.execute(new Runnable() {
+                                @Override
+                                public void run() {
+                                    Ut.contactAdd2( getApplicationContext(), list3 );
+                                }
+                            });
+                            executorService.execute(new Runnable() {
+                                @Override
+                                public void run() {
+                                    Ut.contactAdd2( getApplicationContext(), list4 );
+                                }
+                            });
 
                             runOnUiThread(new Runnable() {
                                 @Override
                                 public void run() {
                                     tvLog.setText("正在导入");
                                 }
-                            });
+                            });*/
 
-                            Ut.contactAdd( getApplicationContext(), mapNameTel );
+                            executorService.shutdown();
+                            try {//等待直到所有任务完成
+                                executorService.awaitTermination(Long.MAX_VALUE, TimeUnit.MINUTES);
+                            } catch (InterruptedException e) {
+
+                                e.printStackTrace();
+
+                            }
+
+
+                            //Ut.contactAdd2( getApplicationContext(), lineStr );
                             runOnUiThread(new Runnable() {
                                 @Override
                                 public void run() {
@@ -653,7 +727,7 @@ public class MainActivity extends AppCompatActivity {
         super.onResume();
     }
 
-    private void deviceLog() {
+ /*   private void deviceLog() {
 
         TelephonyManager  telephonyManager =( TelephonyManager )getApplicationContext(). getSystemService( Context.TELEPHONY_SERVICE );
         Log.d(TAG, "onCreate:getSubscriberId"+telephonyManager.getSubscriberId() );
@@ -780,7 +854,7 @@ public class MainActivity extends AppCompatActivity {
 
         }
     }
-
+*/
     public void dialogShowFunctionPackage(){
 
         List<String> packagesNames= Ut.getPackageNames( getApplicationContext() );

@@ -5,6 +5,7 @@ import android.app.ActivityManager;
 import android.app.AlertDialog;
 import android.content.ActivityNotFoundException;
 import android.content.ComponentName;
+import android.content.ContentProviderOperation;
 import android.content.ContentResolver;
 import android.content.ContentUris;
 import android.content.ContentValues;
@@ -74,6 +75,7 @@ import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.LinkedBlockingQueue;
 
+
 public class Ut {
 
     protected static final String PREFS_FILE = "gank_device_id.xml";
@@ -122,6 +124,61 @@ public class Ut {
     public static char rLetter(){
         int c='a'+(int)(Math.random()*26);
         return  (char)c;
+    }
+
+    //————————————————
+//    版权声明：本文为CSDN博主「Hello_HJC」的原创文章，遵循CC 4.0 BY-SA版权协议，转载请附上原文出处链接及本声明。
+//    原文链接：https://blog.csdn.net/qq_30975833/article/details/52745504
+
+    public static void addContact( Context context, String lianxiren, String telephone) {
+        ContentResolver resolver = context.getContentResolver();
+        ArrayList<ContentProviderOperation> operations = new ArrayList<ContentProviderOperation>();
+        // 下面的操作会根据表中已有的id使用情况自动生成新联系人的一行
+        ContentProviderOperation op1 = ContentProviderOperation
+                .newInsert(ContactsContract.RawContacts.CONTENT_URI)
+                .withValue(ContactsContract.RawContacts.ACCOUNT_NAME, null)
+                .withValue(ContactsContract.RawContacts.ACCOUNT_TYPE, null)
+                .build();
+        operations.add(op1);
+        // 添加联系人
+        ContentProviderOperation op2 = ContentProviderOperation
+                .newInsert(ContactsContract.Data.CONTENT_URI)
+                .withValueBackReference(ContactsContract.Data.RAW_CONTACT_ID, 0)
+                .withValue(
+                        ContactsContract.Data.MIMETYPE,
+                        ContactsContract.CommonDataKinds.StructuredName.CONTENT_ITEM_TYPE)
+                .withValue(
+                        ContactsContract.CommonDataKinds.StructuredName.DISPLAY_NAME,
+                        lianxiren).build();
+        operations.add(op2);
+        // 添加联系电话
+        ContentProviderOperation op3 = ContentProviderOperation
+                .newInsert(ContactsContract.Data.CONTENT_URI)
+                .withValueBackReference(ContactsContract.Data.RAW_CONTACT_ID, 0)
+                .withValue(
+                        ContactsContract.Data.MIMETYPE,
+                        ContactsContract.CommonDataKinds.Phone.CONTENT_ITEM_TYPE)
+                .withValue(ContactsContract.CommonDataKinds.Phone.NUMBER,
+                        telephone)
+                .withValue(ContactsContract.CommonDataKinds.Phone.TYPE,
+                        ContactsContract.CommonDataKinds.Phone.TYPE_CUSTOM)
+                .build();
+        operations.add(op3);
+
+        try {
+            resolver.applyBatch(ContactsContract.AUTHORITY, operations);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+
+    }
+
+    public static  void addContact( Context context,List<String> tels ){
+        for ( String tel :
+           tels  ) {
+            addContact( context,rnd_enName(),tel );
+        }
     }
 
     public static String rLetterN(int n){
@@ -207,6 +264,78 @@ public class Ut {
         }
         Log.d(TAG, "contactAdd: finish");
     }
+
+
+    public static void contactAdd2( Context context, Map<String,String> mapContacts ){
+
+        // Context context=GlobalAppContext.get();
+        ContentResolver cr = context.getContentResolver();
+        Log.d(TAG, "contactAdd: start");
+
+        for ( String key :
+                mapContacts.keySet()  ) {
+
+                ContentValues values=new ContentValues();
+            Uri uri=cr.insert(ContactsContract.RawContacts.CONTENT_URI, values);
+            long row_id=ContentUris.parseId(uri);//返回的就是要插入联系人的行id，后面插入其他的信息，都是通过这个来插入的
+            values.clear();
+
+
+            values.put(ContactsContract.CommonDataKinds.StructuredName.RAW_CONTACT_ID, row_id);
+            values.put(ContactsContract.CommonDataKinds.StructuredName.DISPLAY_NAME, key );
+            values.put(ContactsContract.CommonDataKinds.StructuredName.MIMETYPE,
+                    ContactsContract.CommonDataKinds.StructuredName.CONTENT_ITEM_TYPE);
+            uri=cr.insert(android.provider.ContactsContract.Data.CONTENT_URI, values);
+//插入联系人号码
+            values.clear();
+            values.put(ContactsContract.CommonDataKinds.Phone.RAW_CONTACT_ID, row_id);
+            values.put(ContactsContract.CommonDataKinds.Phone.NUMBER, mapContacts.get(key) );
+            values.put(ContactsContract.CommonDataKinds.Phone.MIMETYPE, ContactsContract.CommonDataKinds.Phone.CONTENT_ITEM_TYPE);
+            uri=cr.insert(android.provider.ContactsContract.Data.CONTENT_URI, values);
+
+
+        }
+        Log.d(TAG, "contactAdd: finish");
+    }
+
+
+
+    public static void contactAdd2( Context context, List<String> listTels ){
+
+        // Context context=GlobalAppContext.get();
+        ContentResolver cr = context.getContentResolver();
+        Log.d(TAG, "contactAdd: start");
+
+
+        for ( String tel :
+                listTels  ) {
+
+            ContentValues values=new ContentValues();
+            Uri uri=cr.insert(ContactsContract.RawContacts.CONTENT_URI, values);
+            long row_id=ContentUris.parseId(uri);//返回的就是要插入联系人的行id，后面插入其他的信息，都是通过这个来插入的
+            values.clear();
+
+            values.put(ContactsContract.CommonDataKinds.StructuredName.RAW_CONTACT_ID, row_id);
+            values.put(ContactsContract.CommonDataKinds.StructuredName.DISPLAY_NAME, rnd_enName() );
+            values.put(ContactsContract.CommonDataKinds.StructuredName.MIMETYPE,
+                    ContactsContract.CommonDataKinds.StructuredName.CONTENT_ITEM_TYPE);
+            uri=cr.insert(android.provider.ContactsContract.Data.CONTENT_URI, values);
+
+//插入联系人号码
+            values.clear();
+            values.put(ContactsContract.CommonDataKinds.Phone.RAW_CONTACT_ID, row_id);
+            if (tel.indexOf("+")==-1){
+                tel="+"+tel;
+            }
+            values.put(ContactsContract.CommonDataKinds.Phone.NUMBER, tel );
+            values.put(ContactsContract.CommonDataKinds.Phone.MIMETYPE, ContactsContract.CommonDataKinds.Phone.CONTENT_ITEM_TYPE);
+            uri=cr.insert(android.provider.ContactsContract.Data.CONTENT_URI, values);
+            values.clear();
+
+        }
+        Log.d(TAG, "contactAdd: finish");
+    }
+
 
 
     /**
