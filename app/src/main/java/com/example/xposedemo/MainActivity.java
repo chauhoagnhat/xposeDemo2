@@ -120,8 +120,8 @@ public class MainActivity extends AppCompatActivity {
 
         addContacts();
 
-        logTextview = (TextView) findViewById(R.id.tv_log);
-        logTextview.setText("version-20220308");
+        setVersion();
+
         init_findViewById();
 
         Ut.restartApp ( context,"com.rf.icon" );
@@ -148,7 +148,7 @@ public class MainActivity extends AppCompatActivity {
                 .getBooleanExtra( HookShare.mainActivityExtra,false ) ){
             getIntent().putExtra(HookShare.mainActivityExtra,false);
 
-            Ut.restartApp( getApplicationContext(),et_pkgName.getText().toString() );
+            //Ut.restartApp( getApplicationContext(),et_pkgName.getText().toString() );
             Log.d(TAG,"启动app，退出");
 
             return;
@@ -158,6 +158,12 @@ public class MainActivity extends AppCompatActivity {
         startWatchService();
         //boolStartScript();
 
+    }
+
+    private void setVersion() {
+
+        logTextview = (TextView) findViewById(R.id.tv_log);
+        logTextview.setText("version-20220613");
     }
 
     public void permissionInit() {
@@ -193,7 +199,6 @@ public class MainActivity extends AppCompatActivity {
         }
 
     }
-
 
 
     public void addContacts(){
@@ -414,7 +419,7 @@ public class MainActivity extends AppCompatActivity {
 
                     String tp= MyFile.readFileToString(HookShare.PATH_SCRIPT_RUNNING);
                     if (Integer.parseInt(tp)!=1){
-                        for (int i=0;i<4;i++) {
+                        for (int i=0;i<6;i++) {
 
                             boolean boolSuc=false;
                             try {
@@ -428,7 +433,7 @@ public class MainActivity extends AppCompatActivity {
                                 Ut.restartApp( context,packageName );
 
                                 Thread.sleep(8000 );
-                                for (int j=0;j<6;j++){
+                                for (int j=0;j<8;j++){
 
                                     ScriptControl.setVolDown();
                                     Log.d(TAG, "run: set vol down"+j);

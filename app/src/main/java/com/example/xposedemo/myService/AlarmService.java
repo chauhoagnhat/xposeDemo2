@@ -8,11 +8,13 @@ import android.app.PendingIntent;
 import android.app.Service;
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Build;
 import android.os.IBinder;
 import android.os.Looper;
 import android.os.SystemClock;
 import android.util.Log;
+import android.widget.Switch;
 import android.widget.Toast;
 
 import androidx.annotation.Nullable;
@@ -31,7 +33,7 @@ import com.example.xposedemo.utils.Ut;
 
 public class AlarmService extends Service {
 
-    private static final int ONE_Miniute=1*60*1000;
+    private static final int ONE_Miniute=1*20*1000;
     private static final int PENDING_REQUEST=0;
     private static final String TAG = "AlarmService";
     public static boolean watchRun =true;
@@ -198,14 +200,9 @@ public class AlarmService extends Service {
         Log.d(TAG, "run: loop");
         Toast.makeText(context,"判断脚本是否运行",Toast.LENGTH_LONG);
         Log.d(TAG, "scriptRunSub: 判断脚本是否运行");
-        MyFile.fileWriterTxt( HookShare.PATH_SCRIPT_RUNNING,"0" );
-        try {
-            Thread.sleep(10*1000);
-            //Thread.sleep(500);
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-            return;
-        }
+
+//        if( context.sw_scriptBootedRun.isChecked() ){
+//        }
 
        // String pkgName="com.rf.icon";
         String uiJson=MyFile.readFileToString( HookShare.PATH_UI_SETTING );
@@ -216,27 +213,46 @@ public class AlarmService extends Service {
         }else{
             Log.d(TAG, "scriptRunSub: "+pkgName );
         }
-            
+
+       // if (jobjUi.getBoolean("sw_scriptBootedRun")) {
+            SharedPreferences sharedPreferences = context.getSharedPreferences(
+                    HookShare.BootBroadcastReceiver, Context.MODE_PRIVATE);
+            int state = sharedPreferences.getInt(HookShare.BootBroadcastReceiverState, 0);
+            if (state == HookShare.BootBroadcastReceiverBooted) {
+                SharedPreferences.Editor editor = sharedPreferences.edit();
+                editor.putInt(HookShare.BootBroadcastReceiverState
+                        , HookShare.BootBroadcastReceiverDefault);
+                MyFile.fileWriterTxt( HookShare.PATH_SCRIPT_RUNNING,"0" );
+                editor.commit();
+            }else{
+                MyFile.fileWriterTxt( HookShare.PATH_SCRIPT_RUNNING,"0" );
+                try {
+                    Thread.sleep(10*1000);
+                    //Thread.sleep(500);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                    return;
+                }
+            }
 
         String tp= MyFile.readFileToString(HookShare.PATH_SCRIPT_RUNNING);
         if (Integer.parseInt(tp)!=1){
             Log.d(TAG, "scriptRunSub: script not running,beginning..");
-            for (int i=0;i<3;i++) {
+            for (int i=0;i<4;i++) {
                 boolean boolSuc=false;
 
                 try {
-
                     Intent intentMain = new Intent(context,MainActivity.class);
 
                     intentMain.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-                    //intentMain.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK);
-                    intentMain.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+                    intentMain.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK);
+                    //intentMain.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
                     intentMain.putExtra(HookShare.mainActivityExtra,true );
                     //MainActivity.volumeChangeObserver.unregisterReceiver();
                     context.startActivity( intentMain );
 
                     Log.d(TAG, "run: stop-app"+i);
-                    Ut.stopAppByCmd(pkgName);
+                    //Ut.stopAppByCmd(pkgName);
                     Ut.stopAppByCmd("com.tunnelworkshop.postern");
                     Ut.stopAppByCmd(HookShare.packageSurboard);
                     Log.d(TAG, "run: stop-app2");
@@ -248,19 +264,26 @@ public class AlarmService extends Service {
                     //actIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
                     context.startActivity(actIntent);
                     //Thread.sleep(1000);;*/
-                    Log.d(TAG, "scriptRunSub: 启动app"+pkgName );
-                    Ut.restartApp ( context,pkgName );
-                    Toast.makeText(context,"等待脚本加载10秒",Toast.LENGTH_LONG);
-                    Thread.sleep(8000 );
 
-                    for (int j=0;j<4;j++){
+                    Log.d(TAG, "scriptRunSub: 启动app"+pkgName );
+                    if (i!=0){
+                        Log.d(TAG, "scriptRunSub:  restart app");
+                        Ut.restartApp ( context,pkgName );
+                        Thread.sleep(7000 );
+                        Toast.makeText(context,"等待脚本加载10秒",Toast.LENGTH_LONG);
+                    }else{
+                        Log.d(TAG, "scriptRunSub: first do not restart App");
+                    }
+
+
+                    for (int j=0;j<6;j++){
 
                         if ( !getJsonWatch() ) {
                             return;
                         }
                         ScriptControl.setVolDown();
                         Log.d(TAG, "run: set vol down"+j);
-                        Thread.sleep(7000 );
+                        Thread.sleep(9000 );
 
                         tp = MyFile.readFileToString(HookShare.PATH_SCRIPT_RUNNING);
                         if (Integer.parseInt(tp) == 1) {
@@ -269,6 +292,7 @@ public class AlarmService extends Service {
                             Toast.makeText(context, "启动成功", Toast.LENGTH_SHORT );
                             Log.d(TAG, "run: 启动成功");
                             break;
+
                      /*       //再次确认启动成功
                             MyFile.fileWriterTxt( HookShare.PATH_SCRIPT_RUNNING,"0" );
                             Thread.sleep(10000);
@@ -284,6 +308,11 @@ public class AlarmService extends Service {
                                 break;
                             }*/
 
+                        }  else {
+                            if (i==0){
+                                Log.d(TAG, "scriptRunSub: first run break ");
+                                break;
+                            }
                         }
                     }
                 } catch (InterruptedException e) {
