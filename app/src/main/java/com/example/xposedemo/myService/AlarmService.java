@@ -31,9 +31,11 @@ import com.example.xposedemo.myBroadcast.AlarmReceive;
 import com.example.xposedemo.utils.MyFile;
 import com.example.xposedemo.utils.Ut;
 
+import java.io.File;
+
 public class AlarmService extends Service {
 
-    private static final int ONE_Miniute=1*20*1000;
+    private static final int ONE_Miniute=1*30*1000;
     private static final int PENDING_REQUEST=0;
     private static final String TAG = "AlarmService";
     public static boolean watchRun =true;
@@ -148,8 +150,10 @@ public class AlarmService extends Service {
 
     public boolean getJsonWatch(){
 
-        String uiJson=MyFile.readFileToString( HookShare.PATH_UI_SETTING );
+      //  String uiJson=MyFile.readFileToString( HookShare.PATH_UI_SETTING );
+        String uiJson=MyFile.readFileToString( HookShare.PATH_UI_SETTING  );
         JSONObject jsonObject=null;
+
         Log.d(TAG, "getJsonWatch");
         if (uiJson!=""){
             jsonObject= JSON.parseObject(uiJson);
@@ -214,6 +218,10 @@ public class AlarmService extends Service {
             Log.d(TAG, "scriptRunSub: "+pkgName );
         }
 
+        if ( !new File( HookShare.pathNkFolder ).exists() ){
+            Ut.crFolder( HookShare.pathNkFolder );
+        }
+
        // if (jobjUi.getBoolean("sw_scriptBootedRun")) {
             SharedPreferences sharedPreferences = context.getSharedPreferences(
                     HookShare.BootBroadcastReceiver, Context.MODE_PRIVATE);
@@ -235,7 +243,7 @@ public class AlarmService extends Service {
                 }
             }
 
-        String tp= MyFile.readFileToString(HookShare.PATH_SCRIPT_RUNNING);
+        String tp= MyFile.readFileToString( HookShare.PATH_SCRIPT_RUNNING );
         if (Integer.parseInt(tp)!=1){
             Log.d(TAG, "scriptRunSub: script not running,beginning..");
             for (int i=0;i<4;i++) {
@@ -340,6 +348,9 @@ public class AlarmService extends Service {
         if (watchRun){
             Log.d(TAG, "run: awake-setting1");
             triggerAtTime = SystemClock.elapsedRealtime()+ONE_Miniute;
+            if (alarmManager == null) {
+                alarmManager= (AlarmManager) getSystemService(ALARM_SERVICE);
+            }
             alarmManager.set(AlarmManager.ELAPSED_REALTIME_WAKEUP,triggerAtTime, pIntent);
         }
         super.onDestroy();

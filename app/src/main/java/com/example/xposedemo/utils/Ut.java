@@ -433,6 +433,7 @@ public class Ut {
     }
 
 
+
     /**
      *
      * @param activity
@@ -930,8 +931,10 @@ public class Ut {
             ex.printStackTrace();
         } finally {
             try {
-                fwriter.flush();
-                fwriter.close();
+                if (fwriter!=null){
+                    fwriter.flush();
+                    fwriter.close();
+                }
             } catch (IOException ex) {
                 ex.printStackTrace();
             }

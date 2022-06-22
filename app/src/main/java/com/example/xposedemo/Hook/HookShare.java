@@ -1,6 +1,7 @@
 package com.example.xposedemo.Hook;
 
 import android.app.AndroidAppHelper;
+import android.content.ContentProvider;
 import android.content.Context;
 import android.util.Log;
 
@@ -57,7 +58,9 @@ public class HookShare {
     public static final String PATH_DATABACK_SELECTED_PATH=sdcardRoot+"nk/PATH_DATABACK_SELECTED_PATH.txt";
     public static final String PATH_DATA_USER="/data/user/0";
     public static final String PATH_DEVICE_PHONE=sdcardRoot+"nk/devicePhone.txt";
-    public static final String PATH_UI_SETTING=sdcardRoot+"nk/ui.txt";
+    //public static final String PATH_UI_SETTING=sdcardRoot+"nk/ui.txt";
+    public static final String PATH_UI_SETTING="/data/user/0/com.example.xposedemo/cache/ui.txt";
+
     public static final String PATH_SCRIPT_RUNNING=sdcardRoot+"nk/script.txt";
 
     public static final String PATH_PHONE_DEVICE_DATA = pathDataRoot+"nk/devicePhone.txt";

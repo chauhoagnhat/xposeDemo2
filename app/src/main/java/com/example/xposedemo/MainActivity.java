@@ -107,6 +107,7 @@ public class MainActivity extends AppCompatActivity {
     String[] permissions;
     List<String> mPermissionList = new ArrayList<>();
     private static final int MY_PERMISSIONS_REQUEST_CODE = 10000;
+    public String uiPath;
 
     @RequiresApi(api = Build.VERSION_CODES.P)
     @Override
@@ -114,20 +115,15 @@ public class MainActivity extends AppCompatActivity {
 
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-
+        uiPath=getCacheDir().toString()+"/ui.txt";
         permissionInit();
         getPermissions();
 
         addContacts();
-
         setVersion();
-
         init_findViewById();
 
-        Ut.restartApp ( context,"com.rf.icon" );
-
         //testPhone();
-        Log.d(TAG, "onCreate: finger"+Build.FINGERPRINT );
         loadUiSetting();
 
 //        volumeChangeObserver=
@@ -142,7 +138,7 @@ public class MainActivity extends AppCompatActivity {
         //setSelectedPackges();
         //testHook();
         ui();
-        MyFile.execCmdsforResult( new String[]{ "am force-stop com.tunnelworkshop.postern" } );
+       // MyFile.execCmdsforResult( new String[]{ "am force-stop com.tunnelworkshop.postern" } );
 
         if ( getIntent()
                 .getBooleanExtra( HookShare.mainActivityExtra,false ) ){
@@ -150,8 +146,8 @@ public class MainActivity extends AppCompatActivity {
 
             //Ut.restartApp( getApplicationContext(),et_pkgName.getText().toString() );
             Log.d(TAG,"启动app，退出");
-
             return;
+
         }
         Log.d(TAG, "onCreate: aaa");
 
@@ -163,7 +159,7 @@ public class MainActivity extends AppCompatActivity {
     private void setVersion() {
 
         logTextview = (TextView) findViewById(R.id.tv_log);
-        logTextview.setText("version-20220613");
+        logTextview.setText("version-20220617");
     }
 
     public void permissionInit() {
@@ -238,7 +234,7 @@ public class MainActivity extends AppCompatActivity {
                                     tvLog.setText("正在导入");
                                 }});
 
-                             ExecutorService executorService=  newCachedThreadPool ();
+                     /*        ExecutorService executorService=  newCachedThreadPool ();
                             for (int i=0;i<lineStr.size();i+=linePer ){
 
                                 final List<String> list=new ArrayList<>();
@@ -263,7 +259,7 @@ public class MainActivity extends AppCompatActivity {
                                         Ut.addContact ( getApplicationContext(), list );
                                     }
                                 });
-                            }
+                            }*/
 
 
 /*
@@ -299,16 +295,27 @@ public class MainActivity extends AppCompatActivity {
                                 }
                             });*/
 
-                            executorService.shutdown();
-                            try {//等待直到所有任务完成
-                                executorService.awaitTermination(Long.MAX_VALUE, TimeUnit.MINUTES);
-                            } catch (InterruptedException e) {
+//                            executorService.shutdown();
+//                            try {//等待直到所有任务完成
+//                                executorService.awaitTermination(Long.MAX_VALUE, TimeUnit.MINUTES);
+//                            } catch (InterruptedException e) {
+//                                e.printStackTrace();
+//                            }
 
-                                e.printStackTrace();
-
+                            final List<String> list=new ArrayList<>();
+                            for (int i=0;i<lineStr.size();i++){
+                                Log.d(TAG, "run: i="+i);
+                                if ( i>=lineStr.size() ){
+                                    break;
+                                }else{
+                                    if ( lineStr.get( i ).indexOf("+")==-1 ){
+                                        list.add( "+"+lineStr.get( i ) );
+                                    }else
+                                        list.add( lineStr.get( i ) );
+                                }
                             }
 
-
+                            Ut.addContact ( getApplicationContext(), list );
                             //Ut.contactAdd2( getApplicationContext(), lineStr );
                             runOnUiThread(new Runnable() {
                                 @Override
@@ -316,11 +323,10 @@ public class MainActivity extends AppCompatActivity {
                                     tvLog.setText("通讯录添加完成");
                                 }
                             });
-
                         }
-
                     }
                 }).start();
+
 
             }
         });
@@ -725,10 +731,10 @@ public class MainActivity extends AppCompatActivity {
 
     @Override
     protected void onResume() {
-                Log.d(TAG, "onResume: " );
+        Log.d(TAG, "onResume: " );
         //if ( HookShare.boolIsPackageEmpty()!=true )
-         if (HookShare.returnSelectedPackages( HookShare.pathPackages )==null)
-            MyUi.dialogShow( new String[]{ "未指定app" },MainActivity.this );
+//         if (HookShare.returnSelectedPackages( HookShare.pathPackages )==null)
+//            MyUi.dialogShow( new String[]{ "未指定app" },MainActivity.this );
         super.onResume();
     }
 
@@ -901,7 +907,8 @@ public class MainActivity extends AppCompatActivity {
         
         EditText et_path=( EditText )  findViewById( R.id.et_path );
         Switch sw_script_watch= (Switch)findViewById( R.id.sw_script_watch );
-        String uiJson=MyFile.readFileToString( HookShare.PATH_UI_SETTING );
+       // String uiJson=MyFile.readFileToString( HookShare.PATH_UI_SETTING );
+        String uiJson=MyFile.readFileToString( uiPath );
         JSONObject jsonObject = null;
 
         
@@ -909,7 +916,7 @@ public class MainActivity extends AppCompatActivity {
             jsonObject=JSON.parseObject(uiJson);
             //if (jsonObject.containsKey( "et_path" ));
             jsonObject= setUiDefault( jsonObject,"et_path","/sdcard/Download" );
-            jsonObject= setUiDefault( jsonObject,"sw_script_watch",false );
+            jsonObject= setUiDefault( jsonObject,"sw_script_watch",true );
             jsonObject= setUiDefault( jsonObject,"sw_scriptBootedRun",true );
             jsonObject= setUiDefault( jsonObject,"et_pkgName","com.rf.icon" );
             jsonObject= setUiDefault( jsonObject,"sw_enable_para",false );
@@ -918,9 +925,9 @@ public class MainActivity extends AppCompatActivity {
             //defult value
             jsonObject=new JSONObject();
             jsonObject.put( "et_path","/sdcard/Download" );
-            jsonObject.put( "sw_script_watch", false );
+            jsonObject.put( "sw_script_watch", true );
             jsonObject.put( "sw_scriptBootedRun", true );
-            jsonObject.put( "et_pkgName", "com.apple" );
+            jsonObject.put( "et_pkgName", "com.rf.icon" );
             jsonObject.put( "sw_enable_para", false );
 
         }
@@ -932,6 +939,10 @@ public class MainActivity extends AppCompatActivity {
         sw_enable_para.setChecked( jsonObject.getBoolean( "sw_enable_para" )  );
 
         Log.d(TAG, "loadUiSetting: finish");
+        if (!new File(uiPath).exists() ){
+            saveUiSetting();
+        }
+
 //        MyFile.fileWriterTxt( HookShare.PATH_UI_SETTING,jsonObject.toJSONString() );
 
     }
@@ -967,8 +978,9 @@ public class MainActivity extends AppCompatActivity {
                           }
         );
 
-        MyFile.fileWriterTxt( HookShare.PATH_UI_SETTING,jsonObject.toJSONString() );
-        logUi("保存完成");
+        //MyFile.fileWriterTxt( HookShare.PATH_UI_SETTING,jsonObject.toJSONString() );
+        MyFile.fileWriterTxt(  uiPath,jsonObject.toJSONString());
+          logUi("保存完成");
 
     }
 
