@@ -1,4 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
-  <component name="Encoding" addBOMForNewFiles="with NO BOM" />
+  <component name="Encoding">
+    <file url="file://$USER_HOME$/AppData/Local/Google/AndroidStudio2020.3/device-explorer/oneplus-hd1901-B4A2D8683ECD/data/data/net.s17s.s17ray/databases/quickq_6.3.data-shm" charset="ISO-8859-1" />
+  </component>
 </project>

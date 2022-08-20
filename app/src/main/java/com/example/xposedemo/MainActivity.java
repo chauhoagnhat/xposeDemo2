@@ -80,6 +80,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.UUID;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.TimeUnit;
 import java.util.regex.Matcher;
@@ -87,7 +88,6 @@ import java.util.regex.Pattern;
 
 
 public class MainActivity extends AppCompatActivity {
-
 
     private String TAG = "MainActivity";
     TelephonyManager tm;
@@ -126,6 +126,13 @@ public class MainActivity extends AppCompatActivity {
         //testPhone();
         loadUiSetting();
 
+        Log.d(TAG, "onCreate: tele="+Ut.getSystemProperties( "gsm.sim.operator.alpha" ) ); //中国电信
+        Log.d(TAG, "onCreate: tele="+Ut.getSystemProperties( "gsm.sim.operator.iso-country" ) );//c
+        Log.d(TAG, "onCreate: tele="+Ut.getSystemProperties( "gsm.sim.operator.numeric" ) );//46011
+        Log.d(TAG, "onCreate: tele="+Ut.getSystemProperties( "gsm.network.type" ) ); //lte
+        Log.d(TAG, "onCreate: tele="+Ut.getSystemProperties( "gsm.operator.numeric" ) );
+
+
 //        volumeChangeObserver=
 //                new VolumeChangeObserver( getApplicationContext() ) ;
 //        volumeChangeObserver.registerReceiver();
@@ -154,6 +161,35 @@ public class MainActivity extends AppCompatActivity {
         startWatchService();
         //boolStartScript();
 
+    }
+
+    public void testDevice(){
+//        val build = "Build.BOARD:${Build.BOARD}\n" +
+//                "Build.BOOTLOADER:${Build.BOOTLOADER}\n" +
+//                "Build.BRAND:${Build.BRAND}\n" +
+//                "Build.DEVICE:${Build.DEVICE}\n" +
+//                "Build.DISPLAY:${Build.DISPLAY}\n" +
+//                "Build.FINGERPRINT:${Build.FINGERPRINT}\n" +
+//                "Build.HARDWARE:${Build.HARDWARE}\n" +
+//                "Build.HOST:${Build.HOST}\n" +
+//                "Build.ID:${Build.ID}\n" +
+//                "Build.MANUFACTURER:${Build.MANUFACTURER}\n" +
+//                "Build.MODEL:${Build.MODEL}\n" +
+//                "Build.PRODUCT:${Build.PRODUCT}\n" +
+//                "Build.TIME:${Build.TIME}\n" +
+//                "Build.TYPE:${Build.TYPE}\n" +
+//                "Build.USER:${Build.USER}\n" +
+//                "Build.Partition.PARTITION_NAME_SYSTEM:${Build.Partition.PARTITION_NAME_SYSTEM}\n" +
+//                "Build.VERSION.BASE_OS:${Build.VERSION.BASE_OS}\n" +
+//                "Build.VERSION.CODENAME:${Build.VERSION.CODENAME}\n" +
+//                "Build.VERSION.INCREMENTAL:${Build.VERSION.INCREMENTAL}\n" +
+//                "Build.VERSION.PREVIEW_SDK_INT:${Build.VERSION.PREVIEW_SDK_INT}\n" +
+//                "Build.VERSION.RELEASE:${Build.VERSION.RELEASE}\n" +
+//                "Build.VERSION.SDK_INT:${Build.VERSION.SDK_INT}\n" +
+//                "Build.VERSION.SECURITY_PATCH:${Build.VERSION.SECURITY_PATCH}\n"
+////————————————————
+////        版权声明：本文为CSDN博主「清霜之辰」的原创文章，遵循CC 4.0 BY-SA版权协议，转载请附上原文出处链接及本声明。
+////        原文链接：https://blog.csdn.net/CSqingchen/article/details/51304429
     }
 
     private void setVersion() {
@@ -1000,11 +1036,13 @@ public class MainActivity extends AppCompatActivity {
     public void startWatchService(){
 
         Context context=getApplicationContext();
+
         if ( Ut.isServiceRunning( context,AlarmService.class.getName())==false ){
             Log.d(TAG, "startWatchService: AlarmService not run.start..");
             Intent serIntent= new Intent( context, AlarmService.class);
             serIntent.addFlags( Intent.FLAG_ACTIVITY_NEW_TASK );
             serIntent.addFlags( Intent.FLAG_ACTIVITY_CLEAR_TASK );
+
             if(Build.VERSION.SDK_INT>=Build.VERSION_CODES.O){
                 Log.d(TAG, "startWatchService: startForegroundService" );
                 context.startForegroundService(serIntent);

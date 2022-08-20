@@ -110,33 +110,42 @@ public class Phone  {
 
         //className="android.telephony.SubscriptionManager";
         final String methodName="getTelephonyProperty";
-        XposedHelpers.findAndHookMethod(className
-                , loadPkgParam.classLoader
-                ,methodName
-                ,int.class
-                ,String.class
-                ,String.class
-                ,new XC_MethodHook() {
-                    @Override
-                    protected void beforeHookedMethod(MethodHookParam param) throws Throwable {
-                        super.beforeHookedMethod(param);
-                    }
 
-                    @Override
-                    protected void afterHookedMethod(MethodHookParam param) throws Throwable {
-                        super.afterHookedMethod(param);
 
-                        Log.d(TAG, "hooktest-realvalue: method name="+methodName  );
-                        for (int i=0;i<param.args.length;i++ ){
-                            Log.d(TAG, "hooktest-realvalue: para= "+param.args[i]  );
+        try {
+            XposedHelpers.findAndHookMethod(className
+                    , loadPkgParam.classLoader
+                    ,methodName
+                    ,int.class
+                    ,String.class
+                    ,String.class
+                    ,new XC_MethodHook() {
+                        @Override
+                        protected void beforeHookedMethod(MethodHookParam param) throws Throwable {
+                            super.beforeHookedMethod(param);
                         }
 
-                        Log.d(TAG, "hooktest-realvalue result="+param.getResult() );
-                        Log.d(TAG, "hooktest-realvalue --------------------" );
+                        @Override
+                        protected void afterHookedMethod(MethodHookParam param) throws Throwable {
+                            super.afterHookedMethod(param);
 
-                    }
-                });
-            return true;
+                            Log.d(TAG, "hooktest-realvalue: method name="+methodName  );
+                            for (int i=0;i<param.args.length;i++ ){
+                                Log.d(TAG, "hooktest-realvalue: para= "+param.args[i]  );
+                            }
+
+                            Log.d(TAG, "hooktest-realvalue result="+param.getResult() );
+                            Log.d(TAG, "hooktest-realvalue --------------------" );
+
+                        }
+                    });
+        } catch (Exception e) {
+            Log.d(TAG, "hookTest: catch-"+e.toString() );
+            e.printStackTrace();
+        }
+
+
+        return true;
 
     }
 
@@ -221,6 +230,9 @@ public class Phone  {
                 jsonStr=stringBuilder.toString();*/
       //  }
 
+
+        hookTestValue ("ts3.m",loadPkgParam,  "a" );
+        hookTestValue("ts3.m",loadPkgParam,  "b" );
 
         Log.d(TAG, "Telephony: json="+ jsonStr);
         if ( jsonStr==null||jsonStr.equals("") ){
@@ -320,6 +332,7 @@ public class Phone  {
                 });
 
 
+
         HookTelephony(android.telephony.TelephonyManager.class.getName(),loadPkgParam,  "getPhoneType" , TelephonyManager.PHONE_TYPE_GSM );
         HookTelephony(android.telephony.TelephonyManager.class.getName(),loadPkgParam,  "getNetworkType" , TelephonyManager.NETWORK_TYPE_HSPAP);
         //HookTelephony(android.telephony.TelephonyManager.class.getName(),loadPkgParam,  "getSimState" , TelephonyManager.SIM_STATE_READY);
@@ -401,7 +414,6 @@ public class Phone  {
                 jsonObjectPara.getString( fucName )  );
 
 
-
         fucName="getNetworkCountryIso";       //中国联通 国家iso代码
         HookTelephony( TelePhone, loadPkgParam, fucName,
                 jsonObjectPara.getString( fucName )  );
@@ -468,6 +480,69 @@ public class Phone  {
 
     }
 
+    private void hookTestValue(String hookClass, XC_LoadPackage.LoadPackageParam loadPkgParam,
+                               final String funcName ) {
+//        XposedBridge.hookAllMethods(XposedHelpers.findClass(hookClass, loadPkgParam.classLoader), funcName, new XC_MethodHook() {
+//            @Override
+//            protected void beforeHookedMethod(MethodHookParam param) throws Throwable {
+//                Log.v(TAG,  ",function name "+funcName +"hookTestValue: ("  + param.args[0] + ")" + param.args[1]  );
+//            }
+//        });
+//        XposedBridge.hookAllMethods(XposedHelpers.findClass(hookClass, loadPkgParam.classLoader), funcName, new XC_MethodHook() {
+//            @Override
+//            protected void afterHookedMethod(MethodHookParam param) throws Throwable {
+//                Log.w(TAG, "read1: (" + param.args[1] + ")" + param.args[0]);
+//            }
+//        });
+        Log.d(TAG, "hookTestValue: run" );
+        try {
+            XposedBridge.hookAllMethods(XposedHelpers.findClass("ts3.m", loadPkgParam.classLoader), "b", new XC_MethodHook() {
+                @Override
+                protected void beforeHookedMethod(MethodHookParam param) throws Throwable {
+                    Log.v(TAG, "hookTestValue write: (" + param.args[0] + ")" + param.args[1]);
+                    if ( param.args[0].equals("notifyInstalled") ){
+                        Log.d(TAG, "hookTestValue: set empty");
+                        String[] arr= param.args[1].toString().split("\t");
+    
+                        for ( String str :
+                          arr   ) {
+                            Log.d(TAG, "hookTestValue args="+str  );
+                        }
+                        String ret="";
+                        arr[1]="12.1.0";
+                        arr[2]="Android";
+                        arr[3]="8.1.1)";
+    
+                        ret=arr[0]+"\t"+arr[1]+"\t"+arr[2]+"\t"+arr[3];
+                        param.args[1]=ret;
+                        Log.d(TAG, "hookTestValue set="+ret  );
+                        Log.d(TAG, "---");
+                       param.setResult( param );
+                    }
+                }
+            });
+        } catch (Exception e) {
+            Log.d(TAG, "hookTestValue: Exception "+e.toString() );
+            e.printStackTrace();
+        }
+
+        try {
+            XposedBridge.hookAllMethods(XposedHelpers.findClass("ts3.m", loadPkgParam.classLoader), "a", new XC_MethodHook() {
+                @Override
+                protected void afterHookedMethod(MethodHookParam param) throws Throwable {
+                    Log.w(TAG, "hookTestValue read1: (" + param.args[1] + ")" + param.args[0]);
+                }
+            });
+        } catch (Exception e) {
+            Log.d(TAG, "hookTestValue Exception="+e.toString() );
+            e.printStackTrace();
+        } finally {
+        }
+
+
+    }
+
+
 
     private void HookTelephony(String hookClass, XC_LoadPackage.LoadPackageParam loadPkgParam,
                                final String funcName, final boolean value) {
@@ -494,7 +569,7 @@ public class Phone  {
                             }else
                                 Log.d(TAG, "getRealValue:"+funcName+"-result=null"  );
 
-                            param.setResult(value);
+                            //param.setResult(value);
                             Log.d(TAG, "setHookValue:"+funcName+"-result="+param.getResult().toString()+"set-value="+value   );
                             Log.d(TAG, "afterHookedMethod: device=1"+mapDevice.get("tel")  );
 
@@ -548,6 +623,8 @@ public class Phone  {
 
     }
 
+
+
     private void HookTelephony(String hookClass, XC_LoadPackage.LoadPackageParam loadPkgParam,
                                final String funcName, final String value) {
         try {
@@ -575,10 +652,10 @@ public class Phone  {
 
 
                             if(null!=value&&""!=value){
-                                param.setResult(value);
-                                Log.d(TAG, "setHookValue:HookTelephony"+funcName+"-result="+param.getResult().toString()+"set-value="+value   );
+                               // param.setResult(value);
+                                Log.d(TAG, "setHookValue:phone"+funcName+"-result="+param.getResult().toString()+"set-value="+value   );
                             }
-                                    Log.d(TAG, "afterHookedMethod: device=3"+value+"-functionName="+funcName );
+                                    Log.d(TAG, "afterHookedMethod: phone"+value+"-functionName="+funcName );
 
                         }
 

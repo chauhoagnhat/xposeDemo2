@@ -51,14 +51,20 @@ android {
     }*/
 }
 
+configurations {
+    cleanedAnnotations
+    compile.exclude group: 'org.jetbrains' , module:'annotations'
+}
 
 dependencies {
+
     implementation 'com.google.android.material:material:1.4.0'
     implementation 'androidx.navigation:navigation-fragment:2.3.5'
     implementation 'androidx.navigation:navigation-ui:2.3.5'
     implementation 'org.jetbrains:annotations-java5:15.0'
     implementation files('libs\\simplename-20170918.jar')
-
+    implementation files('libs\\commons-io-2.6.jar')
+    implementation 'com.squareup.okhttp3:okhttp:4.4.1'
 
     //implementation fileTree(dir: 'libs', include: ['*.jar'])
     compileOnly fileTree(dir: 'libs', include: ['*.jar'])

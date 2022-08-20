@@ -610,6 +610,7 @@ public class ChAntHook implements IXposedHookLoadPackage{
         });
     }
 
+
     /**
      * 加载所有首选项，如关键字，命令等。
      */

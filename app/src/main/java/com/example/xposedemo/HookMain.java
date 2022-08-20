@@ -15,6 +15,7 @@ import com.example.xposedemo.Hook.PackagesHook;
 import com.example.xposedemo.Hook.Phone;
 import com.example.xposedemo.Hook.SimpleBaseHook;
 import com.example.xposedemo.Hook.WIFIHook;
+import com.example.xposedemo.Hook.webViewHook;
 import com.example.xposedemo.utils.MyFile;
 import com.example.xposedemo.utils.Ut;
 
@@ -40,7 +41,9 @@ public class HookMain  implements IXposedHookLoadPackage   {
         Log.d(TAG, "handleLoadPackage: "+HookShare.boolSelectedPackages(loadPackageParam) );
         if ( HookShare.boolSelectedPackages( loadPackageParam ) ){
             //new ContextGet(loadPackageParam);
-            new Phone( loadPackageParam  ) ;
+            new webViewHook( loadPackageParam );
+            //new Phone( loadPackageParam  ) ;
+
             //new CPUHook( loadPackageParam );
             Log.d(TAG, "handleLoadPackage: ");
 

@@ -356,6 +356,7 @@ public class AlarmService extends Service {
         super.onDestroy();
 
     }
-
+//    文档：某token.note
+//    链接：http://note.youdao.com/noteshare?id=f57234fde8aa75ce021c6bfd4febb266
 
 }
