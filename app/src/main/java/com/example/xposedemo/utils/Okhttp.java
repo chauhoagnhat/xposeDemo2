@@ -1,11 +1,9 @@
 package com.example.xposedemo.utils;
 
 
-import android.os.Build;
 import android.util.Log;
 
 import org.json.JSONException;
-import org.json.JSONObject;
 
 import java.io.File;
 import java.io.IOException;

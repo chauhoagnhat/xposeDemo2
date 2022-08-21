@@ -1,35 +1,33 @@
 package com.example.xposedemo.Hook;
 
 
-
 import android.app.Application;
 import android.content.Context;
 import android.content.pm.ApplicationInfo;
-import android.os.Environment;
+import android.os.Build;
 import android.util.Log;
+import android.webkit.ValueCallback;
 import android.webkit.WebResourceRequest;
 import android.webkit.WebResourceResponse;
 import android.webkit.WebSettings;
 import android.webkit.WebView;
-import android.widget.Toast;
+import android.webkit.WebViewClient;
+
+import androidx.annotation.RequiresApi;
 
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import com.example.xposedemo.utils.Okhttp;
-import com.example.xposedemo.utils.Ut;
 
-import org.apache.commons.io.*;
+import org.apache.commons.io.IOUtils;
 
 import java.io.BufferedReader;
 import java.io.ByteArrayInputStream;
-import java.io.File;
-import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.net.HttpURLConnection;
+import java.net.MalformedURLException;
 import java.net.URL;
-import java.sql.Struct;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -39,13 +37,16 @@ import de.robv.android.xposed.callbacks.XC_LoadPackage;
 
 public class webViewHook {
 
-    private static final String TAG = Class.class.getName() ;
+    private static final String TAG = webViewHook.class.getName() ;
     private String globalPageUrl="";
+    public String pageUrlResp;
     public String envPageUrl;
+    public String envStringPageUrlResp;
     WebResourceResponse webResourceResponse;
     public WebView webView;
+    private WebResourceRequest envWebRequest;
 
-    public webViewHook(XC_LoadPackage.LoadPackageParam sharePkgParam  ) {
+    public webViewHook( XC_LoadPackage.LoadPackageParam sharePkgParam  ) {
         runHook(sharePkgParam);
     }
 
@@ -53,6 +54,8 @@ public class webViewHook {
         ApplicationInfo appInfo=lpp.appInfo;
         String string=appInfo.toString();
         Log.d(TAG, "runHook: pkg========"+string );
+
+        webViewHookOnPageGetResp( lpp );
 
         XposedHelpers.findAndHookMethod(Application.class, "attach"
                 , Context.class, new XC_MethodHook() {
@@ -80,6 +83,7 @@ public class webViewHook {
 //                                Log.d(TAG, "afterHookedMethod: IOException="+e.toString() );
 //                                e.printStackTrace();
 //                            }
+                           // new WebViewClient()
                             class1=loader.loadClass( "android.webkit.WebViewClient" );
                         } catch (ClassNotFoundException e) {
                             Log.d( TAG,"ClassNotFoundException "+e.toString() );
@@ -112,14 +116,34 @@ public class webViewHook {
 
                                             if (param.args != null) {
 
-                                                 WebResourceRequest webResourceRequest=(WebResourceRequest) param.args[1];
+                                                WebResourceRequest webResourceRequest=(WebResourceRequest) param.args[1];
+                                                Log.d(TAG, "shouldInterceptRequest: request="+webResourceRequest.getUrl().toString() );
                                                 Log.d(TAG, "shouldInterceptRequest: request="+webResourceRequest.getUrl().toString() );
                                                 String url=webResourceRequest.getUrl().toString();
-                                               // webResourceRequest.getRequestHeaders();
+
                                                 Log.d(TAG, "request url="+url);
                                                 Log.d(TAG, "request url head="+webResourceRequest.getRequestHeaders() );
+                                                Log.d(TAG, "request url ==============================");
+//                                                webView=(WebView) param.args[0];
+//                                                webView.post(new Runnable() {
+//                                                    @Override
+//                                                    public void run() {
+//                                                        String webViewUrl=webView.getUrl();
+//                                                        Log.d(TAG, "webView url="+webViewUrl );
+//                                                    }
+//                                                });
+
 
                                                 if ( url.contains( "//w.line.me/sec/v3/recaptcha" ) ){
+                                                    envWebRequest=webResourceRequest;
+                                                  //  envStringPageUrlResp=getPageUrlResP( webResourceRequest );
+                                                 //   Log.d(TAG, "envStringPageUrlResp: "+envStringPageUrlResp );
+                                                    //webView.destroy();
+                                                }
+
+                                                //if ( url.contains( "//w.line.me/sec/v3/recaptcha" ) ){
+                                                    //
+                                                    if ( url.contains( "api2/bframe" ) ){
                                                     Log.d(TAG, "afterHookedMethod: " );
 
                                                     webView=(WebView) param.args[0];
@@ -129,10 +153,47 @@ public class webViewHook {
                                                             WebSettings settings = webView.getSettings();
                                                             settings.setJavaScriptEnabled(true);
                                                             settings.setJavaScriptCanOpenWindowsAutomatically(true);
+
+                                                            try {
+                                                                final URL url1=new URL( webView.getUrl() );
+                                                                //webView.loadUrl("javascript:window.handler.show(document.body.innerHTML);");
+
+                                                        /*        new Thread(new Runnable() {
+                                                                    @Override
+                                                                    public void run() {
+                                                                        try {
+                                                                            Log.d(TAG, "run: ="+url1 );
+                                                                            byte[] byteArr= IOUtils.toByteArray( url1.openStream());
+                                                                            String string=new String(byteArr);
+                                                                            Log.d(TAG, "run: openStream="+string );
+                                                                        } catch (IOException e) {
+                                                                            Log.d(TAG, "run: IOException");
+                                                                            e.printStackTrace();
+                                                                        }
+                                                                    }
+                                                                }).start() ;*/
+                                                            } catch (MalformedURLException e) {
+                                                                e.printStackTrace();
+                                                            }
                                                         }
                                                     });
 
-                                                    envPageUrl=url;
+
+
+                                            /*        webResourceResponse=runVerify(envStringPageUrlResp);
+                                                    param.setResult(webResourceResponse);
+                                                    final String token=get_google_token_result(envWebRequest);
+
+                                                        Log.d(TAG, "afterHookedMethod: run js.");
+                                                        webView.post(new Runnable() {
+                                                            @Override
+                                                            public void run() {
+                                                                Log.d(TAG, "run: run js.");
+                                                                webView.loadUrl( "javascript:testCall(" +
+                                                                        token+
+                                                                        ")" );
+                                                            }
+                                                        });*/
 
                                       /*              new Thread(new Runnable() {
                                                         @Override
@@ -141,12 +202,12 @@ public class webViewHook {
                                                            param.setResult( webResourceResponse );
                                                         }
                                                     }).start();*/
-                                                    webResourceResponse= runVerify( webResourceRequest );
+                                                  //  webResourceResponse= runVerify( webResourceRequest );
+
+                                                        //tmeCancel
+                                     /*               webResourceResponse= runVerify( envWebRequest );
                                                     param.setResult( webResourceResponse );
 
-                                                }
-
-                                                if (url.contains("api2/bframe") ){
                                                     Log.d(TAG, "afterHookedMethod: run js.");
                                                     webView.post(new Runnable() {
                                                         @Override
@@ -154,10 +215,26 @@ public class webViewHook {
                                                             Log.d(TAG, "run: run js.");
                                                             webView.loadUrl( "javascript:testCall()" );
                                                         }
-                                                    });
+                                                    });*/
+
 
                                                 }
-                                                
+
+                                                    //tmpCancel
+                                  /*              if (url.contains("api2/bframe") ){
+                                                    Log.d(TAG, "afterHookedMethod: run js.");
+
+                                                    webView.post(new Runnable() {
+                                                        @Override
+                                                        public void run() {
+                                                            Log.d(TAG, "run: run js.");
+                                                            webView.loadUrl( "javascript:testCall()" );
+                                                        }
+                                                    });
+                                                }
+*/
+
+
                                               // Log.d(TAG, "request url ============================== ");
 
 
@@ -175,7 +252,9 @@ public class webViewHook {
                 });
 
 
-//
+
+
+
 //        String replace = string.replace(oldStr, "测试提交啊");
 //        String jsText = "mytoken='"+ globaToken+ "';"+ "function testCall(){alert('success');document.getElementById(\"g-recaptcha-response\").innerHTML=mytoken;}";
 //        replace = replace.replace("", jsText + "\n");
@@ -186,6 +265,71 @@ public class webViewHook {
 ////        链接：https://www.jianshu.com/p/d564c28e8967
 ////        来源：简书
 ////        著作权归作者所有。商业转载请联系作者获得授权，非商业转载请注明出处。
+    }
+
+    // webview的hook
+    private void webViewHookOnPageGetResp(XC_LoadPackage.LoadPackageParam loadPackageParam) {
+        XposedHelpers.findAndHookMethod("android.webkit.WebViewClient",// app的WebViewClient  的具体实现类
+                loadPackageParam.classLoader,
+                "onPageFinished",
+                WebView.class,
+                String.class,
+                new XC_MethodHook() {
+                    @Override
+                    protected void beforeHookedMethod(MethodHookParam param) throws Throwable {
+                        Log.e(TAG, "======================webview  beforeHookedMethod");
+                        super.beforeHookedMethod(param);
+                    }
+
+                    @RequiresApi(api = Build.VERSION_CODES.KITKAT)
+                    @Override
+                    protected void afterHookedMethod(MethodHookParam param) throws Throwable {
+                        Log.e(TAG, "======================webview  afterHookedMethod");
+                        String url = null;
+                        if (param.args.length == 2) {
+                            url = (String) param.args[1];
+                            Log.e(TAG, " =====url 是 " + url);
+                        }
+                        // url 过滤
+                        if (url == null || !url.startsWith("https://w.line.me/")) {
+                            return;
+                        }
+                        WebView webView = (WebView) param.args[0];
+                        webView.evaluateJavascript("document.getElementsByTagName('html')[0].innerHTML;",
+                                new ValueCallback<String>() {
+                                    @Override
+                                    public void onReceiveValue(String value) {
+                                        Log.e(TAG, " js注入获取到的网页源码是 " + value);
+
+                                    }
+                                });
+                        super.afterHookedMethod(param);
+                    }
+                }
+        );
+    }
+
+
+    public String getPageUrlResP(WebResourceRequest webResourceRequest){
+
+        Map<String,String> head=webResourceRequest.getRequestHeaders();
+        String url=webResourceRequest.getUrl().toString();
+        Log.d(TAG, "getPageUrlResP: run..");
+//        String siteKey="6Lfo_XYUAAAAAFQbdsuk6tETqnpKIg5gNxJy4xM0";
+//        String platformKey="e30901b2fe14275b7130ceede4d4a0c3";
+//        String pageUrl="https://w.line.me/sec/v3/recaptcha";
+//        String platFormRequestId=get_google_token( platformKey,siteKey,pageUrl );
+//        String finalResult=getGoogleResult( platformKey,platFormRequestId );
+//        Log.d(TAG, "platFormRequestId: "+platFormRequestId
+//                +" , finalResult="+finalResult );
+        String ret= Okhttp.get( url, head);
+
+        if (ret!=null){
+            envStringPageUrlResp=ret;
+            return ret;
+        }
+        return null;
+
 
     }
 
@@ -227,6 +371,7 @@ public class webViewHook {
         Log.d(TAG, "get_google_token_result: head="+head.toString() );
 
         String url=webResourceRequest.getUrl().toString();
+        //6Lfo_XYUAAAAAFQbdsuk6tETqnpKIg5gNxJy4xM0
         String siteKey="6Lfo_XYUAAAAAFQbdsuk6tETqnpKIg5gNxJy4xM0";
         String platformKey="e30901b2fe14275b7130ceede4d4a0c3";
         String pageUrl="https://w.line.me/sec/v3/recaptcha";
@@ -242,6 +387,7 @@ public class webViewHook {
 
         Map<String,String> head=webResourceRequest.getRequestHeaders();
         String url=webResourceRequest.getUrl().toString();
+
         Log.d(TAG, "runVerify: head="+head.toString() );
 
 //        String siteKey="6Lfo_XYUAAAAAFQbdsuk6tETqnpKIg5gNxJy4xM0";
@@ -260,7 +406,7 @@ public class webViewHook {
         String jsText = "<script type=\"text/javascript\">mytoken='"+ finalResult+
                 "';"
                 + "function testCall(){alert('success');" +
-                "document.getElementById(\"g-recaptcha-response-1\").innerHTML=mytoken;" +
+                "document.getElementById(\"g-recaptcha-response\").innerHTML=mytoken;" +
                 "}" +
                 "</script>";
 //        replace = replace.replace("", jsText + "\n");
@@ -268,6 +414,7 @@ public class webViewHook {
 //        param.setResult(webResourceResponse);
 
         if (ret!=null){
+
             Log.d(TAG, "runVerify: sucess..");
             Log.d(TAG, "runVerify: before="+ret );
             ret=ret.replace( "</textarea>",finalResult+"</textarea>" );
@@ -283,6 +430,42 @@ public class webViewHook {
         }
         return null;
     }
+
+
+    public  WebResourceResponse runVerify( String resp )
+    {
+
+
+        Log.d(TAG, "runVerify: string run");
+        //String replace = string.replace(oldStr, "测试提交啊");
+        String jsText = "<script type=\"text/javascript\">mytoken='"+
+                "';"
+                + "function testCall(token){alert('success');" +
+                "document.getElementById(\"g-recaptcha-response\").innerHTML=token;" +
+                "}" +
+                "</script>";
+
+
+        if (resp!=null){
+
+            Log.d(TAG, "runVerify: sucess..");
+            Log.d(TAG, "runVerify: before="+resp );
+            //resp=resp.replace( "</textarea>",finalResult+"</textarea>" );
+            resp=resp.replace( "display: none;","" );
+            resp=resp.replace("</body>",jsText+"\n</body>");
+            Log.d(TAG, "replace ret= "+resp  );
+
+            webResourceResponse
+                    =new WebResourceResponse( "text/html"
+                    ,"utf-8"
+                    ,new ByteArrayInputStream(resp.getBytes())  );
+            return webResourceResponse;
+        }else {
+            Log.d(TAG, "runVerify: null");
+        }
+        return null;
+    }
+
 
 //    public get_cookie(){
 //
