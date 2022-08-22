@@ -74,6 +74,9 @@ import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.LinkedBlockingQueue;
+import java.util.regex.MatchResult;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 
 public class Ut {
@@ -941,6 +944,27 @@ public class Ut {
         }
     }
 
+static public List<String> regexp( String pattern,String str ){
+    //https://github.com/google/re2/wiki/Syntax
+        //    Pattern p=Pattern.compile( "siteKey: '([\\w]{30,100})'" );
+    Pattern p=Pattern.compile( pattern );
+    Matcher m=p.matcher(str);
+    Boolean isFind = m.find();
+
+    if(isFind){
+        Log.d(TAG, "regexp: find "+pattern);
+        List<String> ret=new ArrayList<>();
+        for (int i=0;i<=m.groupCount();i++ ){
+            ret.add( m.group(i) );
+        }
+        return ret;
+        
+    }else {
+        Log.d(TAG, "regexp: find false");
+    }
+
+    return null;
+}
 
     /**
      * 获取uuid

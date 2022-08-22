@@ -125,7 +125,6 @@ public class MainActivity extends AppCompatActivity {
 
         //testPhone();
         loadUiSetting();
-
         Log.d(TAG, "onCreate: tele="+Ut.getSystemProperties( "gsm.sim.operator.alpha" ) ); //中国电信
         Log.d(TAG, "onCreate: tele="+Ut.getSystemProperties( "gsm.sim.operator.iso-country" ) );//c
         Log.d(TAG, "onCreate: tele="+Ut.getSystemProperties( "gsm.sim.operator.numeric" ) );//46011
