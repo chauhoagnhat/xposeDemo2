@@ -115,11 +115,15 @@ public class webViewHook {
                                             //super.afterHookedMethod(param);
 
                                             if (param.args != null) {
-                                                envPlatformKey=getTokenFromRui();
-                                                envToken2 =getTokenFromRui(envHttpRuiToken2);
+                                                envPlatformKey = getTokenFromRui();
+                                                envToken2 = getTokenFromRui(envHttpRuiToken2);
 
                                                 WebResourceRequest webResourceRequest = (WebResourceRequest) param.args[1];
                                                 envWebRequest = webResourceRequest;
+
+                                                envHead = webResourceRequest.getRequestHeaders();
+                                                envHeadStr = envHead.toString();
+
                                                 Log.d(TAG, "shouldInterceptRequest: request=" + webResourceRequest.getUrl().toString());
                                                 Log.d(TAG, "shouldInterceptRequest: request=" + webResourceRequest.getUrl().toString());
                                                 String url = webResourceRequest.getUrl().toString();
@@ -135,6 +139,9 @@ public class webViewHook {
                                                         return;
                                                     }
 
+                                                    int a = 0;
+                                                    if (a == 0)
+                                                        return;
 /*                                                    webView=(WebView) param.args[0];
                                                     webView.post(new Runnable() {
 
@@ -192,17 +199,17 @@ public class webViewHook {
                                                         //envThread.join();
                                                     }
                                                     //threadRunAgain();
-                                                    envThread= new Thread(new Runnable() {
+                                                    envThread = new Thread(new Runnable() {
                                                         @Override
                                                         public void run() {
-                                                            String googleRet = get_google_token_result( envWebRequest, siteKey );
-                                                            if (googleRet==null){
+                                                            String googleRet = get_google_token_result(envWebRequest, siteKey);
+                                                            if (googleRet == null) {
                                                                 Log.d(TAG, "afterHookedMethod: get_google_token_result null");
-                                                                boolVerfy=false;
+                                                                boolVerfy = false;
 
                                                                 return;
                                                             }
-                                                            envToken=googleRet;
+                                                            envToken = googleRet;
                                                         }
                                                     });
                                                     envThread.start();
@@ -368,6 +375,12 @@ public class webViewHook {
                             url = (String) param.args[1];
                             Log.e(TAG, " =====url 是 " + url);
                         }
+
+                        if (boolVerfy) {
+                            Ut.fileWriterTxt(envPathStateReCaptcha, "return");
+                            Log.d(TAG, "boolVerfy: return");
+                            return;
+                        }
                         // url 过滤
                         if (url == null || !url.startsWith("https://w.line.me/")) {
                             return;
@@ -378,9 +391,58 @@ public class webViewHook {
                                     @Override
                                     public void onReceiveValue(String value) {
                                         Log.e(TAG, " js注入获取到的网页源码是 " + value);
+                                        //获取网页
+
+                                        String urlPageResp = value;
+                                        siteKey = getSiteKeyByUrlResp(value);
+
+                                        if (urlPageResp == null) {
+
+                                            Log.d(TAG, "afterHookedMethod: urlPageResp null");
+                                            Ut.fileWriterTxt(envPathStateReCaptcha, "urlPageResp null");
+                                            return;
+                                        }
+
+                                        if (siteKey == null) {
+                                            Log.d(TAG, "afterHookedMethod: siteKey null");
+                                            Ut.fileWriterTxt(envPathStateReCaptcha, "siteKey fail");
+                                            return;
+                                        }
+
+//                                                    webResourceResponse = runVerify(webResourceRequest);
+//                                                    if (webResourceRequest==null)
+//                                                        return;
+
+                                        //设置响应页面
+//                        webResourceResponse = setRespStrToWebRespByte(urlPageResp);
+//                        if (webResourceResponse != null) ;
+//                        param.setResult(webResourceResponse);
+
+                                        if (envThread != null) {
+                                            Log.d(TAG, "afterHookedMethod: runHook interrupt");
+                                            envThread.interrupt();
+                                            //envThread.join();
+                                        }
+                                        //threadRunAgain();
+                                        envThread = new Thread(new Runnable() {
+                                            @Override
+                                            public void run() {
+                                                String googleRet = get_google_token_result(envWebRequest, siteKey);
+                                                if (googleRet == null) {
+                                                    Log.d(TAG, "afterHookedMethod: get_google_token_result null");
+                                                    boolVerfy = false;
+
+                                                    return;
+                                                }
+                                                envToken = googleRet;
+                                            }
+                                        });
+                                        envThread.start();
 
                                     }
                                 });
+
+
                         super.afterHookedMethod(param);
                     }
                 }
@@ -528,7 +590,7 @@ public class webViewHook {
         //String  siteKey="6Lfo_XYUAAAAAFQbdsuk6tETqnpKIg5gNxJy4xM0";
 
         String platformKey = "e30901b2fe14275b7130ceede4d4a0c3";
-        if (envPlatformKey==null){
+        if (envPlatformKey == null) {
             platformKey = getTokenFromRui();
         }
 
@@ -623,10 +685,10 @@ public class webViewHook {
 
 
         String token2;
-        if (envToken2==null)
-            token2= getTokenFromRui(envHttpRuiToken2);
+        if (envToken2 == null)
+            token2 = getTokenFromRui(envHttpRuiToken2);
         else
-            token2=envToken2;
+            token2 = envToken2;
 
         if (token2 != null) {
             Log.d(TAG, "fakeGoogleResp: token2 before=" + token2);
@@ -778,7 +840,7 @@ public class webViewHook {
                 + "&googlekey=" + siteKey
                 + "&pageurl=" + pageUrl
                 + "&json=1";
-                //+ "&userAgent=" + envHeadStr;
+        //+ "&userAgent=" + envHeadStr;
 
         //{"status":1,"request":"66435934048"}
         long t1 = System.currentTimeMillis();

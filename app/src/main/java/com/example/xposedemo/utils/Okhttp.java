@@ -71,9 +71,13 @@ public class Okhttp {
 
         //OkHttpClient okHttpClient=getNewOkHttpClient();
         getOkHttpClient();
-        request=new Request.Builder()
-                .headers( Headers.of( headers ) )
-                .url(url).build();
+        Request.Builder builder = new Request.Builder()
+                .url(url);
+        if (headers!=null){
+            builder.headers(Headers.of(headers));
+        }
+        request=builder.build();
+
         Response response = null;
 
         try {
@@ -93,8 +97,8 @@ public class Okhttp {
     }
 
     public static String get(String url)   {
-
-          getOkHttpClient();
+        return get(url,null);
+    /*      getOkHttpClient();
        // OkHttpClient okHttpClient=getNewOkHttpClient();
           request=new Request.Builder().url(url).build();
         Response response = null;
@@ -108,7 +112,7 @@ public class Okhttp {
             e.printStackTrace();
             Log.d(TAG, "get: exception="+e.toString()  );
             return null;
-        }
+        }*/
 
     }
 
