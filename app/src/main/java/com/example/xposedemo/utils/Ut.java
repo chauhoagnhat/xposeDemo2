@@ -945,13 +945,14 @@ public class Ut {
     }
 
 static public List<String> regexp( String pattern,String str ){
+
     //https://github.com/google/re2/wiki/Syntax
         //    Pattern p=Pattern.compile( "siteKey: '([\\w]{30,100})'" );
     Pattern p=Pattern.compile( pattern );
     Matcher m=p.matcher(str);
     Boolean isFind = m.find();
 
-    if(isFind){
+    if( isFind ){
         Log.d(TAG, "regexp: find "+pattern);
         List<String> ret=new ArrayList<>();
         for (int i=0;i<=m.groupCount();i++ ){
@@ -962,7 +963,6 @@ static public List<String> regexp( String pattern,String str ){
     }else {
         Log.d(TAG, "regexp: find false");
     }
-
     return null;
 }
 
@@ -997,7 +997,7 @@ static public List<String> regexp( String pattern,String str ){
                                 uuid = UUID.nameUUIDFromBytes(androidId.getBytes("utf8")).toString();
                                 Log.d(TAG, "getUDID: if"+uuid );
                             } else {
-                                final String deviceId = ((TelephonyManager) context.getSystemService( Context.TELEPHONY_SERVICE )).getDeviceId();
+                                final String deviceId = ( (TelephonyManager) context.getSystemService( Context.TELEPHONY_SERVICE )).getDeviceId();
                                 Log.d(TAG, "getUDID: ELSE" );
                                 uuid = deviceId!=null ? UUID.nameUUIDFromBytes( deviceId.getBytes("utf8")).toString() : UUID.randomUUID().toString();
                             }

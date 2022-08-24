@@ -3,6 +3,25 @@
     xmlns:tools="http://schemas.android.com/tools"
     package="com.example.xposedemo">
 
+    <uses-permission android:name="android.permission.READ_PRIVILEGED_PHONE_STATE" />
+    <permission
+        android:name="scut.carson_ho.Read"
+        android:protectionLevel="normal" /> <!-- <uses-permission android:name="android.permission.READ_PRIVILEGED_PHONE_STATE" /> -->
+    <uses-permission android:name="android.permission.ACCESS_WIFI_STATE" />
+    <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
+    <uses-permission android:name="android.permission.READ_PHONE_STATE" />
+    <uses-permission android:name="android.permission.KILL_BACKGROUND_PROCESSES" /> <!-- 接收开机广播权限 -->
+    <uses-permission android:name="android.permission.ACCESS_NOTIFICATION_POLICY" />
+    <uses-permission android:name="android.permission.CHANGE_WIFI_STATE" />
+    <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
+    <uses-permission android:name="android.permission.READ_CONTACTS" />
+    <uses-permission android:name="android.permission.WRITE_CONTACTS" />
+    <uses-feature
+        android:name="org.apache.http.legacy"
+        android:required="false" />
+
     <application
         android:allowBackup="true"
         android:icon="@mipmap/ic_launcher"
@@ -10,33 +29,36 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
+        <meta-data
+            android:name="com.google.android.actions"
+            android:resource="@xml/network_security_config" />
+
         <activity
             android:name=".view.packageShow.Activity_packageShow"
             android:exported="true">
             <intent-filter>
                 <action android:name="Activity_packageShow" />
+
                 <category android:name="android.intent.category.DEFAULT" />
                 <category android:name="Activity_packageShow" />
             </intent-filter>
         </activity>
-
         <activity android:name=".ActivityFunction">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
             </intent-filter>
-        </activity>
-
-        <!-- 是否是xposed模块，xposed根据这个来判断是否是模块 -->
+        </activity> <!-- 是否是xposed模块，xposed根据这个来判断是否是模块 -->
         <activity android:name=".MainActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
+
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity> <!-- 模块描述，显示在xposed模块列表那里第二行 -->
-
         <activity android:name=".view.ActivityPhone">
             <intent-filter>
                 <action android:name="ActivityPhone" />
+
                 <category android:name="android.intent.category.DEFAULT" />
                 <category android:name="Phone" />
             </intent-filter>
@@ -74,25 +96,13 @@
         <service
             android:name=".myService.AlarmService"
             android:enabled="true"
-            android:exported="true" >
+            android:exported="true">
             <intent-filter>
-                <action android:name="com.example.xposedemo.myService.AlarmService.java"/>
+                <action android:name="com.example.xposedemo.myService.AlarmService.java" />
             </intent-filter>
         </service>
-    </application>
 
-    <permission
-        android:name="scut.carson_ho.Read"
-        android:protectionLevel="normal" /> <!-- <uses-permission android:name="android.permission.READ_PRIVILEGED_PHONE_STATE" /> -->
-    <uses-permission android:name="android.permission.ACCESS_WIFI_STATE" />
-    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
-    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
-    <uses-permission android:name="android.permission.READ_PHONE_STATE" />
-    <uses-permission android:name="android.permission.KILL_BACKGROUND_PROCESSES" /> <!-- 接收开机广播权限 -->
-    <uses-permission android:name="android.permission.ACCESS_NOTIFICATION_POLICY" />
-    <uses-permission android:name="android.permission.CHANGE_WIFI_STATE" />
-    <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
-    <uses-permission android:name="android.permission.READ_CONTACTS" />
-    <uses-permission android:name="android.permission.WRITE_CONTACTS" />
+
+    </application>
 
 </manifest>

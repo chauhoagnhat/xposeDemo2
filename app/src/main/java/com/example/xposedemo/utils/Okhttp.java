@@ -7,14 +7,18 @@ import org.json.JSONException;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 
 import okhttp3.FormBody;
 import okhttp3.Headers;
 import okhttp3.MediaType;
 import okhttp3.MultipartBody;
 import okhttp3.OkHttpClient;
+import okhttp3.Protocol;
 import okhttp3.Request;
 import okhttp3.RequestBody;
 import okhttp3.Response;
@@ -30,6 +34,7 @@ public class Okhttp {
     public static OkHttpClient getOkHttpClient() {
         if (okHttpClient==null){
             okHttpClient=new OkHttpClient.Builder()
+                    .retryOnConnectionFailure(true)
                     .readTimeout(timeout,TimeUnit.SECONDS)
                     .writeTimeout(timeout,TimeUnit.SECONDS)
                     .build();
@@ -37,7 +42,21 @@ public class Okhttp {
         return okHttpClient;
     }
 
-    public static void setTimeout( long timeoutB ){
+    public static OkHttpClient getNewOkHttpClient() {
+        //if (okHttpClient==null){
+        List<Protocol> list=new ArrayList<>();
+        list.add(Protocol.HTTP_1_1);
+        list.add(Protocol.HTTP_2);
+        OkHttpClient okHttpClient=new OkHttpClient.Builder()
+                 .protocols(  list )
+                .readTimeout(timeout,TimeUnit.SECONDS)
+                .writeTimeout(timeout,TimeUnit.SECONDS)
+                .build();
+        //}
+        return okHttpClient;
+    }
+
+    public  void setTimeout( long timeoutB ){
         timeout=timeoutB;
         okHttpClient=null;
     }
@@ -50,6 +69,7 @@ public class Okhttp {
      */
     public static String get(String url,Map<String,String> headers)   {
 
+        //OkHttpClient okHttpClient=getNewOkHttpClient();
         getOkHttpClient();
         request=new Request.Builder()
                 .headers( Headers.of( headers ) )
@@ -59,6 +79,10 @@ public class Okhttp {
         try {
             response = okHttpClient.newCall( request).execute();
             String ret=response.body().string();
+            if ( ret.indexOf( "400 Bad Request" )>0 ){
+                Log.d(TAG, "get: 400 Bad Request");
+                return null;
+            }
             return ret;
         } catch (IOException e) {
             e.printStackTrace();
@@ -70,13 +94,15 @@ public class Okhttp {
 
     public static String get(String url)   {
 
-        getOkHttpClient();
-        request=new Request.Builder().url(url).build();
+          getOkHttpClient();
+       // OkHttpClient okHttpClient=getNewOkHttpClient();
+          request=new Request.Builder().url(url).build();
         Response response = null;
 
         try {
             response = okHttpClient.newCall( request).execute();
             String ret=response.body().string();
+            //okHttpClient=null;
             return ret;
         } catch (IOException e) {
             e.printStackTrace();
@@ -104,6 +130,7 @@ public class Okhttp {
         Response response = null;
         try {
             response = okHttpClient.newCall( request).execute();
+            //okHttpClient=null;
             return response.body().string();
         } catch (IOException e) {
             e.printStackTrace();
@@ -178,6 +205,7 @@ public class Okhttp {
         Response response = null;
         try {
             response = okHttpClient.newCall( request).execute();
+            okHttpClient=null;
             return response.body().string();
 
         } catch (IOException e) {

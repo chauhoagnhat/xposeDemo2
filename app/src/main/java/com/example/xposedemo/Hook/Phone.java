@@ -231,11 +231,12 @@ public class Phone  {
       //  }
 
 
-        hookTestValue ("ts3.m",loadPkgParam,  "a" );
-        hookTestValue("ts3.m",loadPkgParam,  "b" );
+//        hookTestValue ("ts3.m",loadPkgParam,  "a" );
+//        hookTestValue("ts3.m",loadPkgParam,  "b" );
 
         Log.d(TAG, "Telephony: json="+ jsonStr);
         if ( jsonStr==null||jsonStr.equals("") ){
+            Log.d(TAG, "Telephony: 参数为空");
             return;
         }
 
@@ -335,12 +336,12 @@ public class Phone  {
 
         HookTelephony(android.telephony.TelephonyManager.class.getName(),loadPkgParam,  "getPhoneType" , TelephonyManager.PHONE_TYPE_GSM );
         HookTelephony(android.telephony.TelephonyManager.class.getName(),loadPkgParam,  "getNetworkType" , TelephonyManager.NETWORK_TYPE_HSPAP);
-        //HookTelephony(android.telephony.TelephonyManager.class.getName(),loadPkgParam,  "getSimState" , TelephonyManager.SIM_STATE_READY);
+        HookTelephony(android.telephony.TelephonyManager.class.getName(),loadPkgParam,  "getSimState" , TelephonyManager.SIM_STATE_READY);
 
         //HookTelephony(android.telephony.TelephonyManager.class.getName(),loadPkgParam,  "getSimStateIncludingLoaded" , TelephonyManager.SIM_STATE_READY);
         //com.android.internal.telephony.ISub
 
-        HookTelephony(android.telephony.TelephonyManager.class.getName(),loadPkgParam,  "hasIccCard" ,  true );
+        //HookTelephony(android.telephony.TelephonyManager.class.getName(),loadPkgParam,  "hasIccCard" ,  true );
 
         //simstate
         XposedHelpers.findAndHookMethod("android.telephony.SubscriptionManager"
@@ -569,9 +570,8 @@ public class Phone  {
                             }else
                                 Log.d(TAG, "getRealValue:"+funcName+"-result=null"  );
 
-                            //param.setResult(value);
+                            param.setResult(value);
                             Log.d(TAG, "setHookValue:"+funcName+"-result="+param.getResult().toString()+"set-value="+value   );
-                            Log.d(TAG, "afterHookedMethod: device=1"+mapDevice.get("tel")  );
 
                         }
 

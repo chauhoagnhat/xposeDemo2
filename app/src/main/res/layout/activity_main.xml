@@ -169,10 +169,9 @@
         </LinearLayout>
 
 
-
         <LinearLayout
             android:layout_width="wrap_content"
-            android:layout_height="50dp">
+            android:layout_height="wrap_content">
 
             <Switch
                 android:id="@+id/sw_scriptBootedRun"
@@ -186,19 +185,33 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:checked="false"
-                android:text="修改参数生效"></Switch>
+                android:text="参数"></Switch>
+
+            <Switch
+                android:id="@+id/sw_tel_simulate"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:checked="false"
+                android:text="模拟sim"></Switch>
 
         </LinearLayout>
 
-
- <!--       <EditText
-            android:id="@+id/et_pkgName"
-            android:layout_width="match_parent"
+        <Switch
+            android:id="@+id/sw_recaptcha"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="com.rf.icon"
-            android:hint="脚本包名"
-            >
-        </EditText>-->
+            android:checked="false"
+            android:text="recaptchaV2(2captcha)"></Switch>
+
+
+        <!--       <EditText
+                   android:id="@+id/et_pkgName"
+                   android:layout_width="match_parent"
+                   android:layout_height="wrap_content"
+                   android:text="com.rf.icon"
+                   android:hint="脚本包名"
+                   >
+               </EditText>-->
 
         <LinearLayout
             android:layout_width="match_parent"

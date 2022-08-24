@@ -41,13 +41,21 @@ public class HookMain  implements IXposedHookLoadPackage   {
         Log.d(TAG, "handleLoadPackage: "+HookShare.boolSelectedPackages(loadPackageParam) );
         if ( HookShare.boolSelectedPackages( loadPackageParam ) ){
             //new ContextGet(loadPackageParam);
-            new webViewHook( loadPackageParam );
-            //new Phone( loadPackageParam  ) ;
+            if (getUiChecked( "sw_recaptcha")){
+                Log.d(TAG, "handleLoadPackage: sw_recaptcha-run");
+                new webViewHook( loadPackageParam );
+            }
+
+            if ( getUiChecked("sw_tel_simulate") ){
+                Log.d(TAG, "handleLoadPackage: sw_tel_simulate-run");
+                new Phone( loadPackageParam  ) ;
+            }
 
             //new CPUHook( loadPackageParam );
             Log.d(TAG, "handleLoadPackage: ");
 
             if ( getUiChecked( "sw_enable_para" ) ){
+                Log.d(TAG, "handleLoadPackage: sw_enable_para-run");
                 Log.d(TAG, "handleLoadPackage: enable BaseHook" );
                 new BaseHook( loadPackageParam );
             }

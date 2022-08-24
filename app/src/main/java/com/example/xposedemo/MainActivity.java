@@ -48,6 +48,7 @@ import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.alibaba.fastjson.TypeReference;
 import com.example.xposedemo.Hook.HookShare;
+import com.example.xposedemo.Hook.webViewHook;
 import com.example.xposedemo.MyProvider.MultiprocessSharedPreferences;
 import com.example.xposedemo.MyProvider.MyOpenHelper;
 import com.example.xposedemo.bean.BaseInfo;
@@ -62,6 +63,7 @@ import com.example.xposedemo.myBroadcast.VolumeChangeObserver;
 import com.example.xposedemo.myService.AlarmService;
 import com.example.xposedemo.utils.MyFile;
 import com.example.xposedemo.utils.MyUi;
+import com.example.xposedemo.utils.Okhttp;
 import com.example.xposedemo.utils.PhoneRndTools;
 import com.example.xposedemo.utils.Ut;
 import com.example.xposedemo.utils.SharedPref;
@@ -125,11 +127,12 @@ public class MainActivity extends AppCompatActivity {
 
         //testPhone();
         loadUiSetting();
-        Log.d(TAG, "onCreate: tele="+Ut.getSystemProperties( "gsm.sim.operator.alpha" ) ); //中国电信
-        Log.d(TAG, "onCreate: tele="+Ut.getSystemProperties( "gsm.sim.operator.iso-country" ) );//c
-        Log.d(TAG, "onCreate: tele="+Ut.getSystemProperties( "gsm.sim.operator.numeric" ) );//46011
-        Log.d(TAG, "onCreate: tele="+Ut.getSystemProperties( "gsm.network.type" ) ); //lte
-        Log.d(TAG, "onCreate: tele="+Ut.getSystemProperties( "gsm.operator.numeric" ) );
+//        Log.d(TAG, "onCreate: tele="+Ut.getSystemProperties( "gsm.sim.operator.alpha" ) ); //中国电信
+//        Log.d(TAG, "onCreate: tele="+Ut.getSystemProperties( "gsm.sim.operator.iso-country" ) );//c
+//        Log.d(TAG, "onCreate: tele="+Ut.getSystemProperties( "gsm.sim.operator.numeric" ) );//46011
+//        Log.d(TAG, "onCreate: tele="+Ut.getSystemProperties( "gsm.network.type" ) ); //lte
+//        Log.d(TAG, "onCreate: tele="+Ut.getSystemProperties( "gsm.operator.numeric" ) );
+
 
 
 //        volumeChangeObserver=
@@ -141,17 +144,16 @@ public class MainActivity extends AppCompatActivity {
 
         viewById = findViewById( R.id.textView );
         viewById.setText("no data");
-        //setSelectedPackges();
-        //testHook();
+
         ui();
        // MyFile.execCmdsforResult( new String[]{ "am force-stop com.tunnelworkshop.postern" } );
 
         if ( getIntent()
                 .getBooleanExtra( HookShare.mainActivityExtra,false ) ){
             getIntent().putExtra(HookShare.mainActivityExtra,false);
-
             //Ut.restartApp( getApplicationContext(),et_pkgName.getText().toString() );
             Log.d(TAG,"启动app，退出");
+
             return;
 
         }
@@ -161,6 +163,36 @@ public class MainActivity extends AppCompatActivity {
         //boolStartScript();
 
     }
+
+
+    public String getTokenFromRui() {
+
+        String envHttpRui="http://54.241.117.38:10000/config?key=recapchaToken";
+        String ret = Okhttp.get(envHttpRui);
+
+        for (int i = 0; i < 4; i++) {
+            if (ret != null) {
+                JSONObject jsonObject = JSON.parseObject(ret);
+                if (jsonObject.getIntValue("code") == 200) {
+                    Log.d(TAG, "getTokenFromRui: suc..");
+                    jsonObject = jsonObject.getJSONObject("data");
+                    jsonObject = jsonObject.getJSONObject("data");
+                    Log.d(TAG, "getTokenFromRui: value="+jsonObject.getString("value_string") );
+                    return jsonObject.getString("value_string");
+                } else {
+//                    toast("get token from rui err-" + ret);
+                    Log.d(TAG, "getTokenFromRui:  err" + ret);
+                }
+            } else {
+//                toast("get token from rui fail");
+                Log.d(TAG, "getTokenFromRui: fail");
+            }
+        }
+
+        return null;
+
+    }
+
 
     public void testDevice(){
 //        val build = "Build.BOARD:${Build.BOARD}\n" +
@@ -589,22 +621,38 @@ public class MainActivity extends AppCompatActivity {
                          }
         );
 
-
     Ut.copyAssetsFile(context,
                 "cpuinfo", "/sdcard/cpuinfo");
+
 
     Ut.copyAssetsFile(context,
                 "mccmncJsonData",
             HookShare.pathNkFolder+"/mccmncJsonData" );
+
+        Log.d(TAG, "assertInit: ret.txt"
+        +  Ut.copyAssetsFile(context,
+                "ret.txt",
+                HookShare.pathNkFolder +"/ret.txt" ) );
+
+        String command = "cp -r -f "+
+                HookShare.pathNkFolder+""
+                + "/ret.txt" + " "
+                + HookShare.pathNkFolderData
+                +"/ret.txt" ;
+
+        MyFile.execCmdsforResult(
+                new String[]{command, "chmod 777 "
+                        +HookShare.pathNkFolderData
+                        +"/ret.txt" } );
+
 /*    File file=new File( HookShare.pathNkFolderData
     +"mccmncJsonData" );*/
 
-       String command = "cp -r -f "+
+                command = "cp -r -f "+
                 HookShare.pathNkFolder+""
                + "/mccmncJsonData" + " "
                + HookShare.pathNkFolderData
                +"/mccmncJsonData" ;
-
 
 
         MyFile.execCmdsforResult(
@@ -634,6 +682,9 @@ public class MainActivity extends AppCompatActivity {
                     }
             );
         }
+
+
+
     }
 
 
@@ -942,19 +993,24 @@ public class MainActivity extends AppCompatActivity {
         
         EditText et_path=( EditText )  findViewById( R.id.et_path );
         Switch sw_script_watch= (Switch)findViewById( R.id.sw_script_watch );
+        Switch sw_recaptcha= (Switch)findViewById( R.id.sw_recaptcha );
+        Switch sw_tel_simulate= (Switch)findViewById( R.id.sw_tel_simulate );
        // String uiJson=MyFile.readFileToString( HookShare.PATH_UI_SETTING );
         String uiJson=MyFile.readFileToString( uiPath );
         JSONObject jsonObject = null;
 
         
         if (uiJson!=""){
+
             jsonObject=JSON.parseObject(uiJson);
-            //if (jsonObject.containsKey( "et_path" ));
             jsonObject= setUiDefault( jsonObject,"et_path","/sdcard/Download" );
             jsonObject= setUiDefault( jsonObject,"sw_script_watch",true );
             jsonObject= setUiDefault( jsonObject,"sw_scriptBootedRun",true );
             jsonObject= setUiDefault( jsonObject,"et_pkgName","com.rf.icon" );
             jsonObject= setUiDefault( jsonObject,"sw_enable_para",false );
+            jsonObject= setUiDefault( jsonObject,"sw_tel_simulate",false );
+            jsonObject= setUiDefault( jsonObject,"sw_recaptcha",true );
+
         }else
         {
             //defult value
@@ -964,6 +1020,8 @@ public class MainActivity extends AppCompatActivity {
             jsonObject.put( "sw_scriptBootedRun", true );
             jsonObject.put( "et_pkgName", "com.rf.icon" );
             jsonObject.put( "sw_enable_para", false );
+            jsonObject.put( "sw_tel_simulate", false );
+            jsonObject.put( "sw_recaptcha", true );
 
         }
 
@@ -972,6 +1030,8 @@ public class MainActivity extends AppCompatActivity {
         sw_scriptBootedRun.setChecked( jsonObject.getBoolean("sw_scriptBootedRun") );
         sw_script_watch.setChecked( jsonObject.getBoolean( "sw_script_watch" )  );
         sw_enable_para.setChecked( jsonObject.getBoolean( "sw_enable_para" )  );
+        sw_tel_simulate.setChecked( jsonObject.getBoolean( "sw_tel_simulate" )  );
+        sw_recaptcha.setChecked( jsonObject.getBoolean( "sw_recaptcha" )  );
 
         Log.d(TAG, "loadUiSetting: finish");
         if (!new File(uiPath).exists() ){
@@ -993,6 +1053,8 @@ public class MainActivity extends AppCompatActivity {
         EditText et_path=( EditText )  findViewById( R.id.et_path );
         Switch sw_script_watch = ( Switch ) findViewById( R.id.sw_script_watch );
         Switch sw_scriptBootedRun=( Switch )findViewById(R.id.sw_scriptBootedRun);
+        Switch sw_tel_simulate=( Switch )findViewById(R.id.sw_tel_simulate);
+        Switch sw_recaptcha=( Switch )findViewById(R.id.sw_recaptcha);
         EditText et_pkgName=( EditText )findViewById(R.id.et_pkgName);
 
         JSONObject jsonObject=new JSONObject();
@@ -1001,9 +1063,12 @@ public class MainActivity extends AppCompatActivity {
         jsonObject.put("sw_scriptBootedRun", sw_scriptBootedRun.isChecked() );
         jsonObject.put("et_pkgName", et_pkgName.getText () );
         jsonObject.put("sw_enable_para",sw_enable_para.isChecked() );
+        jsonObject.put("sw_tel_simulate",sw_tel_simulate.isChecked() );
+        jsonObject.put("sw_recaptcha",sw_recaptcha.isChecked() );
 
+        MyFile.fileWriterTxt(  uiPath,jsonObject.toJSONString());
         String command = "cp -r -f "+
-                HookShare.PATH_UI_SETTING+
+                uiPath+
                 " "
                 + HookShare.pathUiSettingData;
 
@@ -1014,7 +1079,7 @@ public class MainActivity extends AppCompatActivity {
         );
 
         //MyFile.fileWriterTxt( HookShare.PATH_UI_SETTING,jsonObject.toJSONString() );
-        MyFile.fileWriterTxt(  uiPath,jsonObject.toJSONString());
+
           logUi("保存完成");
 
     }

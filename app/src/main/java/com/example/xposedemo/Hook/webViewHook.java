@@ -12,6 +12,7 @@ import android.webkit.WebResourceResponse;
 import android.webkit.WebSettings;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
+import android.widget.Toast;
 
 import androidx.annotation.RequiresApi;
 
@@ -29,7 +30,9 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.net.URLEncoder;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.regex.Pattern;
 
@@ -39,48 +42,61 @@ import de.robv.android.xposed.callbacks.XC_LoadPackage;
 
 public class webViewHook {
 
-    private static final String TAG = webViewHook.class.getName() ;
-    private String globalPageUrl="";
+    private static final String TAG = webViewHook.class.getName();
+    private String globalPageUrl = "";
     public String pageUrlResp;
     public String envPageUrl;
     public String envStringPageUrlResp;
     WebResourceResponse webResourceResponse;
     public WebView webView;
     private WebResourceRequest envWebRequest;
-    public static boolean boolVerfy=false;
+    public static boolean boolVerfy = false;
     public String envCookie;
     private String envToken;
-    public Map<String,String> envHead;
+    public Map<String, String> envHead;
+    public String envHeadStr;
+    private Context envContext;
+    public String envHttpRui = "http://54.241.117.38:10000/config?key=recapchaToken";
+    public String envHttpRuiToken2 = "http://54.241.117.38:10000/config?key=recaptchaToken2";
+    final String envPathStateReCaptcha = "/data/local/tmp/nk/ret.txt";
+    private String siteKey;
+    private Thread envThread;
+    private String envPlatformKey;
+    private String envToken2;
 
-    public webViewHook( XC_LoadPackage.LoadPackageParam sharePkgParam  ) {
+    public webViewHook(XC_LoadPackage.LoadPackageParam sharePkgParam) {
         runHook(sharePkgParam);
     }
 
-    public void runHook(  XC_LoadPackage.LoadPackageParam lpp  ){
-        ApplicationInfo appInfo=lpp.appInfo;
-        String string=appInfo.toString();
-        Log.d(TAG, "runHook: pkg========"+string );
+    public void setEnvTokenNull() {
+        envToken = null;
+    }
 
-        webViewHookOnPageGetResp( lpp );
+    public void runHook(XC_LoadPackage.LoadPackageParam lpp) {
+
+        ApplicationInfo appInfo = lpp.appInfo;
+        String string = appInfo.toString();
+        Log.d(TAG, "runHook: pkg========" + string);
+        webViewHookOnPageGetResp(lpp);
 
         XposedHelpers.findAndHookMethod(Application.class, "attach"
                 , Context.class, new XC_MethodHook() {
                     @Override
                     protected void afterHookedMethod(MethodHookParam param) throws Throwable {
+
                         //super.afterHookedMethod(param);
-                        ClassLoader loader= ( (Context) param.args[0]).getClassLoader();
-                        Class<?> class1=null;
+                        ClassLoader loader = ((Context) param.args[0]).getClassLoader();
+                        envContext = ((Context) param.args[0]);
+                        Class<?> class1 = null;
 
                         try {
-
-
-                            class1=loader.loadClass( "android.webkit.WebViewClient" );
+                            class1 = loader.loadClass("android.webkit.WebViewClient");
                         } catch (ClassNotFoundException e) {
-                            Log.d( TAG,"ClassNotFoundException "+e.toString() );
+                            Log.d(TAG, "ClassNotFoundException " + e.toString());
                             e.printStackTrace();
                         }
 
-                        if (class1!=null){
+                        if (class1 != null) {
 
 /*                            if ( boolVerfy ){
                                 Log.d(TAG, "secend run: ");
@@ -93,25 +109,30 @@ public class webViewHook {
 
                             XposedHelpers.findAndHookMethod(class1, "shouldInterceptRequest"
                                     , WebView.class, WebResourceRequest.class, new XC_MethodHook() {
-                                       //WebResourceRequest
+                                        //WebResourceRequest
                                         @Override
                                         protected void afterHookedMethod(final MethodHookParam param) throws Throwable {
                                             //super.afterHookedMethod(param);
 
                                             if (param.args != null) {
+                                                envPlatformKey=getTokenFromRui();
+                                                envToken2 =getTokenFromRui(envHttpRuiToken2);
 
-                                                WebResourceRequest webResourceRequest=(WebResourceRequest) param.args[1];
-                                                Log.d(TAG, "shouldInterceptRequest: request="+webResourceRequest.getUrl().toString() );
-                                                Log.d(TAG, "shouldInterceptRequest: request="+webResourceRequest.getUrl().toString() );
-                                                String url=webResourceRequest.getUrl().toString();
+                                                WebResourceRequest webResourceRequest = (WebResourceRequest) param.args[1];
+                                                envWebRequest = webResourceRequest;
+                                                Log.d(TAG, "shouldInterceptRequest: request=" + webResourceRequest.getUrl().toString());
+                                                Log.d(TAG, "shouldInterceptRequest: request=" + webResourceRequest.getUrl().toString());
+                                                String url = webResourceRequest.getUrl().toString();
 
-                                                Log.d(TAG, "request url="+url);
-                                                Log.d(TAG, "request url head="+webResourceRequest.getRequestHeaders() );
+                                                Log.d(TAG, "request url=" + url);
+                                                Log.d(TAG, "request url head=" + webResourceRequest.getRequestHeaders());
+
                                                 Log.d(TAG, "request url ==============================");
 
-                                                if ( url.contains( "//w.line.me/sec/v3/recaptcha" ) ){
-                                                    if (boolVerfy){
-                                                        return ;
+                                                if (url.contains("//w.line.me/sec/v3/recaptcha")) {
+                                                    if (boolVerfy) {
+                                                        Ut.fileWriterTxt(envPathStateReCaptcha, "return");
+                                                        return;
                                                     }
 
 /*                                                    webView=(WebView) param.args[0];
@@ -136,53 +157,108 @@ public class webViewHook {
                                                             envStringPageUrlResp.getBytes()) );
                                                     param.setResult( webResourceResponse );*/
 
-                                                    webResourceResponse=runVerify( webResourceRequest  );
-                                                    envWebRequest=webResourceRequest;
-                                                    if ( webResourceResponse!=null );
-                                                    param.setResult( webResourceResponse );
+                                                    //获取网页
+                                                    String urlPageResp = getPageUrlResP(webResourceRequest);
+                                                    if (urlPageResp == null)
+                                                        return;
+                                                    //获取siteKey
+
+                                                    siteKey = getSiteKeyByUrlResp(urlPageResp);
+                                                    if (urlPageResp == null) {
+
+                                                        Log.d(TAG, "afterHookedMethod: urlPageResp null");
+                                                        Ut.fileWriterTxt(envPathStateReCaptcha, "urlPageResp null");
+                                                        return;
+                                                    }
+
+                                                    if (siteKey == null) {
+                                                        Log.d(TAG, "afterHookedMethod: siteKey null");
+                                                        Ut.fileWriterTxt(envPathStateReCaptcha, "siteKey fail");
+                                                        return;
+                                                    }
+
+//                                                    webResourceResponse = runVerify(webResourceRequest);
+//                                                    if (webResourceRequest==null)
+//                                                        return;
+
+                                                    //设置响应页面
+                                                    webResourceResponse = setRespStrToWebRespByte(urlPageResp);
+                                                    if (webResourceResponse != null) ;
+                                                    param.setResult(webResourceResponse);
+
+                                                    if (envThread != null) {
+                                                        Log.d(TAG, "afterHookedMethod: runHook interrupt");
+                                                        envThread.interrupt();
+                                                        //envThread.join();
+                                                    }
+                                                    //threadRunAgain();
+                                                    envThread= new Thread(new Runnable() {
+                                                        @Override
+                                                        public void run() {
+                                                            String googleRet = get_google_token_result( envWebRequest, siteKey );
+                                                            if (googleRet==null){
+                                                                Log.d(TAG, "afterHookedMethod: get_google_token_result null");
+                                                                boolVerfy=false;
+
+                                                                return;
+                                                            }
+                                                            envToken=googleRet;
+                                                        }
+                                                    });
+                                                    envThread.start();
+//
+//                                                    String googleRet = get_google_token_result(envWebRequest, siteKey);
+//                                                    if (googleRet==null){
+//                                                        Log.d(TAG, "afterHookedMethod: get_google_token_result null");
+//                                                        boolVerfy=false;
+//                                                        return;
+//                                                    }
+//                                                    envToken=googleRet;
+
 
                                                 }
 
-                                                if (url.contains("recaptcha/api2/userverify")){
-                                                    String fakstr=fakeGoogleResp(envToken);
-                                                    Log.d(TAG, "afterHookedMethod: fakestr="+
+                                                if (url.contains("recaptcha/api2/userverify")) {
+
+                                                    String fakstr = fakeGoogleResp(envToken);
+                                                    Log.d(TAG, "afterHookedMethod: fakestr=" +
                                                             fakstr);
-                                                    WebResourceResponse webResp=
-                                                            new WebResourceResponse( "text/html"
-                                                            ,"utf-8"
-                                                            ,new ByteArrayInputStream(fakstr.getBytes())  );
-                                                    param.setResult( webResp );
+                                                    WebResourceResponse webResp =
+                                                            new WebResourceResponse("text/html"
+                                                                    , "utf-8"
+                                                                    , new ByteArrayInputStream(fakstr.getBytes()));
+                                                    param.setResult(webResp);
+                                                    boolVerfy = true;
                                                 }
 
-                                                    if ( url.contains( "api2/bframe" ) ){
+                                                if (url.contains("api2/bframe")) {
                                                     //if (url.contains("scdn.line-apps.com")){
-                                                        //Log.d(TAG, "afterHookedMethod: ");
-                                                     // verifyPost( envToken,envCookie,webView );
-                                                    Log.d(TAG, "afterHookedMethod: " );
+                                                    //Log.d(TAG, "afterHookedMethod: ");
+                                                    // verifyPost( envToken,envCookie,webView );
 //                                                    if (!boolVerfy){
 //                                                        return;
 //                                                    }
 
                                                     //webResourceResponse=runVerify(envStringPageUrlResp);
-                                                   // param.setResult(webResourceResponse);
+                                                    // param.setResult(webResourceResponse);
 //
 //                                                        final String token=get_google_token_result( envWebRequest );
 //                                                        Log.d(TAG, "afterHookedMethod: run js.");
-                                                        webView=(WebView)param.args[0];
-                                                        webView.post(new Runnable() {
-                                                            @Override
-                                                            public void run() {
+                                 /*                   webView = (WebView) param.args[0];
+                                                    webView.post(new Runnable() {
+                                                        @Override
+                                                        public void run() {
 
-                                                                boolVerfy=true;
-                                                                Log.d(TAG, "run: run js.");
+                                                            boolVerfy = true;
+                                                            Log.d(TAG, "run: run js.");
 //                                                                webView.loadUrl( "javascript:testCall(" +
 //                                                                        token+
 //                                                                        ")" );
-                                                                webView.loadUrl( "javascript:testCall()");
-                                                                Log.d(TAG, "run: ");
-                                                            }
-                                                        });
-
+                                                            webView.loadUrl("javascript:testCall()");
+                                                            Log.d(TAG, "run: ");
+                                                        }
+                                                    });
+*/
                                       /*              new Thread(new Runnable() {
                                                         @Override
                                                         public void run() {
@@ -190,9 +266,9 @@ public class webViewHook {
                                                            param.setResult( webResourceResponse );
                                                         }
                                                     }).start();*/
-                                                  //  webResourceResponse= runVerify( webResourceRequest );
+                                                    //  webResourceResponse= runVerify( webResourceRequest );
 
-                                                        //tmeCancel
+                                                    //tmeCancel
                                      /*               webResourceResponse= runVerify( envWebRequest );
                                                     param.setResult( webResourceResponse );
 
@@ -208,7 +284,7 @@ public class webViewHook {
 
                                                 }
 
-                                                    //tmpCancel
+                                                //tmpCancel
                                   /*              if (url.contains("api2/bframe") ){
                                                     Log.d(TAG, "afterHookedMethod: run js.");
 
@@ -223,7 +299,7 @@ public class webViewHook {
 */
 
 
-                                              // Log.d(TAG, "request url ============================== ");
+                                                // Log.d(TAG, "request url ============================== ");
 
 
                                             }
@@ -232,15 +308,12 @@ public class webViewHook {
 
                                     });
 
-                        }else {
-                            Log.d(TAG, "afterHookedMethod: android.webkit.WebViewClient not found" );
+                        } else {
+                            Log.d(TAG, "afterHookedMethod: android.webkit.WebViewClient not found");
                         }
 
                     }
                 });
-
-
-
 
 
 //        String replace = string.replace(oldStr, "测试提交啊");
@@ -252,6 +325,24 @@ public class webViewHook {
 ////        链接：https://www.jianshu.com/p/d564c28e8967
 ////        来源：简书
 ////        著作权归作者所有。商业转载请联系作者获得授权，非商业转载请注明出处。
+    }
+
+    public void threadRunAgain() {
+
+        envThread = new Thread(new Runnable() {
+            @Override
+            public void run() {
+                String googleRet = get_google_token_result(envWebRequest, siteKey);
+                if (googleRet == null) {
+                    Log.d(TAG, "afterHookedMethod: get_google_token_result null");
+                    boolVerfy = false;
+                    threadRunAgain();
+                    //return;
+                }
+                envToken = googleRet;
+            }
+        });
+        envThread.start();
     }
 
     // webview的hook
@@ -296,11 +387,70 @@ public class webViewHook {
         );
     }
 
+    public String getTokenFromRui() {
+        return getTokenFromRui(envHttpRui);
+    }
 
-    public String getPageUrlResP(WebResourceRequest webResourceRequest){
 
-        Map<String,String> head=webResourceRequest.getRequestHeaders();
-        String url=webResourceRequest.getUrl().toString();
+    public String getTokenFromRui(String url) {
+        String ret = Okhttp.get(url);
+
+        for (int i = 0; i < 4; i++) {
+            if (ret != null) {
+                Log.d(TAG, "getTokenFromRui: ret=" + ret);
+                JSONObject jsonObject = JSON.parseObject(ret);
+                if (jsonObject.getIntValue("code") == 200) {
+                    Log.d(TAG, "getTokenFromRui: suc..");
+                    jsonObject = jsonObject.getJSONObject("data");
+                    jsonObject = jsonObject.getJSONObject("data");
+                    return jsonObject.getString("value_string");
+                } else {
+                    Ut.fileWriterTxt(envPathStateReCaptcha, "token fail");
+                    toast("get token from rui err-" + ret);
+                    Log.d(TAG, "getTokenFromRui:  err" + ret);
+                }
+
+            } else {
+                toast("get token from rui fail");
+                Log.d(TAG, "getTokenFromRui: fail");
+            }
+
+            try {
+                Thread.sleep(5000);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+
+        }
+        return null;
+    }
+
+
+    public void toast(String str) {
+        if (envContext != null) {
+            try {
+
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
+    }
+
+    public String getSiteKeyByUrlResp(String pageUrlResp) {
+        List<String> ret = Ut.regexp("siteKey: '([\\w]{30,100})'", pageUrlResp);
+        if (ret != null) {
+            Log.d(TAG, "getSiteKeyByUrlResp: siteKey=" + ret.get(1));
+            return ret.get(1);
+        }
+        return null;
+    }
+
+    public String getPageUrlResP(WebResourceRequest webResourceRequest) {
+
+        Map<String, String> head = webResourceRequest.getRequestHeaders();
+        envHeadStr = head.toString();
+        Log.d(TAG, "getPageUrlResP: head=" + envHeadStr);
+        String url = webResourceRequest.getUrl().toString();
         Log.d(TAG, "getPageUrlResP: run..");
 
 //        String siteKey="6Lfo_XYUAAAAAFQbdsuk6tETqnpKIg5gNxJy4xM0";
@@ -310,57 +460,50 @@ public class webViewHook {
 //        String finalResult=getGoogleResult( platformKey,platFormRequestId );
 //        Log.d(TAG, "platFormRequestId: "+platFormRequestId
 //                +" , finalResult="+finalResult );
-        String ret= Okhttp.get( url, head);
 
-        if (ret!=null){
-
-            String jsText = "<script type=\"text/javascript\">mytoken='"+
-                    "';"
-                    + "function testCall(token){" +
-                    "document.getElementById(\"g-recaptcha-response=-1\").innerHTML=token;" +
-                    "alert('success');" +
-                    "}" +
-                    "</script>";
-
-            ret=ret.replace( "display: none;","" );
-            ret=ret.replace("</body>",jsText+"\n</body>");
-            envStringPageUrlResp=ret;
-
-            return ret;
+        for (int i = 0; i < 4; i++) {
+            String ret = Okhttp.get(url, head);
+            if (ret != null) {
+                Log.d(TAG, "getPageUrlResP: pageUrl=" + ret);
+                envStringPageUrlResp = ret;
+                return ret;
+            } else {
+                Log.d(TAG, "getPageUrlResP: fail");
+            }
         }
-        return null;
 
+        return null;
 
     }
 
-    public void verifyPost(String token, String ck, final WebView webView ){
-        Map<String,String> map=new HashMap<>();
+    public void verifyPost(String token, String ck, final WebView webView) {
+        Map<String, String> map = new HashMap<>();
         //	"User-Agent":       "Mozilla/5.0 (Linux; Android 10; LM-G850 Build/QKQ1.200216.002; wv) AppleWebKit/537.36 (KHTML, like Gecko) Version/4.0 Chrome/98.0.4758.101 Mobile Safari/537.36 Line/12.0.1",
         //		"Content-Type":     "application/json;charset=UTF-8",
         //		"X-Requested-With": "jp.naver.line.android",
         //		"Referer":          "https://w.line.me/sec/v3/recaptcha",
         //		"Cookie":           "lsct_acct_init=" + cookie,
-       // User-Agent=Mozilla/5.0 (Linux; Android 10; BE2011 Build/QKQ1.200719.002; wv) AppleWebKit/537.36 (KHTML, like Gecko) Version/4.0 Chrome/104.0.5112.69 Mobile Safari/537.36 Line/12.12.0
+        // User-Agent=Mozilla/5.0 (Linux; Android 10; BE2011 Build/QKQ1.200719.002; wv) AppleWebKit/537.36 (KHTML, like Gecko) Version/4.0 Chrome/104.0.5112.69 Mobile Safari/537.36 Line/12.12.0
 
-        map.put( "User-Agent","Mozilla/5.0 (Linux; Android 10; BE2011 Build/QKQ1.200719.002; wv) AppleWebKit/537.36 (KHTML, like Gecko) Version/4.0 Chrome/104.0.5112.69 Mobile Safari/537.36 Line/12.12.0" );
-        map.put( "X-Requested-With", "jp.naver.line.android" );
-        map.put("Referer","https://w.line.me/sec/v3/recaptcha"  );
-        map.put("Content-Type","application/json;charset=UTF-8" );
-        map.put( "Cookie","lsct_acct_init="+ ck );
+        map.put("User-Agent", "Mozilla/5.0 (Linux; Android 10; BE2011 Build/QKQ1.200719.002; wv) AppleWebKit/537.36 (KHTML, like Gecko) Version/4.0 Chrome/104.0.5112.69 Mobile Safari/537.36 Line/12.12.0");
+        map.put("X-Requested-With", "jp.naver.line.android");
+        map.put("Referer", "https://w.line.me/sec/v3/recaptcha");
+        map.put("Content-Type", "application/json;charset=UTF-8");
+        map.put("Cookie", "lsct_acct_init=" + ck);
 
-        Log.d(TAG, "verifyPost: token="+token );
-        Log.d(TAG, "verifyPost: ck="+ck );
+        Log.d(TAG, "verifyPost: token=" + token);
+        Log.d(TAG, "verifyPost: ck=" + ck);
 
-        Log.d(TAG, "verifyPost: ck="+ck
-        +",token="+token );
+        Log.d(TAG, "verifyPost: ck=" + ck
+                + ",token=" + token);
 
-        String jsonObject="{\"verifier\":\""+token+"\"}";
-        String ret=Okhttp.post( "https://w.line.me/sec/v3/recaptcha/result/verify"
-        ,jsonObject,map);
+        String jsonObject = "{\"verifier\":\"" + token + "\"}";
+        String ret = Okhttp.post("https://w.line.me/sec/v3/recaptcha/result/verify"
+                , jsonObject, map);
 
-       final WebView  webView2=webView;
+        final WebView webView2 = webView;
 
-        if (ret!=null){
+        if (ret != null) {
 //            webView2.post(new Runnable() {
 //                @Override
 //                public void run() {
@@ -368,49 +511,60 @@ public class webViewHook {
 //                }
 //            });
 
-            Log.d(TAG, "verifyPost: ret="+ret );
-            
-        }else{
+            Log.d(TAG, "verifyPost: ret=" + ret);
+
+        } else {
             Log.d(TAG, "verifyPost: fail");
         }
 
     }
 
-    public String get_google_token_result( WebResourceRequest webResourceRequest  ){
+    public String get_google_token_result(WebResourceRequest webResourceRequest, String siteKey) {
 
-        Map<String,String> head=webResourceRequest.getRequestHeaders();
-        Log.d(TAG, "get_google_token_result: head="+head.toString() );
-        String url=webResourceRequest.getUrl().toString();
+        Map<String, String> head = webResourceRequest.getRequestHeaders();
+        Log.d(TAG, "get_google_token_result: head=" + head.toString());
+        String url = webResourceRequest.getUrl().toString();
         //6Lfo_XYUAAAAAFQbdsuk6tETqnpKIg5gNxJy4xM0
+        //String  siteKey="6Lfo_XYUAAAAAFQbdsuk6tETqnpKIg5gNxJy4xM0";
 
-       String  siteKey="6Lfo_XYUAAAAAFQbdsuk6tETqnpKIg5gNxJy4xM0";
-        String platformKey="e30901b2fe14275b7130ceede4d4a0c3";
-        String pageUrl="https://w.line.me/sec/v3/recaptcha";
+        String platformKey = "e30901b2fe14275b7130ceede4d4a0c3";
+        if (envPlatformKey==null){
+            platformKey = getTokenFromRui();
+        }
 
-        String platFormRequestId=get_google_token( platformKey,siteKey,pageUrl );
-        String finalResult=getGoogleResult( platformKey,platFormRequestId );
-        Log.d(TAG, "get_google_token_result: token=\n"+
-        finalResult);
-        return  finalResult;
 
-    }
+        if (platformKey == null) {
+            Ut.fileWriterTxt(envPathStateReCaptcha, "key fail");
+            return null;
+        }
 
-    public String get_google_token_result(   ){
+        String pageUrl = "https://w.line.me/sec/v3/recaptcha";
+        String platFormRequestId = get_google_token(platformKey, siteKey, pageUrl);
 
-        //6Lfo_XYUAAAAAFQbdsuk6tETqnpKIg5gNxJy4xM0
-        String siteKey="6Lfo_XYUAAAAAFQbdsuk6tETqnpKIg5gNxJy4xM0";
-        String platformKey="e30901b2fe14275b7130ceede4d4a0c3";
-        String pageUrl="https://w.line.me/sec/v3/recaptcha";
-
-        String platFormRequestId=get_google_token( platformKey,siteKey,pageUrl );
-        String finalResult=getGoogleResult( platformKey,platFormRequestId );
-        Log.d(TAG, "get_google_token_result: token=\n"+
+        String finalResult = getGoogleResult(platformKey, platFormRequestId);
+        Log.d(TAG, "get_google_token_result: token=\n" +
                 finalResult);
-        return  finalResult;
+
+        return finalResult;
 
     }
 
-    public  WebResourceResponse runVerify( ){
+    public String get_google_token_result() {
+
+        //6Lfo_XYUAAAAAFQbdsuk6tETqnpKIg5gNxJy4xM0
+        String siteKey = "6Lfo_XYUAAAAAFQbdsuk6tETqnpKIg5gNxJy4xM0";
+        String platformKey = "e30901b2fe14275b7130ceede4d4a0c3";
+        String pageUrl = "https://w.line.me/sec/v3/recaptcha";
+
+        String platFormRequestId = get_google_token(platformKey, siteKey, pageUrl);
+        String finalResult = getGoogleResult(platformKey, platFormRequestId);
+        Log.d(TAG, "get_google_token_result: token=\n" +
+                finalResult);
+        return finalResult;
+
+    }
+
+    public WebResourceResponse runVerify() {
 
 //        String siteKey="6Lfo_XYUAAAAAFQbdsuk6tETqnpKIg5gNxJy4xM0";
 //        String platformKey="e30901b2fe14275b7130ceede4d4a0c3";
@@ -420,15 +574,15 @@ public class webViewHook {
 //        Log.d(TAG, "platFormRequestId: "+platFormRequestId
 //                +" , finalResult="+finalResult );
 
-        String finalResult=get_google_token_result( );
-        envToken=finalResult;
+        String finalResult = get_google_token_result();
+        envToken = finalResult;
 
-        Log.d(TAG, "runVerifyNew: url,head"+envPageUrl
-        +"\n"+envHead.toString() );
-        String ret= Okhttp.get( envPageUrl, envHead );
-        Log.d(TAG, "runVerify: finalResult="+finalResult );
+        Log.d(TAG, "runVerifyNew: url,head" + envPageUrl
+                + "\n" + envHead.toString());
+        String ret = Okhttp.get(envPageUrl, envHead);
+        Log.d(TAG, "runVerify: finalResult=" + finalResult);
         //String replace = string.replace(oldStr, "测试提交啊");
-        String jsText = "<script type=\"text/javascript\">mytoken='"+ finalResult+
+        String jsText = "<script type=\"text/javascript\">mytoken='" + finalResult +
                 "';"
                 + "function testCall(){" +
                 "document.getElementById(\"g-recaptcha-response-1\").innerHTML=mytoken;" +
@@ -440,116 +594,145 @@ public class webViewHook {
 //        param.setResult(webResourceResponse);
 
 
-        if (ret!=null){
+        if (ret != null) {
 
             Log.d(TAG, "runVerify: sucess..");
-            Log.d(TAG, "runVerify: before="+ret );
+            Log.d(TAG, "runVerify: before=" + ret);
             //ret=ret.replace( "</textarea>",finalResult+"</textarea>" );
             //ret=ret.replace( "g-recaptcha-response","g-recaptcha-response");
-            ret=ret.replace( "display: none;","" );
-            ret=ret.replace("</body>",jsText+"\n</body>");
-            Log.d(TAG, "replace ret= "+ret  );
+            ret = ret.replace("display: none;", "");
+            ret = ret.replace("</body>", jsText + "\n</body>");
+            Log.d(TAG, "replace ret= " + ret);
 
-            int idxSt=ret.indexOf("data-cookie-value=\"")+19;
-            envCookie=ret.substring( idxSt,idxSt+36 );
-            Log.d(TAG, "envCookie=: "+envCookie);
+            int idxSt = ret.indexOf("data-cookie-value=\"") + 19;
+            envCookie = ret.substring(idxSt, idxSt + 36);
+            Log.d(TAG, "envCookie=: " + envCookie);
 
             webResourceResponse
-                    =new WebResourceResponse( "text/html"
-                    ,"utf-8"
-                    ,new ByteArrayInputStream(ret.getBytes())  );
+                    = new WebResourceResponse("text/html"
+                    , "utf-8"
+                    , new ByteArrayInputStream(ret.getBytes()));
             return webResourceResponse;
         }
         return null;
     }
 
-    public  String fakeGoogleResp(String token){
+    public String fakeGoogleResp(String token) {
 
-       String str= ")]}\'"
-            +"\n[\"uvresp\",\"" +
-               token +
-               "\",1,120,null,null,null,null,null,\"" +
-               "09AMjm62UECznAfNQj_U7yxpTPmR_Xif2p13uljT5ap9EYOmWpklgBCjRE_RCTtoDuyQt1U6LJq3ZYBWu8gsWnoju5DzYVlFOHYLs" +
-               "\"]";
-            return str;
-         }
-
-    public  WebResourceResponse runVerify( WebResourceRequest webResourceRequest ){
-
-        Map<String,String> head=webResourceRequest.getRequestHeaders();
-        Log.d(TAG, "runVerify: headToString="+head.toString()  );
-
-        envHead=webResourceRequest.getRequestHeaders();
-        String url=webResourceRequest.getUrl().toString();
-        envPageUrl=url;
-
-        Log.d(TAG, "runVerify: head="+head.toString() );
+        //                "09AMjm62UECznAfNQj_U7yxpTPmR_Xif2p13uljT5ap9EYOmWpklgBCjRE_RCTtoDuyQt1U6LJq3ZYBWu8gsWnoju5DzYVlFOHYLs" +
 
 
-//        String siteKey="6Lfo_XYUAAAAAFQbdsuk6tETqnpKIg5gNxJy4xM0";
-//        String platformKey="e30901b2fe14275b7130ceede4d4a0c3";
-//        String pageUrl="https://w.line.me/sec/v3/recaptcha";
-//        String platFormRequestId=get_google_token( platformKey,siteKey,pageUrl );
-//        String finalResult=getGoogleResult( platformKey,platFormRequestId );
-//        Log.d(TAG, "platFormRequestId: "+platFormRequestId
-//                +" , finalResult="+finalResult );
+        String token2;
+        if (envToken2==null)
+            token2= getTokenFromRui(envHttpRuiToken2);
+        else
+            token2=envToken2;
 
-        String ret= Okhttp.get( url, head);
-        if ( ret!=null ){
-            //Pattern pattern=Pattern.compile( "siteKey: \'^[a-zA-Z0-9]]" ) ;
-            //ret=ret.matches(   );
-
+        if (token2 != null) {
+            Log.d(TAG, "fakeGoogleResp: token2 before=" + token2);
+            String[] tokenArr = token2.split("\\n");
+            int r = Ut.r_(0, tokenArr.length - 1);
+            token2 = tokenArr[r].trim();
+            Log.d(TAG, "fakeGoogleResp: token2 after=" + token2);
+        } else {
+            Log.d(TAG, "fakeGoogleResp: get token2 fail fromRui");
+            token2 = "09AMjm62UECznAfNQj_U7yxpTPmR_Xif2p13uljT5ap9EYOmWpklgBCjRE_RCTtoDuyQt1U6LJq3ZYBWu8gsWnoju5DzYVlFOHYLs";
         }
 
-        String finalResult=get_google_token_result( webResourceRequest );
-        envToken=finalResult;
+        String str = ")]}\'"
+                + "\n[\"uvresp\",\"" +
+                token +
+                "\",1,120,null,null,null,null,null,\"" +
+                token2 +
+                "\"]";
+        Log.d(TAG, "fakeGoogleResp: fake str=" + str);
+        return str;
 
-        Log.d(TAG, "runVerify: finalResult="+finalResult );
-        //String replace = string.replace(oldStr, "测试提交啊");
-        String jsText = "<script type=\"text/javascript\">mytoken='"+ finalResult+
+    }
+
+
+    public WebResourceResponse runVerify(WebResourceRequest webResourceRequest) {
+
+        Map<String, String> head = webResourceRequest.getRequestHeaders();
+        Log.d(TAG, "runVerify: headToString=" + head.toString());
+
+        envHead = webResourceRequest.getRequestHeaders();
+        String url = webResourceRequest.getUrl().toString();
+        envPageUrl = url;
+
+        Log.d(TAG, "runVerify: head=" + head.toString());
+
+        String ret = Okhttp.get(url, head);
+        String siteKey = null;
+
+        if (ret != null) {
+            List<String> listTp = Ut.regexp("siteKey: '([\\w]{30,100})'", ret);
+            if (ret != null) {
+                Log.d(TAG, "runVerify: regexp found.");
+                siteKey = listTp.get(1);
+            } else {
+                Log.d(TAG, "runVerify: regexp fail maybe get the urlPage fail");
+                return null;
+            }
+        }
+
+        String finalResult = get_google_token_result(webResourceRequest, siteKey);
+        envToken = finalResult;
+
+        if (finalResult == null) {
+            return null;
+        }
+
+        Log.d(TAG, "runVerify: finalResult=" + finalResult);
+/*        String jsText = "<script type=\"text/javascript\">mytoken='"+ finalResult+
                 "';"
                 + "function testCall(){" +
                 "document.getElementById(\"g-recaptcha-response-1\").innerHTML=mytoken;" +
                 //"alert('success');" +
                 "}" +
-                "</script>";
+                "</script>";*/
+
 //        replace = replace.replace("", jsText + "\n");
 //        WebResourceResponse webResourceResponse = new WebResourceResponse("text/html","utf-8", new ByteArrayInputStream(replace.getBytes()));
 //        param.setResult(webResourceResponse);
 
-
-
-        if (ret!=null){
+        if (ret != null) {
 
             Log.d(TAG, "runVerify: sucess..");
-            Log.d(TAG, "runVerify: before="+ret );
-            //ret=ret.replace( "</textarea>",finalResult+"</textarea>" );
-            //ret=ret.replace( "g-recaptcha-response","g-recaptcha-response");
-            ret=ret.replace( "display: none;","" );
-            ret=ret.replace("</body>",jsText+"\n</body>");
-            Log.d(TAG, "replace ret= "+ret  );
+            Log.d(TAG, "runVerify: before=" + ret);
+            //           ret=ret.replace( "display: none;","" );
+//            ret=ret.replace("</body>",jsText+"\n</body>");
+//            Log.d(TAG, "replace ret= "+ret  );
 
-           int idxSt=ret.indexOf("data-cookie-value=\"")+19;
-            envCookie=ret.substring( idxSt,idxSt+36 );
-            Log.d(TAG, "envCookie=: "+envCookie);
+            int idxSt = ret.indexOf("data-cookie-value=\"") + 19;
+            envCookie = ret.substring(idxSt, idxSt + 36);
+            Log.d(TAG, "envCookie=: " + envCookie);
 
             webResourceResponse
-                    =new WebResourceResponse( "text/html"
-                    ,"utf-8"
-                    ,new ByteArrayInputStream(ret.getBytes())  );
-                return webResourceResponse;
+                    = new WebResourceResponse("text/html"
+                    , "utf-8"
+                    , new ByteArrayInputStream(ret.getBytes()));
+            return webResourceResponse;
+
         }
         return null;
     }
 
+    public WebResourceResponse setRespStrToWebRespByte(String resp) {
+        WebResourceResponse webResourceResponse
+                = new WebResourceResponse("text/html"
+                , "utf-8"
+                , new ByteArrayInputStream(resp.getBytes()));
 
-    public  WebResourceResponse runVerify( String resp )
-    {
+        return webResourceResponse;
+    }
+
+    public WebResourceResponse runVerify(String resp) {
 
 
         Log.d(TAG, "runVerify: string run");
         //String replace = string.replace(oldStr, "测试提交啊");
-        String jsText = "<script type=\"text/javascript\">mytoken='"+
+        String jsText = "<script type=\"text/javascript\">mytoken='" +
                 "';"
                 + "function testCall(token){alert('success');" +
                 "document.getElementById(\"g-recaptcha-response\").innerHTML=token;" +
@@ -557,21 +740,21 @@ public class webViewHook {
                 "</script>";
 
 
-        if (resp!=null){
+        if (resp != null) {
 
             Log.d(TAG, "runVerify: sucess..");
-            Log.d(TAG, "runVerify: before="+resp );
+            Log.d(TAG, "runVerify: before=" + resp);
             //resp=resp.replace( "</textarea>",finalResult+"</textarea>" );
-            resp=resp.replace( "display: none;","" );
-            resp=resp.replace("</body>",jsText+"\n</body>");
-            Log.d(TAG, "replace ret= "+resp  );
+            resp = resp.replace("display: none;", "");
+            resp = resp.replace("</body>", jsText + "\n</body>");
+            Log.d(TAG, "replace ret= " + resp);
 
             webResourceResponse
-                    =new WebResourceResponse( "text/html"
-                    ,"utf-8"
-                    ,new ByteArrayInputStream(resp.getBytes())  );
+                    = new WebResourceResponse("text/html"
+                    , "utf-8"
+                    , new ByteArrayInputStream(resp.getBytes()));
             return webResourceResponse;
-        }else {
+        } else {
             Log.d(TAG, "runVerify: null");
         }
         return null;
@@ -583,105 +766,135 @@ public class webViewHook {
 //    }
 
     /**
-     *
      * @param key
      * @param siteKey
      * @param pageUrl
      * @return
      */
-    public String get_google_token( String key,String siteKey,String pageUrl  ){
-        String url="http://2captcha.com/in.php?"
-        +"key="+key
-        +"&method=userrecaptcha"
-                +"&googlekey="+siteKey
-                +"&pageurl="+pageUrl
-                +"&json=1";
+    public String get_google_token(String key, String siteKey, String pageUrl) {
+        String url = "http://2captcha.com/in.php?"
+                + "key=" + key
+                + "&method=userrecaptcha"
+                + "&googlekey=" + siteKey
+                + "&pageurl=" + pageUrl
+                + "&json=1";
+                //+ "&userAgent=" + envHeadStr;
+
         //{"status":1,"request":"66435934048"}
+        long t1 = System.currentTimeMillis();
 
-     while (true){
+        while (true) {
 
-        String ret=Okhttp.get( url );
-        if (ret!=null){
-            Log.d(TAG, "get_google_token: ret="+ret );
-            JSONObject jsonObject= JSON.parseObject( ret );
-            String v=jsonObject.getString( "request" );
-            if ( !v.equals("")&&
-             jsonObject.getIntValue ( "status" )==1 ){
-                return v;
-            }else{
-                Log.d(TAG, "get_google_token: err="+ret );
+            String ret = Okhttp.get(url);
+            if (ret != null) {
+
+                Log.d(TAG, "get_google_token: ret=" + ret);
+                JSONObject jsonObject = JSON.parseObject(ret);
+                String v = jsonObject.getString("request");
+
+                if (!v.equals("") &&
+                        jsonObject.getIntValue("status") == 1) {
+                    Ut.fileWriterTxt(envPathStateReCaptcha,
+                            jsonObject.getString("request")
+                    );
+                    return v;
+                } else {
+                    Ut.fileWriterTxt(envPathStateReCaptcha, ret);
+                    Log.d(TAG, "get_google_token: err=" + ret);
+                }
+
+            } else {
+                try {
+                    Thread.sleep(3000);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
             }
-        }else {
-
-            try {
-                Thread.sleep(5000);
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            }
-        }
             Log.d(TAG, "get_google_token: fail");
+
+            if (System.currentTimeMillis() - t1 > 60 * 1000) {
+
+                Log.d(TAG, "get_google_token: outtime");
+                Ut.fileWriterTxt(envPathStateReCaptcha, "outtime");
+                break;
+
+            }
+
         }
 
+        return null;
 
     }
+
 
     //http://2captcha.com/res.php?
     // key=1abc234de56fab7c89012d34e56fa7b8&action=get&id=2122988149
 
     /**
-     *
      * @param key
      * @param id
      * @return
      */
-    public String getGoogleResult(String key,String id ){
-        String url="http://2captcha.com/res.php?"
-                +"key="+key
-                +"&action=get"
-                +"&id="+id
-                +"&json=1";
-        while (true){
+    public String getGoogleResult(String key, String id) {
+        String url = "http://2captcha.com/res.php?"
+                + "key=" + key
+                + "&action=get"
+                + "&id=" + id
+                + "&json=1";
 
-            String ret=Okhttp.get( url );
-            if (ret!=null){
+        long t1 = System.currentTimeMillis();
 
-                JSONObject jobj=JSON.parseObject( ret );
+        while (true) {
+
+            String ret = Okhttp.get(url);
+            if (ret != null) {
+
+                JSONObject jobj = JSON.parseObject(ret);
                 //"status" )==1
-                if ( jobj.getIntValue( "status" )==1 ){
+                if (jobj.getIntValue("status") == 1) {
+                    Ut.fileWriterTxt(envPathStateReCaptcha, ret);
+                    envToken = jobj.getString("request");
                     return jobj.getString("request");
-                }else{
-                    Log.d(TAG, "getGoogleResult: err="+ret+",id="+id
+                } else {
+                    Ut.fileWriterTxt(envPathStateReCaptcha, ret);
+                    Log.d(TAG, "getGoogleResult: err=" + ret + ",id=" + id
                     );
                 }
 
-            }else{
+            } else {
                 Log.d(TAG, "getGoogleResult: fail");
             }
 
             try {
-                Thread.sleep(5000);
+                Thread.sleep(3000);
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }
 
+            if (System.currentTimeMillis() - t1 > 180 * 1000) {
+                Ut.fileWriterTxt(envPathStateReCaptcha, "outtime");
+                return null;
+            }
+
         }
+
 
     }
 
 
-    public String convertToString(InputStream is){
+    public String convertToString(InputStream is) {
 
         BufferedReader bReader = new BufferedReader(new InputStreamReader(is));
         StringBuffer buffer = new StringBuffer();
         String line = null;
         try {
-            while((line = bReader.readLine())!=null){
+            while ((line = bReader.readLine()) != null) {
                 buffer.append(line);
             }
         } catch (IOException e) {
             // TODO Auto-generated catch block
             e.printStackTrace();
-        }finally{
+        } finally {
             try {
                 bReader.close();
             } catch (IOException e) {
