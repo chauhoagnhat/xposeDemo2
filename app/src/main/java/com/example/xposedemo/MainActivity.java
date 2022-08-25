@@ -106,6 +106,7 @@ public class MainActivity extends AppCompatActivity {
     private Switch sw_scriptBootedRun;
     private Switch sw_enable_para;
     public  static VolumeChangeObserver volumeChangeObserver;
+
     String[] permissions;
     List<String> mPermissionList = new ArrayList<>();
     private static final int MY_PERMISSIONS_REQUEST_CODE = 10000;
@@ -113,7 +114,7 @@ public class MainActivity extends AppCompatActivity {
 
     @RequiresApi(api = Build.VERSION_CODES.P)
     @Override
-    protected void onCreate(Bundle savedInstanceState) {
+    protected void onCreate( Bundle savedInstanceState) {
 
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
@@ -127,17 +128,7 @@ public class MainActivity extends AppCompatActivity {
 
         //testPhone();
         loadUiSetting();
-//        Log.d(TAG, "onCreate: tele="+Ut.getSystemProperties( "gsm.sim.operator.alpha" ) ); //中国电信
-//        Log.d(TAG, "onCreate: tele="+Ut.getSystemProperties( "gsm.sim.operator.iso-country" ) );//c
-//        Log.d(TAG, "onCreate: tele="+Ut.getSystemProperties( "gsm.sim.operator.numeric" ) );//46011
-//        Log.d(TAG, "onCreate: tele="+Ut.getSystemProperties( "gsm.network.type" ) ); //lte
-//        Log.d(TAG, "onCreate: tele="+Ut.getSystemProperties( "gsm.operator.numeric" ) );
 
-
-
-//        volumeChangeObserver=
-//                new VolumeChangeObserver( getApplicationContext() ) ;
-//        volumeChangeObserver.registerReceiver();
         mainActivityDataInit();
         //getLanguages();
         assertInit();
@@ -150,7 +141,7 @@ public class MainActivity extends AppCompatActivity {
 
         if ( getIntent()
                 .getBooleanExtra( HookShare.mainActivityExtra,false ) ){
-            getIntent().putExtra(HookShare.mainActivityExtra,false);
+            getIntent().putExtra( HookShare.mainActivityExtra,false);
             //Ut.restartApp( getApplicationContext(),et_pkgName.getText().toString() );
             Log.d(TAG,"启动app，退出");
 
@@ -226,7 +217,7 @@ public class MainActivity extends AppCompatActivity {
     private void setVersion() {
 
         logTextview = (TextView) findViewById(R.id.tv_log);
-        logTextview.setText("version-20220617");
+        logTextview.setText("version-20220825");
     }
 
     public void permissionInit() {
@@ -640,6 +631,17 @@ public class MainActivity extends AppCompatActivity {
                 + HookShare.pathNkFolderData
                 +"/ret.txt" ;
 
+        Log.d(TAG, "assertInit: token2.txt"
+                +  Ut.copyAssetsFile(context,
+                "token2.txt",
+                HookShare.pathNkFolder +"/token2.txt" ) );
+
+         command = "cp -r -f "+
+                HookShare.pathNkFolder+""
+                + "/token2.txt" + " "
+                + HookShare.pathNkFolderData
+                +"/token2.txt" ;
+
         MyFile.execCmdsforResult(
                 new String[]{command, "chmod 777 "
                         +HookShare.pathNkFolderData
@@ -674,7 +676,7 @@ public class MainActivity extends AppCompatActivity {
                 +HookShare.PATH_DEVICE_PHONE
                 +" "+HookShare.PATH_DEVICE_PHONE_DATA;
 
-        File fileData=new File(HookShare.PATH_DEVICE_PHONE_DATA);
+        File fileData=new File(HookShare.PATH_DEVICE_PHONE_DATA );
         if (!fileData.exists()){
             MyFile.execCmdsforResult(
                     new String[]{ command,"chmod 666 "
@@ -682,7 +684,6 @@ public class MainActivity extends AppCompatActivity {
                     }
             );
         }
-
 
 
     }

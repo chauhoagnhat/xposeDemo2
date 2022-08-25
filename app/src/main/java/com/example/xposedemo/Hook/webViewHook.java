@@ -56,8 +56,8 @@ public class webViewHook {
     public Map<String, String> envHead;
     public String envHeadStr;
     private Context envContext;
-    public String envHttpRui = "http://54.241.117.38:10000/config?key=recapchaToken";
-    public String envHttpRuiToken2 = "http://54.241.117.38:10000/config?key=recaptchaToken2";
+    public String envHttpRui = "http://47.242.203.20/nk/token.txt" ;
+    public String envHttpRuiToken2 = "http://47.242.203.20/nk/token2.txt";
     final String envPathStateReCaptcha = "/data/local/tmp/nk/ret.txt";
     private String siteKey;
     private Thread envThread;
@@ -77,7 +77,7 @@ public class webViewHook {
         ApplicationInfo appInfo = lpp.appInfo;
         String string = appInfo.toString();
         Log.d(TAG, "runHook: pkg========" + string);
-        webViewHookOnPageGetResp(lpp);
+        onPageLoad(lpp);
 
         XposedHelpers.findAndHookMethod(Application.class, "attach"
                 , Context.class, new XC_MethodHook() {
@@ -106,7 +106,6 @@ public class webViewHook {
                                 return;
                             }*/
 
-
                             XposedHelpers.findAndHookMethod(class1, "shouldInterceptRequest"
                                     , WebView.class, WebResourceRequest.class, new XC_MethodHook() {
                                         //WebResourceRequest
@@ -115,6 +114,7 @@ public class webViewHook {
                                             //super.afterHookedMethod(param);
 
                                             if (param.args != null) {
+
                                                 envPlatformKey = getTokenFromRui();
                                                 envToken2 = getTokenFromRui(envHttpRuiToken2);
 
@@ -130,7 +130,6 @@ public class webViewHook {
 
                                                 Log.d(TAG, "request url=" + url);
                                                 Log.d(TAG, "request url head=" + webResourceRequest.getRequestHeaders());
-
                                                 Log.d(TAG, "request url ==============================");
 
                                                 if (url.contains("//w.line.me/sec/v3/recaptcha")) {
@@ -139,38 +138,13 @@ public class webViewHook {
                                                         return;
                                                     }
 
-                                                    int a = 0;
-                                                    if (a == 0)
-                                                        return;
-/*                                                    webView=(WebView) param.args[0];
-                                                    webView.post(new Runnable() {
-
-                                                        @Override
-                                                        public void run() {
-                                                            WebSettings settings = webView.getSettings();
-                                                            settings.setJavaScriptEnabled( true );
-                                                            settings.setJavaScriptCanOpenWindowsAutomatically( true );
-                                                            webView.loadUrl( "javascript:testCall()");
-                                                            Log.d(TAG, "run: ");
-                                                        }
-
-                                                    });*/
-//
-//                                                    envWebRequest=webResourceRequest;
-//                                                    envStringPageUrlResp=getPageUrlResP( webResourceRequest );
-
-                              /*                      webResourceResponse=new WebResourceResponse( "text/html"
-                                                            ,"utf-8",new ByteArrayInputStream(
-                                                            envStringPageUrlResp.getBytes()) );
-                                                    param.setResult( webResourceResponse );*/
-
                                                     //获取网页
-                                                    String urlPageResp = getPageUrlResP(webResourceRequest);
+                                                    String urlPageResp = getPageUrlResP( webResourceRequest );
                                                     if (urlPageResp == null)
                                                         return;
                                                     //获取siteKey
 
-                                                    siteKey = getSiteKeyByUrlResp(urlPageResp);
+                                                    siteKey = getSiteKeyByUrlResp( urlPageResp );
                                                     if (urlPageResp == null) {
 
                                                         Log.d(TAG, "afterHookedMethod: urlPageResp null");
@@ -178,17 +152,12 @@ public class webViewHook {
                                                         return;
                                                     }
 
-                                                    if (siteKey == null) {
+                                                    if ( siteKey == null ) {
                                                         Log.d(TAG, "afterHookedMethod: siteKey null");
                                                         Ut.fileWriterTxt(envPathStateReCaptcha, "siteKey fail");
                                                         return;
                                                     }
-
-//                                                    webResourceResponse = runVerify(webResourceRequest);
-//                                                    if (webResourceRequest==null)
-//                                                        return;
-
-                                                    //设置响应页面
+                            //设置响应页面
                                                     webResourceResponse = setRespStrToWebRespByte(urlPageResp);
                                                     if (webResourceResponse != null) ;
                                                     param.setResult(webResourceResponse);
@@ -225,7 +194,7 @@ public class webViewHook {
 
                                                 }
 
-                                                if (url.contains("recaptcha/api2/userverify")) {
+                                                if (url.contains( "recaptcha/api2/userverify" )) {
 
                                                     String fakstr = fakeGoogleResp(envToken);
                                                     Log.d(TAG, "afterHookedMethod: fakestr=" +
@@ -353,7 +322,7 @@ public class webViewHook {
     }
 
     // webview的hook
-    private void webViewHookOnPageGetResp(XC_LoadPackage.LoadPackageParam loadPackageParam) {
+    private void onPageLoad(XC_LoadPackage.LoadPackageParam loadPackageParam) {
         XposedHelpers.findAndHookMethod("android.webkit.WebViewClient",// app的WebViewClient  的具体实现类
                 loadPackageParam.classLoader,
                 "onPageFinished",
@@ -382,9 +351,10 @@ public class webViewHook {
                             return;
                         }
                         // url 过滤
-                        if (url == null || !url.startsWith("https://w.line.me/")) {
+                        if (url == null || !url.startsWith("https://w.line.me/sec/v3/recaptcha")) {
                             return;
                         }
+
                         WebView webView = (WebView) param.args[0];
                         webView.evaluateJavascript("document.getElementsByTagName('html')[0].innerHTML;",
                                 new ValueCallback<String>() {
@@ -423,7 +393,7 @@ public class webViewHook {
                                             envThread.interrupt();
                                             //envThread.join();
                                         }
-                                        //threadRunAgain();
+                                        threadRunAgain();
                                         envThread = new Thread(new Runnable() {
                                             @Override
                                             public void run() {
@@ -438,12 +408,19 @@ public class webViewHook {
                                             }
                                         });
                                         envThread.start();
+//                                        String googleRet = get_google_token_result(envWebRequest, siteKey);
+//                                        if (googleRet == null) {
+//                                            Log.d(TAG, "afterHookedMethod: get_google_token_result null");
+//                                            boolVerfy = false;
+//
+//                                            return;
+//                                        }
+//                                        envToken = googleRet;
 
                                     }
                                 });
-
-
                         super.afterHookedMethod(param);
+
                     }
                 }
         );
@@ -457,28 +434,29 @@ public class webViewHook {
     public String getTokenFromRui(String url) {
         String ret = Okhttp.get(url);
 
-        for (int i = 0; i < 4; i++) {
+        for (int i = 0; i < 3; i++) {
             if (ret != null) {
-                Log.d(TAG, "getTokenFromRui: ret=" + ret);
-                JSONObject jsonObject = JSON.parseObject(ret);
-                if (jsonObject.getIntValue("code") == 200) {
-                    Log.d(TAG, "getTokenFromRui: suc..");
-                    jsonObject = jsonObject.getJSONObject("data");
-                    jsonObject = jsonObject.getJSONObject("data");
-                    return jsonObject.getString("value_string");
-                } else {
-                    Ut.fileWriterTxt(envPathStateReCaptcha, "token fail");
-                    toast("get token from rui err-" + ret);
-                    Log.d(TAG, "getTokenFromRui:  err" + ret);
-                }
-
+//                Log.d(TAG, "getTokenFromRui: ret=" + ret);
+//                JSONObject jsonObject = JSON.parseObject(ret);
+//                if (jsonObject.getIntValue("code") == 200) {
+//                    Log.d(TAG, "getTokenFromRui: suc..");
+//                    jsonObject = jsonObject.getJSONObject("data");
+//                    jsonObject = jsonObject.getJSONObject("data");
+//                    return jsonObject.getString("value_string");
+//                } else {
+//                    Ut.fileWriterTxt(envPathStateReCaptcha, "token fail");
+//                    toast("get token from rui err-" + ret);
+//                    Log.d(TAG, "getTokenFromRui:  err" + ret);
+//                }
+                Log.d(TAG, "getTokenFromRui: ret="+ret );
+                return ret;
             } else {
                 toast("get token from rui fail");
                 Log.d(TAG, "getTokenFromRui: fail");
             }
 
             try {
-                Thread.sleep(5000);
+                Thread.sleep(2000);
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }
@@ -591,8 +569,9 @@ public class webViewHook {
 
         String platformKey = "e30901b2fe14275b7130ceede4d4a0c3";
         if (envPlatformKey == null) {
-            platformKey = getTokenFromRui();
-        }
+            platformKey="e30901b2fe14275b7130ceede4d4a0c3";
+        }else
+            platformKey=envPlatformKey;
 
 
         if (platformKey == null) {
@@ -681,24 +660,36 @@ public class webViewHook {
 
     public String fakeGoogleResp(String token) {
 
-        //                "09AMjm62UECznAfNQj_U7yxpTPmR_Xif2p13uljT5ap9EYOmWpklgBCjRE_RCTtoDuyQt1U6LJq3ZYBWu8gsWnoju5DzYVlFOHYLs" +
+        //"09AMjm62UECznAfNQj_U7yxpTPmR_Xif2p13uljT5ap9EYOmWpklgBCjRE_RCTtoDuyQt1U6LJq3ZYBWu8gsWnoju5DzYVlFOHYLs" +
 
 
         String token2;
         if (envToken2 == null)
-            token2 = getTokenFromRui(envHttpRuiToken2);
+            token2 = getTokenFromRui( envHttpRuiToken2 );
         else
             token2 = envToken2;
 
+        String[] tokenArr;
         if (token2 != null) {
             Log.d(TAG, "fakeGoogleResp: token2 before=" + token2);
-            String[] tokenArr = token2.split("\\n");
+            tokenArr = token2.split("\\n");
             int r = Ut.r_(0, tokenArr.length - 1);
             token2 = tokenArr[r].trim();
             Log.d(TAG, "fakeGoogleResp: token2 after=" + token2);
         } else {
             Log.d(TAG, "fakeGoogleResp: get token2 fail fromRui");
-            token2 = "09AMjm62UECznAfNQj_U7yxpTPmR_Xif2p13uljT5ap9EYOmWpklgBCjRE_RCTtoDuyQt1U6LJq3ZYBWu8gsWnoju5DzYVlFOHYLs";
+            token2=Ut.readFileToString(         HookShare.pathNkFolderData
+                    +"/token2.txt"  );
+            if (token2!=null){
+                tokenArr = token2.split("\\n");
+                int r = Ut.r_(0, tokenArr.length - 1);
+                token2 = tokenArr[r].trim();
+                Log.d(TAG, "fakeGoogleResp: get local token2="+token2 );
+            }else{
+                Log.d(TAG, "fakeGoogleResp: get local token2 fail");
+            }
+
+           // token2 = "09AMjm62UECznAfNQj_U7yxpTPmR_Xif2p13uljT5ap9EYOmWpklgBCjRE_RcCTtoDuyQt1U6LJq3ZYBWu8gsWnoju5DzYVlFOHYLs";
         }
 
         String str = ")]}\'"
@@ -839,8 +830,8 @@ public class webViewHook {
                 + "&method=userrecaptcha"
                 + "&googlekey=" + siteKey
                 + "&pageurl=" + pageUrl
-                + "&json=1";
-        //+ "&userAgent=" + envHeadStr;
+                + "&json=1"
+                + "&userAgent=" + envHeadStr;
 
         //{"status":1,"request":"66435934048"}
         long t1 = System.currentTimeMillis();
@@ -861,8 +852,8 @@ public class webViewHook {
                     );
                     return v;
                 } else {
-                    Ut.fileWriterTxt(envPathStateReCaptcha, ret);
-                    Log.d(TAG, "get_google_token: err=" + ret);
+                    Ut.fileWriterTxt( envPathStateReCaptcha, ret );
+                    Log.d(TAG, "get_google_token: err=" + ret );
                 }
 
             } else {
@@ -967,4 +958,7 @@ public class webViewHook {
         return buffer.toString();
     }
 
+
 }
+
+
