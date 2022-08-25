@@ -631,6 +631,12 @@ public class MainActivity extends AppCompatActivity {
                 + HookShare.pathNkFolderData
                 +"/ret.txt" ;
 
+
+        MyFile.execCmdsforResult(
+                new String[]{command, "chmod 777 "
+                        +HookShare.pathNkFolderData
+                        +"/ret.txt" } );
+
         Log.d(TAG, "assertInit: token2.txt"
                 +  Ut.copyAssetsFile(context,
                 "token2.txt",
@@ -645,7 +651,7 @@ public class MainActivity extends AppCompatActivity {
         MyFile.execCmdsforResult(
                 new String[]{command, "chmod 777 "
                         +HookShare.pathNkFolderData
-                        +"/ret.txt" } );
+                        +"/token2.txt" } );
 
 /*    File file=new File( HookShare.pathNkFolderData
     +"mccmncJsonData" );*/

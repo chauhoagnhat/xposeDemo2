@@ -1,5 +1,7 @@
 package com.example.xposedemo.Hook;
 
+//HookTelephony all=   allHook
+
 import android.app.AndroidAppHelper;
 import android.app.Application;
 import android.content.Context;
@@ -214,25 +216,6 @@ public class Phone  {
 //            e.printStackTrace();
 
         jsonStr=MyFile.readFileToString(HookShare.PATH_DEVICE_PHONE_DATA);
-
-        /*      List aa=MyFile.execCmdsforResult( new String[]{
-                    "cat "+HookShare.PATH_DEVICE_PHONE_DATA
-            } );
-            StringBuilder stringBuilder=new StringBuilder();
-            for ( Object str :
-                    aa ) {
-                Log.d(TAG, "Telephony: cat="+str );
-                stringBuilder.append(str);
-            }
-            if ( aa==null)
-                return;
-            else
-                jsonStr=stringBuilder.toString();*/
-      //  }
-
-
-//        hookTestValue ("ts3.m",loadPkgParam,  "a" );
-//        hookTestValue("ts3.m",loadPkgParam,  "b" );
 
         Log.d(TAG, "Telephony: json="+ jsonStr);
         if ( jsonStr==null||jsonStr.equals("") ){
@@ -556,7 +539,7 @@ public class Phone  {
                             super.beforeHookedMethod(param);
                             if(!methodNamelist.contains( funcName ))
                                 methodNamelist.add( funcName );
-                            Log.d(TAG, "HookTelephony="+methodNamelist.toString() );
+                            Log.d(TAG, "HookTelephony all="+methodNamelist.toString() );
                         }
 
                         @Override
@@ -652,7 +635,7 @@ public class Phone  {
 
 
                             if(null!=value&&""!=value){
-                               // param.setResult(value);
+                              param.setResult(value);
                                 Log.d(TAG, "setHookValue:phone"+funcName+"-result="+param.getResult().toString()+"set-value="+value   );
                             }
                                     Log.d(TAG, "afterHookedMethod: phone"+value+"-functionName="+funcName );
