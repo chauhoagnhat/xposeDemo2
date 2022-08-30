@@ -133,8 +133,8 @@ public class webViewHook {
                                                 Log.d(TAG, "request url ==============================");
 
                                                 if (url.contains("//w.line.me/sec/v3/recaptcha")) {
-                                                    if (boolVerfy) {
-                                                        Ut.fileWriterTxt(envPathStateReCaptcha, "return");
+                                                 /*   if (boolVerfy) {
+                                                        //Ut.fileWriterTxt(envPathStateReCaptcha, "return");
                                                         return;
                                                     }
 
@@ -181,7 +181,7 @@ public class webViewHook {
                                                             envToken = googleRet;
                                                         }
                                                     });
-                                                    envThread.start();
+                                                    envThread.start();*/
 //
 //                                                    String googleRet = get_google_token_result(envWebRequest, siteKey);
 //                                                    if (googleRet==null){
@@ -204,63 +204,15 @@ public class webViewHook {
                                                                     , "utf-8"
                                                                     , new ByteArrayInputStream(fakstr.getBytes()));
                                                     param.setResult(webResp);
-                                                    boolVerfy = true;
+                                                    //boolVerfy = true;
                                                 }
 
                                                 if (url.contains("api2/bframe")) {
-                                                    //if (url.contains("scdn.line-apps.com")){
-                                                    //Log.d(TAG, "afterHookedMethod: ");
-                                                    // verifyPost( envToken,envCookie,webView );
-//                                                    if (!boolVerfy){
-//                                                        return;
-//                                                    }
-
-                                                    //webResourceResponse=runVerify(envStringPageUrlResp);
-                                                    // param.setResult(webResourceResponse);
-//
-//                                                        final String token=get_google_token_result( envWebRequest );
-//                                                        Log.d(TAG, "afterHookedMethod: run js.");
-                                 /*                   webView = (WebView) param.args[0];
-                                                    webView.post(new Runnable() {
-                                                        @Override
-                                                        public void run() {
-
-                                                            boolVerfy = true;
-                                                            Log.d(TAG, "run: run js.");
-//                                                                webView.loadUrl( "javascript:testCall(" +
-//                                                                        token+
-//                                                                        ")" );
-                                                            webView.loadUrl("javascript:testCall()");
-                                                            Log.d(TAG, "run: ");
-                                                        }
-                                                    });
-*/
-                                      /*              new Thread(new Runnable() {
-                                                        @Override
-                                                        public void run() {
-                                                           WebResourceResponse webResourceResponse= runVerify( webResourceRequest );
-                                                           param.setResult( webResourceResponse );
-                                                        }
-                                                    }).start();*/
-                                                    //  webResourceResponse= runVerify( webResourceRequest );
-
-                                                    //tmeCancel
-                                     /*               webResourceResponse= runVerify( envWebRequest );
-                                                    param.setResult( webResourceResponse );
-
-                                                    Log.d(TAG, "afterHookedMethod: run js.");
-                                                    webView.post(new Runnable() {
-                                                        @Override
-                                                        public void run() {
-                                                            Log.d(TAG, "run: run js.");
-                                                            webView.loadUrl( "javascript:testCall()" );
-                                                        }
-                                                    });*/
 
 
                                                 }
 
-                                                //tmpCancel
+                                                                             //tmpCancel
                                   /*              if (url.contains("api2/bframe") ){
                                                     Log.d(TAG, "afterHookedMethod: run js.");
 
@@ -346,7 +298,7 @@ public class webViewHook {
                         }
 
                         if (boolVerfy) {
-                            Ut.fileWriterTxt(envPathStateReCaptcha, "return");
+                            //Ut.fileWriterTxt(envPathStateReCaptcha, "return");
                             Log.d(TAG, "boolVerfy: return");
                             return;
                         }
@@ -393,7 +345,8 @@ public class webViewHook {
                                             envThread.interrupt();
                                             //envThread.join();
                                         }
-                                        threadRunAgain();
+
+                                       //threadRunAgain();
                                         envThread = new Thread(new Runnable() {
                                             @Override
                                             public void run() {
@@ -909,6 +862,7 @@ public class webViewHook {
                     envToken = jobj.getString("request");
                     return jobj.getString("request");
                 } else {
+                    boolVerfy=true;
                     Ut.fileWriterTxt(envPathStateReCaptcha, ret);
                     Log.d(TAG, "getGoogleResult: err=" + ret + ",id=" + id
                     );

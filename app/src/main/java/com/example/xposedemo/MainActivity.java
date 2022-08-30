@@ -91,6 +91,7 @@ import java.util.regex.Pattern;
 
 public class MainActivity extends AppCompatActivity {
 
+
     private String TAG = "MainActivity";
     TelephonyManager tm;
     TelecomManager tm2;
@@ -149,7 +150,6 @@ public class MainActivity extends AppCompatActivity {
 
         }
         Log.d(TAG, "onCreate: aaa");
-
         startWatchService();
         //boolStartScript();
 
@@ -415,21 +415,20 @@ public class MainActivity extends AppCompatActivity {
     }
 
 
-    private List<String> getLanguages(){
-        List<String> list=new ArrayList<>();
+    private List<String> getLanguages() {
+        List<String> list = new ArrayList<>();
         Locale[] lg = Locale.getAvailableLocales();
-        for(Locale language:lg){
-            String name=language.getDisplayLanguage();
-            Log.d(TAG, "getLanguages: "+language.toString());
+        for (Locale language : lg) {
+            String name = language.getDisplayLanguage();
+            Log.d(TAG, "getLanguages: " + language.toString());
             //去掉重复的语言
-            if (!list.contains(name)){
+            if (!list.contains(name)) {
                 list.add(name);
-                Log.d(TAG, "getLanguages: " );
+                Log.d(TAG, "getLanguages: ");
             }
         }
         return list;
     }
-
 
     public void boolStartScript(){
        if( sw_scriptBootedRun.isChecked() ){
