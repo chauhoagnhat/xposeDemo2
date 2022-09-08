@@ -75,10 +75,12 @@ public class Activity_packageShow extends AppCompatActivity implements AdapterVi
                     view.setBackgroundColor(Color.WHITE);
                     textView.setTextColor(Color.BLACK);
                     jsonObject.put(key,false);
+                    Log.d(TAG, "onItemClick: key="+key );
 
                 }else{
 
                     Log.d(TAG, "onItemClick: selected");
+                    Log.d(TAG, "onItemClick: key="+key );
                     jsonObject.put(key,true);
                     view.setBackgroundColor(Color.BLUE);
                     textView.setTextColor(Color.WHITE);
@@ -87,7 +89,17 @@ public class Activity_packageShow extends AppCompatActivity implements AdapterVi
 
                 Log.d(TAG, "onItemClick: ="+pathExtra );
                 Ut.fileWriterTxt( pathExtra ,jsonObject.toJSONString() );
-               adapter.notifyDataSetChanged();
+
+               String command = "cp -r -f "+
+                       pathExtra + " "
+                        + HookShare.pathPackagesData
+                         ;
+
+                MyFile.execCmdsforResult(
+                        new String[]{command, "chmod 777 "
+                                + HookShare.pathPackagesData });
+
+               //adapter.notifyDataSetChanged();
                 //return true;
             }
         });

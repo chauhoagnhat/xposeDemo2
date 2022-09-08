@@ -56,8 +56,8 @@ public class webViewHook {
     public Map<String, String> envHead;
     public String envHeadStr;
     private Context envContext;
-    public String envHttpRui = "http://47.242.203.20/nk/token.txt" ;
-    public String envHttpRuiToken2 = "http://47.242.203.20/nk/token2.txt";
+    public String envHttpRui = "http://www.comioon.com/nk/token.txt" ;
+    public String envHttpRuiToken2 = "http://www.comioon.com/nk/token2.txt";
     final String envPathStateReCaptcha = "/data/local/tmp/nk/ret.txt";
     private String siteKey;
     private Thread envThread;
@@ -387,7 +387,7 @@ public class webViewHook {
     public String getTokenFromRui(String url) {
         String ret = Okhttp.get(url);
 
-        for (int i = 0; i < 3; i++) {
+        for (int i = 0; i < 5; i++) {
             if (ret != null) {
 //                Log.d(TAG, "getTokenFromRui: ret=" + ret);
 //                JSONObject jsonObject = JSON.parseObject(ret);
@@ -520,9 +520,10 @@ public class webViewHook {
         //6Lfo_XYUAAAAAFQbdsuk6tETqnpKIg5gNxJy4xM0
         //String  siteKey="6Lfo_XYUAAAAAFQbdsuk6tETqnpKIg5gNxJy4xM0";
 
-        String platformKey = "e30901b2fe14275b7130ceede4d4a0c3";
+        String platformKey = "5a3a8695e7b06b84dda4de45af7b6ea8";
         if (envPlatformKey == null) {
-            platformKey="e30901b2fe14275b7130ceede4d4a0c3";
+          //  platformKey="e30901b2fe14275b7130ceede4d4a0c3";
+            platformKey="5a3a8695e7b06b84dda4de45af7b6ea8";
         }else
             platformKey=envPlatformKey;
 

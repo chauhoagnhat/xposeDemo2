@@ -46,6 +46,7 @@ public class Phone  {
 
         methodNamelist=new ArrayList<>();
         Telephony( sharePkgParam );
+       hookTestValue( sharePkgParam );
 
     }
 
@@ -464,8 +465,8 @@ public class Phone  {
 
     }
 
-    private void hookTestValue(String hookClass, XC_LoadPackage.LoadPackageParam loadPkgParam,
-                               final String funcName ) {
+    private void hookTestValue( XC_LoadPackage.LoadPackageParam loadPkgParam
+                                ) {
 //        XposedBridge.hookAllMethods(XposedHelpers.findClass(hookClass, loadPkgParam.classLoader), funcName, new XC_MethodHook() {
 //            @Override
 //            protected void beforeHookedMethod(MethodHookParam param) throws Throwable {
@@ -478,31 +479,13 @@ public class Phone  {
 //                Log.w(TAG, "read1: (" + param.args[1] + ")" + param.args[0]);
 //            }
 //        });
+
         Log.d(TAG, "hookTestValue: run" );
         try {
-            XposedBridge.hookAllMethods(XposedHelpers.findClass("ts3.m", loadPkgParam.classLoader), "b", new XC_MethodHook() {
+            XposedBridge.hookAllMethods( XposedHelpers.findClass ("ts3.m", loadPkgParam.classLoader ), "b", new XC_MethodHook() {
                 @Override
                 protected void beforeHookedMethod(MethodHookParam param) throws Throwable {
                     Log.v(TAG, "hookTestValue write: (" + param.args[0] + ")" + param.args[1]);
-                    if ( param.args[0].equals("notifyInstalled") ){
-                        Log.d(TAG, "hookTestValue: set empty");
-                        String[] arr= param.args[1].toString().split("\t");
-    
-                        for ( String str :
-                          arr   ) {
-                            Log.d(TAG, "hookTestValue args="+str  );
-                        }
-                        String ret="";
-                        arr[1]="12.1.0";
-                        arr[2]="Android";
-                        arr[3]="8.1.1)";
-    
-                        ret=arr[0]+"\t"+arr[1]+"\t"+arr[2]+"\t"+arr[3];
-                        param.args[1]=ret;
-                        Log.d(TAG, "hookTestValue set="+ret  );
-                        Log.d(TAG, "---");
-                       param.setResult( param );
-                    }
                 }
             });
         } catch (Exception e) {
@@ -521,6 +504,7 @@ public class Phone  {
             Log.d(TAG, "hookTestValue Exception="+e.toString() );
             e.printStackTrace();
         } finally {
+
         }
 
 

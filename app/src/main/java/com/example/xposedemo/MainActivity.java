@@ -525,7 +525,6 @@ public class MainActivity extends AppCompatActivity {
                                         Log.d(TAG, "run: 判断脚本失败 readtxt="+Integer.parseInt(tp) );
                                     }
 
-
                                 }
                             } catch (InterruptedException e) {
                                 e.printStackTrace();
@@ -630,6 +629,15 @@ public class MainActivity extends AppCompatActivity {
                 + HookShare.pathNkFolderData
                 +"/ret.txt" ;
 
+
+         command = "cp -r -f "+
+                HookShare.pathPackages + " "
+                + HookShare.pathPackagesData
+                ;
+
+        MyFile.execCmdsforResult(
+                new String[]{command, "chmod 777 "
+                        + HookShare.pathPackagesData });
 
         MyFile.execCmdsforResult(
                 new String[]{command, "chmod 777 "
@@ -1014,7 +1022,7 @@ public class MainActivity extends AppCompatActivity {
             jsonObject= setUiDefault( jsonObject,"sw_scriptBootedRun",true );
             jsonObject= setUiDefault( jsonObject,"et_pkgName","com.rf.icon" );
             jsonObject= setUiDefault( jsonObject,"sw_enable_para",false );
-            jsonObject= setUiDefault( jsonObject,"sw_tel_simulate",false );
+            jsonObject= setUiDefault( jsonObject,"sw_tel_simulate",true );
             jsonObject= setUiDefault( jsonObject,"sw_recaptcha",true );
 
         }else
@@ -1026,7 +1034,7 @@ public class MainActivity extends AppCompatActivity {
             jsonObject.put( "sw_scriptBootedRun", true );
             jsonObject.put( "et_pkgName", "com.rf.icon" );
             jsonObject.put( "sw_enable_para", false );
-            jsonObject.put( "sw_tel_simulate", false );
+            jsonObject.put( "sw_tel_simulate", true );
             jsonObject.put( "sw_recaptcha", true );
 
         }
