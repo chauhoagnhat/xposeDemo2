@@ -124,6 +124,30 @@ public class Ut {
         //https://blog.csdn.net/u013491946/article/details/78191591  androidStudio配置
     }
 
+    /**
+     * 结束进程
+     */
+    public static void killProcess(String packageName) {
+        Process process = null;
+        try {
+            process = Runtime.getRuntime().exec("su");
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        OutputStream out = process.getOutputStream();
+        String cmd = "am force-stop " + packageName + " \n";
+        try {
+            out.write(cmd.getBytes());
+            out.flush();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+
+    }
+
+
     public static char rLetter(){
         int c='a'+(int)(Math.random()*26);
         return  (char)c;
@@ -929,6 +953,26 @@ public class Ut {
         try {
             // true表示不覆盖原来的内容，而是加到文件的后面。若要覆盖原来的内容，直接省略这个参数就好
             fwriter = new FileWriter( filePath );
+            fwriter.write(content);
+        } catch (IOException ex) {
+            ex.printStackTrace();
+        } finally {
+            try {
+                if (fwriter!=null){
+                    fwriter.flush();
+                    fwriter.close();
+                }
+            } catch (IOException ex) {
+                ex.printStackTrace();
+            }
+        }
+    }
+
+    public static void fileAppend(String filePath,String content) {
+        FileWriter fwriter = null;
+        try {
+            // true表示不覆盖原来的内容，而是加到文件的后面。若要覆盖原来的内容，直接省略这个参数就好
+            fwriter = new FileWriter( filePath,true );
             fwriter.write(content);
         } catch (IOException ex) {
             ex.printStackTrace();

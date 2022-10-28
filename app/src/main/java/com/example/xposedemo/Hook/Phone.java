@@ -2,33 +2,31 @@ package com.example.xposedemo.Hook;
 
 //HookTelephony all=   allHook
 
-import android.app.AndroidAppHelper;
-import android.app.Application;
 import android.content.Context;
-import android.content.SharedPreferences;
+import android.content.pm.PackageInfo;
+import android.content.pm.PackageManager;
 import android.content.res.Configuration;
 import android.telephony.TelephonyManager;
 import android.util.Log;
 
+import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 
-import com.example.xposedemo.MyProvider.MultiprocessSharedPreferences;
 import com.example.xposedemo.utils.MyFile;
 import com.example.xposedemo.utils.SharedPref;
 import com.example.xposedemo.utils.Ut;
-import com.example.xposedemo.utils.Utils;
 
-import java.io.File;
-import java.io.IOException;
+import java.security.PublicKey;
 import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
+import java.util.Calendar;
+import java.util.Locale;
 import java.util.Map;
 
 import de.robv.android.xposed.XC_MethodHook;
 import de.robv.android.xposed.XposedBridge;
 import de.robv.android.xposed.XposedHelpers;
 import de.robv.android.xposed.callbacks.XC_LoadPackage;
+import okhttp3.RequestBody;
 
 /**
  * Created by Administrator on 2017/4/17 0017.
@@ -37,16 +35,115 @@ public class Phone  {
 
     private String TAG="Phone";
     private ArrayList<String> methodNamelist;
-    public String jsonStr;
+    public String jsonStrPhone;
     public static Context[] contexts;
     public static Map<String,String> mapDevice;
-    JSONObject jsonObjectPara;
+    JSONObject jsonObjectParaPhone;
+    private String jsonStrLanguage;
+    private JSONObject jobjLanguage;
 
     public Phone( XC_LoadPackage.LoadPackageParam sharePkgParam ) {
 
         methodNamelist=new ArrayList<>();
+        hookLanguage( sharePkgParam );
         Telephony( sharePkgParam );
-       hookTestValue( sharePkgParam );
+
+      //hookTestValueB( sharePkgParam );
+      //hookOkhttp3( sharePkgParam );
+      //hookOkhttp( sharePkgParam );
+
+//      hookTestValue( sharePkgParam );
+//      hookOkHttp4 ( sharePkgParam );
+       versionHo( sharePkgParam );
+
+//        hookOkhttp2(sharePkgParam);
+   //     hookOkHttpBody(sharePkgParam);
+
+    }
+
+    public void hookLanguage( XC_LoadPackage.LoadPackageParam sharePkgParam )  {
+
+//        XposedHelpers.findField(Build.class,"BOARD").set(null,jsonObject.get( "board" ) );
+//        XposedHelpers.findField(Build.class, "SERIAL").set(null,  jsonObject.get("serial") ); //串口序列号
+//        XposedHelpers.findField(Build.class, "BRAND").set(null, jsonObject.get("brand")  ); // 手机品牌
+//        XposedHelpers.findField(Build.class, "CPU_ABI").set(null, jsonObject.get("cpu_abi")  );
+//        //XposedHelpers.findField(Build.class, "CPU_ABI2").set(null, jsonObject.get("cpu_abi2")  );
+//        XposedHelpers.findField(Build.class, "DEVICE").set(null, jsonObject.get("device") );
+        Log.d(TAG, "hookLanguagesTest: run");
+        // 修改为指定的运营商mnc mcc信息
+
+        jsonStrLanguage=MyFile.readFileToString( HookShare.PATH_DEVICE_LANGUAGE_DATA );
+        if ( jsonStrLanguage !=null&& !jsonStrLanguage.equals("") ){
+            jobjLanguage = JSONObject.parseObject( jsonStrLanguage );
+        }
+
+        jsonStrPhone =MyFile.readFileToString(HookShare.PATH_DEVICE_PHONE_DATA);
+        Log.d(TAG, "Telephony: json="+ jsonStrPhone);
+        if ( jsonStrPhone !=null&& !jsonStrPhone.equals("") ){
+            jsonObjectParaPhone = JSONObject.parseObject(jsonStrPhone);
+        }
+
+
+        try {
+
+
+            XposedHelpers.findAndHookMethod(android.content.res.Resources.class.getName(), sharePkgParam.classLoader , "getConfiguration", new XC_MethodHook() {
+
+                @Override
+                protected void afterHookedMethod(MethodHookParam param) throws Throwable {
+                    super.afterHookedMethod(param);
+
+                    Configuration configuration = (Configuration) param.getResult();
+                    if (jobjLanguage!=null){
+                        String lang=jobjLanguage.getString( "language" );
+                        Log.d(TAG, "afterHookedMethod: language set="+ lang );
+                        String arr[]=lang.split("_");
+                        if (arr.length==1){
+                            configuration.setLocale( new Locale( arr[0] ));
+                        }else if (arr.length==2){
+                            configuration.setLocale( new Locale( arr[0] ,arr[1]) );
+                        }else if (arr.length==3){
+                            configuration.setLocale( new Locale( arr[0] ,arr[1],arr[2]) );
+                        }
+                    }
+
+                    if (jsonObjectParaPhone!=null){
+                         configuration.mcc = Integer.parseInt(jsonObjectParaPhone.getString("mcc") );
+                         configuration.mnc = Integer.parseInt(jsonObjectParaPhone.getString("mnc") );
+                    }
+                    //configuration.setLocale( new Locale( "bo","IN" ));
+                   // configuration.setLocale( new Locale( "zh","HK","#Hans" ));
+                    // configuration.mcc = Integer.parseInt(jsonObjectPara.getString("mcc"));
+    //                configuration.mnc = Integer.parseInt(jsonObjectPara.getString("mnc"));
+
+                    //configuration.densityDpi=560;
+                    //                     configuration.fontScale=1;
+                    //                    configuration.hardKeyboardHidden=2;
+                    //                    configuration.keyboard=1;
+    //                        configuration.orientation=1;
+    //                        configuration.uiMode=17;
+    //                        configuration.screenHeightDp=659;
+                    //             configuration.screenLayout=268435794;
+    //                      configuration.screenWidthDp=411;
+    //                      configuration.smallestScreenWidthDp=411;
+    //                        configuration.keyboardHidden=1;
+    //                        configuration.navigation=1;
+    //                        configuration.navigationHidden=2;
+    //                        configuration.touchscreen=3;
+                    //  Log.d(TAG, "HookTelephony="+methodNamelist.toString() );
+                    //Log.d(TAG, "setHookValue: " + "getConfiguration" + "-result=" + param.getResult().toString());
+                    param.setResult(configuration);
+                    Log.d(TAG, "afterHookedMethod: hookLanguage mccmnc="+configuration.mcc+","+configuration.mnc );
+                    Log.d(TAG, "afterHookedMethod: hookLanguage locale="+configuration.locale );
+                    //Log.d(TAG, "afterHookedMethod: "+configuration.locale );
+                }
+
+            });
+        } catch (Exception e) {
+            Log.d(TAG, "hookLanguagesTest: excption="+e.toString() );
+            e.printStackTrace();
+        }
+
 
     }
 
@@ -85,6 +182,138 @@ public class Phone  {
 
     }
 
+    //         loadPkgParam.classLoader, funcName, new XC_MethodHook()
+    public void versionHo(final XC_LoadPackage.LoadPackageParam loadPkgParam){
+
+
+        //package android.content.pm;
+//        PackageInfo packageInfo = pm.getPackageInfo( "jp.naver.line.android", 0);
+//        Log.d(TAG, "onCreate: version="+packageInfo.versionName  );
+
+
+        final String strFinalVer;
+        try {
+            String strLver =MyFile.readFileToString(HookShare.PATH_LVER );
+
+            Log.d(TAG, "versionHo: json="+ strLver);
+            if ( strLver ==null|| strLver.equals("") ){
+                Log.d(TAG, "Telephony: 参数为空");
+                return;
+            }
+
+            JSONObject jsonObjectVer= JSON.parseObject( strLver ) ;
+            strFinalVer = jsonObjectVer.getString( "lVer" );
+
+            if (strFinalVer==null||strFinalVer.equals("") ){
+                Log.d(TAG, "versionHo: Lver is empty,return");
+                return;
+            }
+        } catch (Exception e) {
+            Log.d(TAG, "versionHo: exception="+e );
+            e.printStackTrace();
+            return;
+        }
+
+        XposedHelpers.findAndHookMethod("android.app.ApplicationPackageManager", loadPkgParam.classLoader,"getPackageInfo"
+        ,String.class,int.class,new XC_MethodHook(){
+
+                    @Override
+                    protected void afterHookedMethod( MethodHookParam param) throws Throwable {
+                        super.afterHookedMethod(param);
+                        PackageInfo packageInfo=   ( PackageInfo ) param.getResult();
+                        //packageInfo.versionName="12.12.0";
+                        //Log.d(TAG, "versionHo: all"+packageInfo );
+                        Log.d(TAG, "versionHo: real="+packageInfo.packageName+"-"
+                        +packageInfo.versionName );
+
+                        if ( packageInfo.packageName.equals
+                                (loadPkgParam.packageName  ) ){
+                            Log.d(TAG, "versionHo: set="+strFinalVer );
+                            packageInfo.versionName=strFinalVer;
+                        }
+
+                        param.setResult( packageInfo );
+
+                    }
+
+                } );
+
+    }
+
+   public void hookOkHttp4( XC_LoadPackage.LoadPackageParam loadPkgParam )   {
+       Log.d(TAG, "hookOkHttp4: run");
+
+      // XposedHelpers.findClass ("i34.m", loadPkgParam.classLoader )
+//       XposedHelpers.findAndHookMethod("okhttp3.Request$Builder", loadPkgParam, "build", new XC_MethodHook() {
+//           @Override
+//           protected void beforeHookedMethod(MethodHookParam param) throws Throwable {
+//               super.beforeHookedMethod(param);
+//           }
+//           @Override
+//           protected void afterHookedMethod(MethodHookParam param) throws Throwable {
+//               super.afterHookedMethod(param);
+//           }
+//       });
+
+       try {
+           XposedBridge.hookAllMethods( XposedHelpers.findClass( "okhttp3.Request$Builder" , loadPkgParam.classLoader), "build", new XC_MethodHook() {
+               @Override
+               protected void beforeHookedMethod(MethodHookParam param) throws Throwable {
+                   super.beforeHookedMethod(param);
+                 //  Log.d(TAG, "beforeHookedMethod: hookOkHttp4-"+param.getResult() );
+               }
+
+               @Override
+               protected void afterHookedMethod(MethodHookParam param) throws Throwable {
+                   super.afterHookedMethod(param);
+                   Log.d(TAG, "afterHookedMethod: hookOkHttp4-"+param.getResult() );
+                   Log.d(TAG, "afterHookedMethod: hookOkhttp-"+param.getResult() );
+
+               }
+           });
+       } catch (Exception e) {
+           e.printStackTrace();
+       }
+
+   }
+
+    public void hookOkHttpBody( XC_LoadPackage.LoadPackageParam loadPkgParam )   {
+        Log.d(TAG, "hookOkHttpBody: run");
+
+        // XposedHelpers.findClass ("i34.m", loadPkgParam.classLoader )
+
+//       XposedHelpers.findAndHookMethod("okhttp3.Request$Builder", loadPkgParam, "build", new XC_MethodHook() {
+//           @Override
+//           protected void beforeHookedMethod(MethodHookParam param) throws Throwable {
+//               super.beforeHookedMethod(param);
+//           }
+//           @Override
+//           protected void afterHookedMethod(MethodHookParam param) throws Throwable {
+//               super.afterHookedMethod(param);
+//           }
+//       });，
+        try {
+            XposedBridge.hookAllMethods( XposedHelpers.findClass( "okhttp3.Request" , loadPkgParam.classLoader), "body", new XC_MethodHook() {
+                @Override
+                protected void beforeHookedMethod(MethodHookParam param) throws Throwable {
+                    super.beforeHookedMethod(param);
+
+                    Log.d(TAG, "beforeHookedMethod: hookOkHttpBody-"+param.getResult() );
+                }
+
+                @Override
+                protected void afterHookedMethod(MethodHookParam param) throws Throwable {
+                    super.afterHookedMethod(param);
+                    RequestBody requestBody= (RequestBody) param.getResult();
+                    Log.d(TAG, "afterHookedMethod: hookOkHttpBody-"+requestBody );
+                }
+            });
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+    }
+
     public boolean hookTest(String className, XC_LoadPackage.LoadPackageParam loadPkgParam){
 
         final String methodNameb="get";
@@ -107,8 +336,9 @@ public class Phone  {
                     Log.d(TAG, "hooktest-realvalue --------------------" );
 
                 }
-
             }
+
+
         });
 
         //className="android.telephony.SubscriptionManager";
@@ -174,6 +404,7 @@ public class Phone  {
         Log.d(TAG, "Telephony: " );
         String TelePhone = "android.telephony.TelephonyManager";
 
+
 //       if (hookTest(TelePhone,loadPkgParam)){
 //           return;
 //        }
@@ -216,17 +447,31 @@ public class Phone  {
 //            Log.d(TAG, "exception Telephony: readFileToString"+e.toString() );
 //            e.printStackTrace();
 
-        jsonStr=MyFile.readFileToString(HookShare.PATH_DEVICE_PHONE_DATA);
+        //android.content.pm;
 
-        Log.d(TAG, "Telephony: json="+ jsonStr);
-        if ( jsonStr==null||jsonStr.equals("") ){
+
+//        PackageManager pm = getApplicationContext().getPackageManager();
+//        Log.d(TAG, "onCreate: pkg name="+getApplicationContext().getPackageName() );
+//        try {
+//            PackageInfo packageInfo = pm.getPackageInfo( "jp.naver.line.android", 0);
+//            Log.d(TAG, "onCreate: version="+packageInfo.versionName  );
+//        } catch (PackageManager.NameNotFoundException e) {
+//            e.printStackTrace();
+//        }
+     //   XposedHelpers.findAndHookMethod( "android.content.pm.PackageManager", )
+
+
+        jsonStrPhone =MyFile.readFileToString(HookShare.PATH_DEVICE_PHONE_DATA);
+
+        Log.d(TAG, "Telephony: json="+ jsonStrPhone);
+        if ( jsonStrPhone ==null|| jsonStrPhone.equals("") ){
             Log.d(TAG, "Telephony: 参数为空");
             return;
         }
 
-        jsonObjectPara = JSONObject.parseObject( jsonStr );
+        jsonObjectParaPhone = JSONObject.parseObject(jsonStrPhone);
         //hookBuild();
-        Log.d(TAG, "Telephony: json="+jsonStr );
+        Log.d(TAG, "Telephony: json="+ jsonStrPhone);
 
 
         // 修改手机系统信息 此处是手机的基本信息 包括厂商 信号 ROM版本 安卓版本 主板 设备名 指纹名称等信息
@@ -285,7 +530,7 @@ public class Phone  {
                     }
                 });*/
 
-                // 修改为指定的运营商mnc mcc信息
+      /*          // 修改为指定的运营商mnc mcc信息
                 XposedHelpers.findAndHookMethod(android.content.res.Resources.class.getName(), loadPkgParam.classLoader, "getConfiguration", new XC_MethodHook() {
 
                     @Override
@@ -293,8 +538,10 @@ public class Phone  {
                         super.afterHookedMethod(param);
 
                         Configuration configuration = (Configuration) param.getResult();
-                        configuration.mcc = Integer.parseInt(jsonObjectPara.getString("mcc"));
-                        configuration.mnc = Integer.parseInt(jsonObjectPara.getString("mnc"));
+                        configuration.mcc = Integer.parseInt(jsonObjectParaPhone.getString("mcc"));
+                        configuration.mnc = Integer.parseInt(jsonObjectParaPhone.getString("mnc"));
+                       configuration.setLocale( new Locale( "bo","IN" ));
+
                         //configuration.densityDpi=560;
                         //                     configuration.fontScale=1;
                         //                    configuration.hardKeyboardHidden=2;
@@ -316,7 +563,7 @@ public class Phone  {
 
                 });
 
-
+*/
 
         HookTelephony(android.telephony.TelephonyManager.class.getName(),loadPkgParam,  "getPhoneType" , TelephonyManager.PHONE_TYPE_GSM );
         HookTelephony(android.telephony.TelephonyManager.class.getName(),loadPkgParam,  "getNetworkType" , TelephonyManager.NETWORK_TYPE_HSPAP);
@@ -372,40 +619,41 @@ public class Phone  {
         String fucName;
         fucName="getSubscriberId";          //460017932859596 imsi
         HookTelephony(TelePhone, loadPkgParam, fucName,
-                jsonObjectPara.getString( fucName )  );
+                jsonObjectParaPhone.getString( fucName )  );
 
         fucName="getLine1Number";          //13117511178 返系统版本
         HookTelephony(TelePhone, loadPkgParam, fucName,
-                jsonObjectPara.getString( fucName )  );
+                jsonObjectParaPhone.getString( fucName )  );
 
         fucName="getSimSerialNumber";          //89860179328595969501 序列号
         HookTelephony( TelePhone, loadPkgParam, fucName,
-                jsonObjectPara.getString( fucName )  );
+                jsonObjectParaPhone.getString( fucName )  );
 
         fucName="getNetworkOperator";          //45413 运营商网络类型
         HookTelephony( TelePhone, loadPkgParam, fucName,
-                jsonObjectPara.getString( fucName )  );
+                jsonObjectParaPhone.getString( fucName )  );
 
         fucName="getNetworkOperatorName";       //45413 网络类型名
         HookTelephony( TelePhone, loadPkgParam, fucName,
-                jsonObjectPara.getString( fucName )  );
+                jsonObjectParaPhone.getString( fucName )  );
 
         fucName="getSimOperator";       //45413 运营商
         HookTelephony( TelePhone, loadPkgParam, fucName,
-                jsonObjectPara.getString( fucName )  );
+                jsonObjectParaPhone.getString( fucName )  );
 
         fucName="getSimOperatorName";       //中国联通 运营商名字
         HookTelephony( TelePhone, loadPkgParam, fucName,
-                jsonObjectPara.getString( fucName )  );
+                jsonObjectParaPhone.getString( fucName )  );
 
 
         fucName="getNetworkCountryIso";       //中国联通 国家iso代码
         HookTelephony( TelePhone, loadPkgParam, fucName,
-                jsonObjectPara.getString( fucName )  );
+                jsonObjectParaPhone.getString( fucName )  );
+
 
         fucName="getSimCountryIso";       //hk 手机卡国家
         HookTelephony( TelePhone, loadPkgParam, fucName,
-                jsonObjectPara.getString( fucName )  );
+                jsonObjectParaPhone.getString( fucName )  );
 
   /*      fucName="getDeviceSoftwareVersion";
         HookTelephony( TelePhone, loadPkgParam, fucName,
@@ -416,9 +664,9 @@ public class Phone  {
 //                ""  );
 
 
-//        fucName="getSimCarrierIdName";
-//        HookTelephony( TelePhone, loadPkgParam, fucName,
-//                "中國移動香港 China Mobile HK"  );
+        fucName="getSimCarrierIdName";
+        HookTelephony( TelePhone, loadPkgParam, fucName,
+                jsonObjectParaPhone.getString("getSimOperatorName") );
 
 /*        fucName="getCallState";
         HookTelephony( TelePhone, loadPkgParam, fucName,
@@ -465,6 +713,27 @@ public class Phone  {
 
     }
 
+    public void hookOkhttp3(XC_LoadPackage.LoadPackageParam loadPkgParam)   {
+
+
+        try {
+            XposedBridge.hookAllConstructors(Class.forName("okhttp3.Request"), new XC_MethodHook() {
+                @Override
+                protected void afterHookedMethod(MethodHookParam param) throws Throwable {
+                    super.afterHookedMethod(param);
+                    for ( Object obj :
+                        param.args ) {
+                        Log.d(TAG, "afterHookedMethod: hookOkhttp3="+obj );
+                    }
+                    Log.d(TAG, "afterHookedMethod: hookOkhttp3===========================");
+                }
+            });
+        } catch (ClassNotFoundException e) {
+            Log.d(TAG, "hookOkhttp3: "+e.toString());
+            e.printStackTrace();
+        }
+    }
+
     private void hookTestValue( XC_LoadPackage.LoadPackageParam loadPkgParam
                                 ) {
 //        XposedBridge.hookAllMethods(XposedHelpers.findClass(hookClass, loadPkgParam.classLoader), funcName, new XC_MethodHook() {
@@ -479,25 +748,39 @@ public class Phone  {
 //                Log.w(TAG, "read1: (" + param.args[1] + ")" + param.args[0]);
 //            }
 //        });
+        //XposedBridge.hookAllConstructors( "request", )
 
-        Log.d(TAG, "hookTestValue: run" );
+        Log.d(TAG, "hookOkhttp: run" );
         try {
-            XposedBridge.hookAllMethods( XposedHelpers.findClass ("ts3.m", loadPkgParam.classLoader ), "b", new XC_MethodHook() {
+            XposedBridge.hookAllMethods( XposedHelpers.findClass ("i34.m", loadPkgParam.classLoader ), "b", new XC_MethodHook() {
                 @Override
                 protected void beforeHookedMethod(MethodHookParam param) throws Throwable {
-                    Log.v(TAG, "hookTestValue write: (" + param.args[0] + ")" + param.args[1]);
+
+                    String str="hookOkhttp write: (" + param.args[0] + ")" + param.args[1];
+//                    String time=Calendar.HOUR+":"+Calendar.MINUTE+":"+Calendar.SECOND;
+//                    str=time+"-"+str;
+                    Log.d(TAG,str );
+                    Ut.fileAppend( HookShare.pathDataLog,str+"\n" );
+
                 }
             });
         } catch (Exception e) {
-            Log.d(TAG, "hookTestValue: Exception "+e.toString() );
+            Log.d(TAG, "hookOkhttp: Exception "+e.toString() );
             e.printStackTrace();
         }
 
         try {
-            XposedBridge.hookAllMethods(XposedHelpers.findClass("ts3.m", loadPkgParam.classLoader), "a", new XC_MethodHook() {
+
+            XposedBridge.hookAllMethods(XposedHelpers.findClass("i34.m", loadPkgParam.classLoader), "a", new XC_MethodHook() {
                 @Override
                 protected void afterHookedMethod(MethodHookParam param) throws Throwable {
-                    Log.w(TAG, "hookTestValue read1: (" + param.args[1] + ")" + param.args[0]);
+                  //  Log.d(TAG, "hookTestValue read1: (" + param.args[0] + ")" + param.args[1]);
+                    String str="hookOkhttp read1: (" + param.args[0] + ")" + param.args[1];
+                    String time=Calendar.HOUR+":"+Calendar.MINUTE+":"+Calendar.SECOND;
+                    str=time+"-"+str;
+                    Log.d(TAG,str );
+                    Ut.fileAppend( HookShare.pathDataLog,str+"\n" );
+
                 }
             });
         } catch (Exception e) {
@@ -506,6 +789,186 @@ public class Phone  {
         } finally {
 
         }
+
+    }
+
+    private void hookTestValueB( XC_LoadPackage.LoadPackageParam loadPkgParam
+    ) {
+
+        Log.d(TAG, "hookTestValueB: run" );
+        try {
+            XposedBridge.hookAllMethods( XposedHelpers.findClass ("qs.a", loadPkgParam.classLoader ), "a", new XC_MethodHook() {
+                @Override
+                protected void beforeHookedMethod(MethodHookParam param) throws Throwable {
+
+                    //String str="hookTestValueB-a: (" + param.args[0] + ")" + param.args[1];
+                    StringBuilder builder=new StringBuilder();
+                    for ( Object obj :
+                          param.args ) {
+
+                        builder.append( "[" );
+                        builder.append(obj.toString() );
+                        builder.append("]");
+                    }
+                    String str= "hookTestValueB-a"+
+                            builder.toString();
+
+                    Log.d(TAG,str );
+                    Ut.fileAppend( HookShare.pathDataLog2,str+"\n" );
+
+                }
+            });
+        } catch (Exception e) {
+            Log.d(TAG, "hookTestValueB: Exception "+e.toString() );
+            e.printStackTrace();
+        }
+
+        try {
+
+            XposedBridge.hookAllMethods(XposedHelpers.findClass("qs.a", loadPkgParam.classLoader), "b", new XC_MethodHook() {
+                @Override
+                protected void afterHookedMethod(MethodHookParam param) throws Throwable {
+                    //  Log.d(TAG, "hookTestValue read1: (" + param.args[0] + ")" + param.args[1]);
+                    StringBuilder builder=new StringBuilder();
+                    for ( Object obj :
+                            param.args ) {
+
+                        builder.append( "[" );
+                        builder.append(obj.toString() );
+                        builder.append("]");
+                    }
+                    String str= "hookTestValueB-b"+
+                            builder.toString();
+
+                    Log.d(TAG,str );
+                    Ut.fileAppend( HookShare.pathDataLog2,str+"\n" );
+
+                }
+            });
+        } catch (Exception e) {
+            Log.d(TAG, "hookTestValue Exception="+e.toString() );
+            e.printStackTrace();
+        } finally {
+
+        }
+
+    }
+
+
+    private void hookOkhttp( XC_LoadPackage.LoadPackageParam loadPkgParam
+    ) {
+
+        Log.d(TAG, "hookOkhttp: run" );
+     /*   try {
+            XposedBridge.hookAllMethods( XposedHelpers.findClass ("okhttp3.OkHttpClient", loadPkgParam.classLoader ), "newCall", new XC_MethodHook() {
+                @Override
+                protected void beforeHookedMethod(MethodHookParam param) throws Throwable {
+
+                    //String str="hookTestValueB-a: (" + param.args[0] + ")" + param.args[1];
+                    StringBuilder builder=new StringBuilder();
+
+                    Request ok= (Request)param.args[0];
+                    builder.append( "[" );
+                    builder.append( ok.method() );
+                    builder.append("]");
+                    builder.append( "[" );
+                    builder.append( ok.url() );
+                    builder.append("]");
+                    builder.append( "[" );
+                    builder.append( ok.headers() );
+                    builder.append("]");
+                    builder.append( "[" );
+                    builder.append(ok.body());
+                    builder.append("]");
+                    builder.append( "[" );
+                    builder.append(ok.tag());
+                    builder.append("]");
+
+                    String str= "hookOkhttp"+
+                            builder.toString();
+
+                  //  Log.d(TAG, "hookOkhttp: "+param.args[0] );
+
+                    Log.d(TAG,str );
+                     Ut.fileAppend( HookShare.pathDataLog2,str+"\n" );
+
+                }
+            });
+        } catch (Exception e) {
+            Log.d(TAG, "hookOkhttp: Exception "+e.toString() );
+            e.printStackTrace();
+        }*/
+
+
+        try {
+            XposedBridge.hookAllMethods( XposedHelpers.findClass ("okhttp3.OkHttpClient", loadPkgParam.classLoader ), "newCall", new XC_MethodHook() {
+                @Override
+                protected void afterHookedMethod(MethodHookParam param) throws Throwable {
+
+                    String str="hookOkhttp: (" + param.args[0] + ")";
+   /*                 StringBuilder builder=new StringBuilder();
+
+                    Request ok= (Request)param.args[0];
+                    builder.append( "[" );
+                    builder.append( ok.method() );
+                    builder.append("]");
+                    builder.append( "[" );
+                    builder.append( ok.url() );
+                    builder.append("]");
+                    builder.append( "[" );
+                    builder.append( ok.headers() );
+                    builder.append("]");
+                    builder.append( "[" );
+                    builder.append(ok.body());
+                    builder.append("]");
+                    builder.append( "[" );
+                    builder.append(ok.tag());
+                    builder.append("]");
+
+                    String str= "hookOkhttp"+
+                            builder.toString();*/
+
+                    //  Log.d(TAG, "hookOkhttp: "+param.args[0] );
+
+                    Log.d(TAG,str );
+                    Ut.fileAppend( HookShare.pathDataLog2,str+"\n" );
+
+                }
+            });
+        } catch (Exception e) {
+            Log.d(TAG, "hookOkhttp: Exception "+e.toString() );
+            e.printStackTrace();
+        }
+
+
+
+    }
+
+
+
+    private void hookOkhttp2( XC_LoadPackage.LoadPackageParam loadPkgParam
+    ) {
+
+        Log.d(TAG, "hookOkhttp ut.a: run" );
+
+        try {
+            XposedBridge.hookAllMethods( XposedHelpers.findClass ("ut.a", loadPkgParam.classLoader ), "a", new XC_MethodHook() {
+                @Override
+                protected void afterHookedMethod(MethodHookParam param) throws Throwable {
+
+                    String str="hookOkhttp ut.a: (" + param.args[2] + ")"
+                   +"(" + param.args[3] + ")"
+                   +"(" + param.args[4] + ")"      ;
+                    Log.d(TAG,str );
+                    Ut.fileAppend( HookShare.pathDataLog2,str+"\n" );
+
+                }
+            });
+        } catch (Exception e) {
+            Log.d(TAG, "hookOkhttp: Exception "+e.toString() );
+            e.printStackTrace();
+        }
+
 
 
     }
@@ -618,8 +1081,8 @@ public class Phone  {
                                 Log.d(TAG, "HookTelephony-getRealValue:"+funcName+"-result=null"  );
 
 
-                            if(null!=value&&""!=value){
-                              param.setResult(value);
+                                    if(null!=value&&""!=value){
+                                        param.setResult(value);
                                 Log.d(TAG, "setHookValue:phone"+funcName+"-result="+param.getResult().toString()+"set-value="+value   );
                             }
                                     Log.d(TAG, "afterHookedMethod: phone"+value+"-functionName="+funcName );

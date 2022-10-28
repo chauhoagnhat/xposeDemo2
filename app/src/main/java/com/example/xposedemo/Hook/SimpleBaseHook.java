@@ -19,7 +19,30 @@ import de.robv.android.xposed.callbacks.XC_LoadPackage;
 public class SimpleBaseHook {
     BaseInfo baseInfo;
     public SimpleBaseHook(XC_LoadPackage.LoadPackageParam loadPackageParam){
-        hookAll(  baseInfo,loadPackageParam  );
+       // hookAll(  baseInfo,loadPackageParam  );
+        hookTestGetValue();
+    }
+
+    public void hookTestGetValue(){
+        XposedHelpers.findAndHookMethod(Settings.Secure.class, "getString", ContentResolver.class, String.class, new XC_MethodHook() {
+            protected void afterHookedMethod(MethodHookParam param) throws Throwable {
+                //accessibility_captioning_locale
+                Object obj=param.getResult();
+                if ( obj==null )
+                    Log.d(TAG, "afterHookedMethod: systemHook="+param.args[1]+"-result=null");
+                else
+                    Log.d(TAG, "afterHookedMethod: systemHook="+param.args[1]+"-result="+obj.toString() );
+                //+"result="+param.getResult().toString() );
+                if (param.args[1].equals(Settings.Secure.ANDROID_ID)){
+                    Log.d(TAG, "afterHookedMethod: android_id get="+param.getResult() );
+                    // Log.d(TAG, "afterHookedMethod: android_id set="+jsonObject.get("android_id")  );
+                    // param.setResult( jsonObject.get("android_id") );
+                }
+
+            }
+
+        });
+
     }
 
     private static final String TAG = "SimpleBaseHook" ;
@@ -99,8 +122,9 @@ public class SimpleBaseHook {
                     Log.d(TAG, "afterHookedMethod: systemHook="+param.args[1]+"-result="+obj.toString() );
                 //+"result="+param.getResult().toString() );
                 if (param.args[1].equals(Settings.Secure.ANDROID_ID)){
-                    Log.d(TAG, "afterHookedMethod: android_id set="+jsonObject.get("android_id")  );
-                    param.setResult( jsonObject.get("android_id") );
+                    Log.d(TAG, "afterHookedMethod: android_id get="+param.getResult() );
+                   // Log.d(TAG, "afterHookedMethod: android_id set="+jsonObject.get("android_id")  );
+                   // param.setResult( jsonObject.get("android_id") );
                 }
 
             }

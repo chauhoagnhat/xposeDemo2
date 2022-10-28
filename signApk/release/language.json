@@ -1,0 +1,994 @@
+{
+	"AD": [
+		"ca_AD"
+	],
+	"AE": [
+		"ar_AE"
+	],
+	"AF": [
+		"fa_AF",
+		"ps_AF",
+		"uz_AF_#Arab"
+	],
+	"AG": [
+		"en_AG"
+	],
+	"AI": [
+		"en_AI"
+	],
+	"AL": [
+		"sq_AL"
+	],
+	"AM": [
+		"hy_AM"
+	],
+	"AO": [
+		"ln_AO",
+		"pt_AO"
+	],
+	"AR": [
+		"es_AR"
+	],
+	"AS": [
+		"en_AS"
+	],
+	"AT": [
+		"de_AT",
+		"en_AT"
+	],
+	"AU": [
+		"en_AU"
+	],
+	"AW": [
+		"nl_AW"
+	],
+	"AX": [
+		"sv_AX"
+	],
+	"AZ": [
+		"az_AZ_#Cyrl",
+		"az_AZ_#Latn"
+	],
+	"BA": [
+		"bs_BA_#Cyrl",
+		"bs_BA_#Latn",
+		"hr_BA",
+		"sr_BA_#Cyrl",
+		"sr_BA_#Latn"
+	],
+	"BB": [
+		"en_BB"
+	],
+	"BD": [
+		"bn_BD",
+		"ccp_BD"
+	],
+	"BE": [
+		"de_BE",
+		"en_BE",
+		"fr_BE",
+		"nl_BE"
+	],
+	"BF": [
+		"fr_BF"
+	],
+	"BG": [
+		"bg_BG"
+	],
+	"BH": [
+		"ar_BH"
+	],
+	"BI": [
+		"en_BI",
+		"fr_BI",
+		"rn_BI"
+	],
+	"BJ": [
+		"fr_BJ",
+		"yo_BJ"
+	],
+	"BL": [
+		"fr_BL"
+	],
+	"BM": [
+		"en_BM"
+	],
+	"BN": [
+		"ms_BN"
+	],
+	"BO": [
+		"es_BO",
+		"qu_BO"
+	],
+	"BQ": [
+		"nl_BQ"
+	],
+	"BR": [
+		"es_BR",
+		"pt_BR"
+	],
+	"BS": [
+		"en_BS"
+	],
+	"BT": [
+		"dz_BT"
+	],
+	"BW": [
+		"en_BW"
+	],
+	"BY": [
+		"be_BY",
+		"ru_BY"
+	],
+	"BZ": [
+		"en_BZ",
+		"es_BZ"
+	],
+	"CA": [
+		"en_CA",
+		"fr_CA"
+	],
+	"CC": [
+		"en_CC"
+	],
+	"CD": [
+		"fr_CD",
+		"ln_CD",
+		"lu_CD",
+		"sw_CD"
+	],
+	"CF": [
+		"fr_CF",
+		"ln_CF",
+		"sg_CF"
+	],
+	"CG": [
+		"fr_CG",
+		"ln_CG"
+	],
+	"CH": [
+		"de_CH",
+		"en_CH",
+		"fr_CH",
+		"gsw_CH",
+		"it_CH",
+		"pt_CH",
+		"rm_CH",
+		"wae_CH"
+	],
+	"CI": [
+		"fr_CI"
+	],
+	"CK": [
+		"en_CK"
+	],
+	"CL": [
+		"es_CL"
+	],
+	"CM": [
+		"agq_CM",
+		"bas_CM",
+		"dua_CM",
+		"en_CM",
+		"ewo_CM",
+		"ff_CM",
+		"fr_CM",
+		"jgo_CM",
+		"kkj_CM",
+		"ksf_CM",
+		"mgo_CM",
+		"mua_CM",
+		"nmg_CM",
+		"nnh_CM",
+		"yav_CM"
+	],
+	"CN": [
+		"bo_CN",
+		"ii_CN",
+		"ug_CN",
+		"yue_CN_#Hans",
+		"zh_CN_#Hans"
+	],
+	"CO": [
+		"es_CO"
+	],
+	"CR": [
+		"es_CR"
+	],
+	"CU": [
+		"es_CU"
+	],
+	"CV": [
+		"kea_CV",
+		"pt_CV"
+	],
+	"CW": [
+		"nl_CW"
+	],
+	"CX": [
+		"en_CX"
+	],
+	"CY": [
+		"el_CY",
+		"en_CY",
+		"tr_CY"
+	],
+	"CZ": [
+		"cs_CZ"
+	],
+	"DE": [
+		"de_DE",
+		"dsb_DE",
+		"en_DE",
+		"hsb_DE",
+		"ksh_DE",
+		"nds_DE"
+	],
+	"DG": [
+		"en_DG"
+	],
+	"DJ": [
+		"ar_DJ",
+		"fr_DJ",
+		"so_DJ"
+	],
+	"DK": [
+		"da_DK",
+		"en_DK",
+		"fo_DK"
+	],
+	"DM": [
+		"en_DM"
+	],
+	"DO": [
+		"es_DO"
+	],
+	"DZ": [
+		"ar_DZ",
+		"fr_DZ",
+		"kab_DZ"
+	],
+	"EA": [
+		"es_EA"
+	],
+	"EC": [
+		"es_EC",
+		"qu_EC"
+	],
+	"EE": [
+		"et_EE"
+	],
+	"EG": [
+		"ar_EG"
+	],
+	"EH": [
+		"ar_EH"
+	],
+	"ER": [
+		"ar_ER",
+		"en_ER",
+		"ti_ER"
+	],
+	"ES": [
+		"ast_ES",
+		"ca_ES",
+		"es_ES",
+		"eu_ES",
+		"gl_ES"
+	],
+	"ET": [
+		"am_ET",
+		"om_ET",
+		"so_ET",
+		"ti_ET"
+	],
+	"FI": [
+		"en_FI",
+		"fi_FI",
+		"se_FI",
+		"smn_FI",
+		"sv_FI"
+	],
+	"FJ": [
+		"en_FJ"
+	],
+	"FK": [
+		"en_FK"
+	],
+	"FM": [
+		"en_FM"
+	],
+	"FO": [
+		"fo_FO"
+	],
+	"FR": [
+		"br_FR",
+		"ca_FR",
+		"fr_FR",
+		"gsw_FR"
+	],
+	"GA": [
+		"fr_GA"
+	],
+	"GB": [
+		"cy_GB",
+		"en_GB",
+		"gd_GB",
+		"kw_GB"
+	],
+	"GD": [
+		"en_GD"
+	],
+	"GE": [
+		"ka_GE",
+		"os_GE"
+	],
+	"GF": [
+		"fr_GF"
+	],
+	"GG": [
+		"en_GG"
+	],
+	"GH": [
+		"ak_GH",
+		"ee_GH",
+		"en_GH",
+		"ha_GH"
+	],
+	"GI": [
+		"en_GI"
+	],
+	"GL": [
+		"da_GL",
+		"kl_GL"
+	],
+	"GM": [
+		"en_GM"
+	],
+	"GN": [
+		"ff_GN",
+		"fr_GN"
+	],
+	"GP": [
+		"fr_GP"
+	],
+	"GQ": [
+		"es_GQ",
+		"fr_GQ",
+		"pt_GQ"
+	],
+	"GR": [
+		"el_GR"
+	],
+	"GT": [
+		"es_GT"
+	],
+	"GU": [
+		"en_GU"
+	],
+	"GW": [
+		"pt_GW"
+	],
+	"GY": [
+		"en_GY"
+	],
+	"HK": [
+		"en_HK",
+		"zh_HK_#Hans",
+		"zh_HK_#Hant"
+	],
+	"HN": [
+		"es_HN"
+	],
+	"HR": [
+		"hr_HR"
+	],
+	"HT": [
+		"fr_HT"
+	],
+	"HU": [
+		"hu_HU"
+	],
+	"IC": [
+		"es_IC"
+	],
+	"ID": [
+		"in_ID"
+	],
+	"IE": [
+		"en_IE",
+		"ga_IE"
+	],
+	"IL": [
+		"ar_IL",
+		"en_IL",
+		"iw_IL"
+	],
+	"IM": [
+		"en_IM",
+		"gv_IM"
+	],
+	"IN": [
+		"as_IN",
+		"bn_IN",
+		"bo_IN",
+		"brx_IN",
+		"ccp_IN",
+		"en_IN",
+		"gu_IN",
+		"hi_IN",
+		"kn_IN",
+		"kok_IN",
+		"ks_IN",
+		"ml_IN",
+		"mr_IN",
+		"ne_IN",
+		"or_IN",
+		"pa_IN_#Guru",
+		"ta_IN",
+		"te_IN",
+		"ur_IN"
+	],
+	"IO": [
+		"en_IO"
+	],
+	"IQ": [
+		"ar_IQ",
+		"ckb_IQ",
+		"lrc_IQ"
+	],
+	"IR": [
+		"ckb_IR",
+		"fa_IR",
+		"lrc_IR",
+		"mzn_IR"
+	],
+	"IS": [
+		"is_IS"
+	],
+	"IT": [
+		"ca_IT",
+		"de_IT",
+		"fur_IT",
+		"it_IT"
+	],
+	"JE": [
+		"en_JE"
+	],
+	"JM": [
+		"en_JM"
+	],
+	"JO": [
+		"ar_JO"
+	],
+	"JP": [
+		"ja_JP"
+	],
+	"KE": [
+		"dav_KE",
+		"ebu_KE",
+		"en_KE",
+		"guz_KE",
+		"kam_KE",
+		"ki_KE",
+		"kln_KE",
+		"luo_KE",
+		"luy_KE",
+		"mas_KE",
+		"mer_KE",
+		"om_KE",
+		"saq_KE",
+		"so_KE",
+		"sw_KE",
+		"teo_KE"
+	],
+	"KG": [
+		"ky_KG",
+		"ru_KG"
+	],
+	"KH": [
+		"km_KH"
+	],
+	"KI": [
+		"en_KI"
+	],
+	"KM": [
+		"ar_KM",
+		"fr_KM"
+	],
+	"KN": [
+		"en_KN"
+	],
+	"KP": [
+		"ko_KP"
+	],
+	"KR": [
+		"ko_KR"
+	],
+	"KW": [
+		"ar_KW"
+	],
+	"KY": [
+		"en_KY"
+	],
+	"KZ": [
+		"kk_KZ",
+		"ru_KZ"
+	],
+	"LA": [
+		"lo_LA"
+	],
+	"LB": [
+		"ar_LB"
+	],
+	"LC": [
+		"en_LC"
+	],
+	"LI": [
+		"de_LI",
+		"gsw_LI"
+	],
+	"LK": [
+		"si_LK",
+		"ta_LK"
+	],
+	"LR": [
+		"en_LR",
+		"vai_LR_#Latn",
+		"vai_LR_#Vaii"
+	],
+	"LS": [
+		"en_LS"
+	],
+	"LT": [
+		"lt_LT"
+	],
+	"LU": [
+		"de_LU",
+		"fr_LU",
+		"lb_LU",
+		"pt_LU"
+	],
+	"LV": [
+		"lv_LV"
+	],
+	"LY": [
+		"ar_LY"
+	],
+	"MA": [
+		"ar_MA",
+		"fr_MA",
+		"shi_MA_#Latn",
+		"shi_MA_#Tfng",
+		"tzm_MA",
+		"zgh_MA"
+	],
+	"MC": [
+		"fr_MC"
+	],
+	"MD": [
+		"ro_MD",
+		"ru_MD"
+	],
+	"ME": [
+		"sr_ME_#Cyrl",
+		"sr_ME_#Latn"
+	],
+	"MF": [
+		"fr_MF"
+	],
+	"MG": [
+		"en_MG",
+		"fr_MG",
+		"mg_MG"
+	],
+	"MH": [
+		"en_MH"
+	],
+	"MK": [
+		"mk_MK",
+		"sq_MK"
+	],
+	"ML": [
+		"bm_ML",
+		"fr_ML",
+		"khq_ML",
+		"ses_ML"
+	],
+	"MM": [
+		"my_MM"
+	],
+	"MN": [
+		"mn_MN"
+	],
+	"MO": [
+		"en_MO",
+		"pt_MO",
+		"zh_MO_#Hans",
+		"zh_MO_#Hant"
+	],
+	"MP": [
+		"en_MP"
+	],
+	"MQ": [
+		"fr_MQ"
+	],
+	"MR": [
+		"ar_MR",
+		"ff_MR",
+		"fr_MR"
+	],
+	"MS": [
+		"en_MS"
+	],
+	"MT": [
+		"en_MT",
+		"mt_MT"
+	],
+	"MU": [
+		"en_MU",
+		"fr_MU",
+		"mfe_MU"
+	],
+	"MW": [
+		"en_MW"
+	],
+	"MX": [
+		"es_MX"
+	],
+	"MY": [
+		"en_MY"
+	],
+	"MZ": [
+		"mgh_MZ",
+		"pt_MZ",
+		"seh_MZ"
+	],
+	"NA": [
+		"af_NA",
+		"en_NA",
+		"naq_NA"
+	],
+	"NC": [
+		"fr_NC"
+	],
+	"NE": [
+		"dje_NE",
+		"fr_NE",
+		"ha_NE",
+		"twq_NE"
+	],
+	"NF": [
+		"en_NF"
+	],
+	"NG": [
+		"en_NG",
+		"ha_NG",
+		"ig_NG",
+		"yo_NG"
+	],
+	"NI": [
+		"es_NI"
+	],
+	"NL": [
+		"en_NL",
+		"fy_NL",
+		"nds_NL",
+		"nl_NL"
+	],
+	"NO": [
+		"nb_NO",
+		"nn_NO",
+		"se_NO"
+	],
+	"NP": [
+		"ne_NP"
+	],
+	"NR": [
+		"en_NR"
+	],
+	"NU": [
+		"en_NU"
+	],
+	"NZ": [
+		"en_NZ"
+	],
+	"OM": [
+		"ar_OM"
+	],
+	"PA": [
+		"es_PA"
+	],
+	"PE": [
+		"es_PE",
+		"qu_PE"
+	],
+	"PF": [
+		"fr_PF"
+	],
+	"PG": [
+		"en_PG"
+	],
+	"PH": [
+		"fil_PH"
+	],
+	"PK": [
+		"en_PK",
+		"pa_PK_#Arab",
+		"ur_PK"
+	],
+	"PL": [
+		"pl_PL"
+	],
+	"PM": [
+		"fr_PM"
+	],
+	"PN": [
+		"en_PN"
+	],
+	"PR": [
+		"en_PR",
+		"es_PR"
+	],
+	"PS": [
+		"ar_PS"
+	],
+	"PT": [
+		"pt_PT"
+	],
+	"PW": [
+		"en_PW"
+	],
+	"PY": [
+		"es_PY"
+	],
+	"QA": [
+		"ar_QA"
+	],
+	"RE": [
+		"fr_RE"
+	],
+	"RO": [
+		"ro_RO"
+	],
+	"RS": [
+		"sr_RS_#Cyrl",
+		"sr_RS_#Latn"
+	],
+	"RU": [
+		"ce_RU",
+		"os_RU",
+		"ru_RU",
+		"sah_RU",
+		"tt_RU"
+	],
+	"RW": [
+		"en_RW",
+		"fr_RW",
+		"rw_RW"
+	],
+	"SA": [
+		"ar_SA"
+	],
+	"SB": [
+		"en_SB"
+	],
+	"SC": [
+		"en_SC",
+		"fr_SC"
+	],
+	"SD": [
+		"ar_SD",
+		"en_SD"
+	],
+	"SE": [
+		"en_SE",
+		"se_SE",
+		"sv_SE"
+	],
+	"SG": [
+		"en_SG",
+		"ms_SG",
+		"ta_SG",
+		"zh_SG_#Hans"
+	],
+	"SH": [
+		"en_SH"
+	],
+	"SI": [
+		"en_SI",
+		"sl_SI"
+	],
+	"SJ": [
+		"nb_SJ"
+	],
+	"SK": [
+		"sk_SK"
+	],
+	"SL": [
+		"en_SL"
+	],
+	"SM": [
+		"it_SM"
+	],
+	"SN": [
+		"dyo_SN",
+		"ff_SN",
+		"fr_SN",
+		"wo_SN"
+	],
+	"SO": [
+		"ar_SO",
+		"so_SO"
+	],
+	"SR": [
+		"nl_SR"
+	],
+	"SS": [
+		"ar_SS",
+		"en_SS",
+		"nus_SS"
+	],
+	"ST": [
+		"pt_ST"
+	],
+	"SV": [
+		"es_SV"
+	],
+	"SX": [
+		"en_SX",
+		"nl_SX"
+	],
+	"SY": [
+		"ar_SY",
+		"fr_SY"
+	],
+	"SZ": [
+		"en_SZ"
+	],
+	"TC": [
+		"en_TC"
+	],
+	"TD": [
+		"ar_TD",
+		"fr_TD"
+	],
+	"TG": [
+		"ee_TG",
+		"fr_TG"
+	],
+	"TH": [
+		"th_TH"
+	],
+	"TJ": [
+		"tg_TJ"
+	],
+	"TK": [
+		"en_TK"
+	],
+	"TL": [
+		"pt_TL"
+	],
+	"TN": [
+		"ar_TN",
+		"fr_TN"
+	],
+	"TO": [
+		"en_TO",
+		"to_TO"
+	],
+	"TR": [
+		"tr_TR"
+	],
+	"TT": [
+		"en_TT"
+	],
+	"TV": [
+		"en_TV"
+	],
+	"TW": [
+		"zh_TW_#Hant"
+	],
+	"TZ": [
+		"asa_TZ",
+		"bez_TZ",
+		"en_TZ",
+		"jmc_TZ",
+		"kde_TZ",
+		"ksb_TZ",
+		"lag_TZ",
+		"mas_TZ",
+		"rof_TZ",
+		"rwk_TZ",
+		"sbp_TZ",
+		"sw_TZ",
+		"vun_TZ"
+	],
+	"UA": [
+		"ru_UA",
+		"uk_UA"
+	],
+	"UG": [
+		"cgg_UG",
+		"en_UG",
+		"lg_UG",
+		"nyn_UG",
+		"sw_UG",
+		"teo_UG",
+		"xog_UG"
+	],
+	"UM": [
+		"en_UM"
+	],
+	"US": [
+		"en",
+		"en_US_POSIX",
+		"es_US"
+	],
+	"UY": [
+		"es_UY"
+	],
+	"UZ": [
+		"uz_UZ_#Cyrl",
+		"uz_UZ_#Latn"
+	],
+	"VA": [
+		"it_VA"
+	],
+	"VC": [
+		"en_VC"
+	],
+	"VE": [
+		"es_VE"
+	],
+	"VG": [
+		"en_VG"
+	],
+	"VI": [
+		"en_VI"
+	],
+	"VN": [
+		"vi_VN"
+	],
+	"VU": [
+		"en_VU",
+		"fr_VU"
+	],
+	"WF": [
+		"fr_WF"
+	],
+	"WS": [
+		"en_WS"
+	],
+	"XA": [
+		"en_XA"
+	],
+	"XB": [
+		"ar_XB"
+	],
+	"XK": [
+		"sq_XK",
+		"sr_XK_#Cyrl",
+		"sr_XK_#Latn"
+	],
+	"YE": [
+		"ar_YE"
+	],
+	"YT": [
+		"fr_YT"
+	],
+	"ZA": [
+		"af_ZA",
+		"en_ZA",
+		"zu_ZA"
+	],
+	"ZM": [
+		"bem_ZM",
+		"en_ZM"
+	],
+	"ZW": [
+		"en_ZW",
+		"nd_ZW",
+		"sn_ZW"
+	]
+}

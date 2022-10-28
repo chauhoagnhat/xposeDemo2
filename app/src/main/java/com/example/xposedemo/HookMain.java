@@ -57,7 +57,8 @@ public class HookMain  implements IXposedHookLoadPackage   {
             if ( getUiChecked( "sw_enable_para" ) ){
                 Log.d(TAG, "handleLoadPackage: sw_enable_para-run");
                 Log.d(TAG, "handleLoadPackage: enable BaseHook" );
-                new BaseHook( loadPackageParam );
+                //new BaseHook( loadPackageParam );
+                new SimpleBaseHook( loadPackageParam );
             }
 
             //new SimpleBaseHook( loadPackageParam );

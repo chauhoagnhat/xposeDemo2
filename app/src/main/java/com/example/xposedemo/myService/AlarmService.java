@@ -115,7 +115,6 @@ public class AlarmService extends Service {
 //            return super.onStartCommand(intent, flags, startId);
 //        }
 
-
         Intent i=new Intent(this, AlarmReceive.class);
         pIntent = PendingIntent.getBroadcast(this,PENDING_REQUEST,i,PENDING_REQUEST);
 
@@ -276,6 +275,8 @@ public class AlarmService extends Service {
                     Log.d(TAG, "scriptRunSub: 启动app"+pkgName );
                     if (i!=0){
                         Log.d(TAG, "scriptRunSub:  restart app");
+                        Ut.killProcess( pkgName );
+                        Thread.sleep(1000);
                         Ut.restartApp ( context,pkgName );
                         Thread.sleep(7000 );
                         Toast.makeText(context,"等待脚本加载10秒",Toast.LENGTH_LONG);

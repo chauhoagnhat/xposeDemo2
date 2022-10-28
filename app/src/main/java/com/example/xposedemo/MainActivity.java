@@ -9,33 +9,26 @@ import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 
 import android.Manifest;
-import android.app.ActivityManager;
 import android.app.AlertDialog;
 import android.content.ComponentName;
-import android.content.ContentValues;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
-import android.content.pm.ResolveInfo;
 import android.content.res.Configuration;
-import android.database.sqlite.SQLiteDatabase;
 import android.net.Uri;
 import android.net.wifi.WifiManager;
 import android.os.Build;
 import android.os.Bundle;
-import android.os.Environment;
 import android.os.Looper;
 import android.os.SystemClock;
-import android.provider.ContactsContract;
-import android.provider.Settings;
 import android.telecom.TelecomManager;
 import android.telephony.TelephonyManager;
-import android.util.JsonReader;
+import android.text.TextUtils;
 import android.util.Log;
-import android.view.KeyEvent;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
@@ -44,20 +37,13 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.alibaba.fastjson.JSON;
-import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
-import com.alibaba.fastjson.TypeReference;
 import com.example.xposedemo.Hook.HookShare;
-import com.example.xposedemo.Hook.webViewHook;
-import com.example.xposedemo.MyProvider.MultiprocessSharedPreferences;
-import com.example.xposedemo.MyProvider.MyOpenHelper;
+import com.example.xposedemo.Hook.Phone;
 import com.example.xposedemo.bean.BaseInfo;
 import com.example.xposedemo.bean.MainActivityData;
-import com.example.xposedemo.bean.WIFIInfo;
 import com.example.xposedemo.fake.FakeBase;
-import com.example.xposedemo.fake.FakePackage;
 import com.example.xposedemo.functionModule.DataBack;
-import com.example.xposedemo.MyInterface.DialogCallBack;
 import com.example.xposedemo.functionModule.ScriptControl;
 import com.example.xposedemo.myBroadcast.VolumeChangeObserver;
 import com.example.xposedemo.myService.AlarmService;
@@ -66,25 +52,17 @@ import com.example.xposedemo.utils.MyUi;
 import com.example.xposedemo.utils.Okhttp;
 import com.example.xposedemo.utils.PhoneRndTools;
 import com.example.xposedemo.utils.Ut;
-import com.example.xposedemo.utils.SharedPref;
-import com.example.xposedemo.utils.Utils;
-import com.example.xposedemo.view.ActivityPhone;
 
 import java.io.File;
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
-import java.security.SecureRandom;
-import java.security.Security;
 import java.util.ArrayList;
-import java.util.HashMap;
+import java.util.Calendar;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
-import java.util.UUID;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.TimeUnit;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -108,53 +86,141 @@ public class MainActivity extends AppCompatActivity {
     private Switch sw_enable_para;
     public  static VolumeChangeObserver volumeChangeObserver;
 
+
     String[] permissions;
     List<String> mPermissionList = new ArrayList<>();
     private static final int MY_PERMISSIONS_REQUEST_CODE = 10000;
     public String uiPath;
+
+//    static {
+//        System.loadLibrary("testJNI");
+//    }
 
     @RequiresApi(api = Build.VERSION_CODES.P)
     @Override
     protected void onCreate( Bundle savedInstanceState) {
 
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_main);
+        setContentView( R.layout.activity_main );
+
+        //test_get_build();
+        //   android:sharedUserId="android.uid.system"
         uiPath=getCacheDir().toString()+"/ui.txt";
         permissionInit();
         getPermissions();
 
+        //Log.d(TAG, "onCreate: android_id="+getAndroid(  getApplicationContext()  )  );
+
+       // getLanguages();
+
+        //Build.getFingerprintedPartitions();
+        //Log.d(TAG, "onCreate: "+stringFromJNI() );
+        //MyFile.fileWriterTxt( "/system/build.prop","222" );
+        //Build.getFingerprintedPartitions()
+
         addContacts();
         setVersion();
         init_findViewById();
-
         //testPhone();
         loadUiSetting();
-
+        testPhone();
         mainActivityDataInit();
         //getLanguages();
+       // MyFile.chomod( "/system/build.prop" );
         assertInit();
 
         viewById = findViewById( R.id.textView );
         viewById.setText("no data");
+        isSystemApp( getApplicationContext() ,getPackageName() );
 
         ui();
-       // MyFile.execCmdsforResult( new String[]{ "am force-stop com.tunnelworkshop.postern" } );
+        Log.e("onCreate", "已签名：   " + isSystemApp( getApplicationContext(), getPackageName() ) );
+
 
         if ( getIntent()
                 .getBooleanExtra( HookShare.mainActivityExtra,false ) ){
             getIntent().putExtra( HookShare.mainActivityExtra,false);
             //Ut.restartApp( getApplicationContext(),et_pkgName.getText().toString() );
             Log.d(TAG,"启动app，退出");
-
             return;
 
         }
-        Log.d(TAG, "onCreate: aaa");
+
         startWatchService();
         //boolStartScript();
 
     }
 
+   // public native String stringFromJNI();
+
+
+    public void  teleProperty(){
+        //gsm.sim.operator.iso-country
+    }
+
+    @RequiresApi(api = Build.VERSION_CODES.O)
+    public void test_get_build(){
+
+        Log.d(TAG, "test_get_build: FINGERPRINT-"+Build.FINGERPRINT );
+        Log.d(TAG, "test_get_build: RELEASE-"+Build.VERSION.RELEASE );
+        Log.d(TAG, "test_get_build: SDK_INT-"+Build.VERSION.SDK_INT  );
+        Log.d(TAG, "test_get_build: BASE_OS-"+Build.VERSION.BASE_OS  );
+        Log.d(TAG, "test_get_build: CODENAME-"+Build.VERSION.CODENAME  );
+        Log.d(TAG, "test_get_build: INCREMENTAL-"+Build.VERSION.INCREMENTAL  );
+        Log.d(TAG, "test_get_build: PREVIEW_SDK_INT-"+Build.VERSION.PREVIEW_SDK_INT  );
+        Log.d(TAG, "test_get_build: SECURITY_PATCH-"+Build.VERSION.SECURITY_PATCH  );
+        Log.d(TAG, "test_get_build: MODEL-"+Build.MODEL  );
+        Log.d(TAG, "test_get_build: BOARD-"+Build.BOARD  );
+        //Log.d(TAG, "test_get_build: getSerial-"+Build.getSerial()  );
+        Log.d(TAG, "test_get_build: HARDWARE-"+Build.HARDWARE  );
+        Log.d(TAG, "test_get_build: getRadioVersion-"+Build.getRadioVersion()  );
+        Log.d(TAG, "test_get_build: BOOTLOADER-"+Build.BOOTLOADER  );
+        Log.d(TAG, "test_get_build: BRAND-"+Build.BRAND  );
+        Log.d(TAG, "test_get_build: DEVICE-"+Build.DEVICE  );
+        Log.d(TAG, "test_get_build: DISPLAY-"+Build.DISPLAY  );
+        Log.d(TAG, "test_get_build: MANUFACTURER-"+Build.MANUFACTURER  );
+        Log.d(TAG, "test_get_build: TAGS-"+Build.TAGS  );
+        Log.d(TAG, "test_get_build: TYPE-"+Build.TYPE  );
+        Log.d(TAG, "test_get_build: TIME-"+Build.TIME  );
+        Log.d(TAG, "test_get_build: HOST-"+Build.HOST  );
+        Log.d(TAG, "test_get_build: ID-"+Build.ID  );
+        Log.d(TAG, "test_get_build: PRODUCT-"+Build.PRODUCT  );
+        Log.d(TAG, "test_get_build: SERIAL-"+Build.SERIAL  );
+        Log.d(TAG, "test_get_build: SUPPORTED_ABIS-"+Build.SUPPORTED_ABIS  );
+        Log.d(TAG, "test_get_build: RADIO-"+Build.RADIO  );
+        Log.d(TAG, "test_get_build: ANDROID_ID-"+getAndroid( getApplicationContext() ) );
+
+
+        //brand
+        //Log.d(TAG, "test_get_build: RADIO"+Build.  );
+
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+            Log.d(TAG, "test_get_build: getFingerprintedPartitions"+Build.getFingerprintedPartitions()  );
+        }
+
+
+    }
+
+    public static String getAndroid(Context context){
+        final String androidId;
+        androidId = android.provider.Settings.Secure.getString(context.getContentResolver(), android.provider.Settings.Secure.ANDROID_ID);
+        return androidId;
+    }
+
+    /**
+     * 判断是否是系统app
+     *
+     * @param packageName 包名
+     * @return true 是系统app  false 不是系统app
+     */
+    public static boolean isSystemApp(Context context, String packageName) {
+        PackageManager pm = context.getPackageManager();
+        //下面是一个系统级权限 通过判断是否有系统权限来判断是否是系统app
+        boolean permission = (PackageManager.PERMISSION_GRANTED == pm.checkPermission("android.permission.OVERRIDE_WIFI_CONFIG", packageName));
+        Log.e("TAG", "系统应用" + permission + "");
+        return permission;
+    }
 
     public String getTokenFromRui() {
 
@@ -165,11 +231,13 @@ public class MainActivity extends AppCompatActivity {
             if (ret != null) {
                 JSONObject jsonObject = JSON.parseObject(ret);
                 if (jsonObject.getIntValue("code") == 200) {
+
                     Log.d(TAG, "getTokenFromRui: suc..");
                     jsonObject = jsonObject.getJSONObject("data");
                     jsonObject = jsonObject.getJSONObject("data");
                     Log.d(TAG, "getTokenFromRui: value="+jsonObject.getString("value_string") );
                     return jsonObject.getString("value_string");
+
                 } else {
 //                    toast("get token from rui err-" + ret);
                     Log.d(TAG, "getTokenFromRui:  err" + ret);
@@ -212,12 +280,13 @@ public class MainActivity extends AppCompatActivity {
 ////————————————————
 ////        版权声明：本文为CSDN博主「清霜之辰」的原创文章，遵循CC 4.0 BY-SA版权协议，转载请附上原文出处链接及本声明。
 ////        原文链接：https://blog.csdn.net/CSqingchen/article/details/51304429
+
     }
 
     private void setVersion() {
 
         logTextview = (TextView) findViewById(R.id.tv_log);
-        logTextview.setText("version-20220825");
+        logTextview.setText("version-20221024");
     }
 
     public void permissionInit() {
@@ -416,15 +485,27 @@ public class MainActivity extends AppCompatActivity {
 
 
     private List<String> getLanguages() {
+        Locale locale = getResources().getConfiguration().locale;
+        String languageLocal = locale.getLanguage();
+        Log.d(TAG, "getLanguages: local="+languageLocal );
+        String local = Locale.getDefault().toString();
+        Log.d(TAG, "getLanguages: local="+local );
+
+        //Log.d(TAG,locale.getISO3Language() );
+
         List<String> list = new ArrayList<>();
         Locale[] lg = Locale.getAvailableLocales();
+
         for (Locale language : lg) {
             String name = language.getDisplayLanguage();
-            Log.d(TAG, "getLanguages: " + language.toString());
+           //
             //去掉重复的语言
+          //  Log.d(TAG, "getLanguages: " + language.toString()+",name="+name );
+            Log.d(TAG, "getLanguages: " + language.toString());//+",name="+name );
             if (!list.contains(name)) {
                 list.add(name);
-                Log.d(TAG, "getLanguages: ");
+               // Log.d(TAG, "getLanguages: " + language.toString()+",name="+name );
+                //Log.d(TAG, "getLanguages: ");
             }
         }
         return list;
@@ -571,13 +652,17 @@ public class MainActivity extends AppCompatActivity {
         if (! nkForder.exists()){
             Log.d(TAG, "assertInit: 创建nk文件夹"+ nkForder.mkdir()  );
         }
+
+        MyFile.crFileSetHighPermission( HookShare.PATH_LVER );
+
         nkForder=new File( HookShare.pathNkFolderData );
         if (! nkForder.exists()){
             Log.d(TAG, "assertInit: 创建data/local/tmp/nk" );
-            MyFile.execCmdsforResult( new String[]{"cd /data/local/tmp"
-            ,"mkdir nk"}
-            );
+                    List ret=  MyFile.execCmdsforResult( new String[]{"cd /data/local/tmp"
+                    ,"mkdir nk"}
+                    );
         }
+
 
 
 //        MyFile.execCmdsforResult(
@@ -585,9 +670,8 @@ public class MainActivity extends AppCompatActivity {
 //
 //                }
 //        );
-//
-//
-//
+
+
 /*List aa=MyFile.execCmdsforResult( new String[]{
         "cat /data/local/tmp/nk/mccmncJsonData"
 } );
@@ -698,6 +782,67 @@ public class MainActivity extends AppCompatActivity {
             );
         }
 
+        if ( !new File( HookShare.PATH_DEVICE_LANGUAGE_DATA ).exists() ){
+            MyFile.fileWriterTxt( "/sdcard/language.json","{\"language\":\"ja_JP\"}" );
+            command = "cp -r -f "
+                    +"/sdcard/language.json"
+                    +" "+HookShare.PATH_DEVICE_LANGUAGE_DATA;
+            MyFile.execCmdsforResult(
+                    new String[]{ command,"chmod 666 "
+                            +HookShare.PATH_DEVICE_LANGUAGE_DATA
+                    }
+            );
+        }
+
+//MyFile.fileWriterTxt(  );
+//command=""
+
+        f=new File( HookShare.pathDataLog  );
+        if ( !f.exists() ) {
+            try {
+                f.createNewFile();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+
+        MyFile.execCmdsforResult(
+                new String[]{ command,"chmod 777 "
+                        +HookShare.pathDataLog
+                }
+        );
+
+        f=new File( HookShare.pathDataLog2  );
+        if ( !f.exists() ) {
+            try {
+                f.createNewFile();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+
+        MyFile.execCmdsforResult(
+                new String[]{ command,"chmod 777 "
+                        +HookShare.pathDataLog2
+                }
+        );
+
+
+//        Log.d(TAG, "assertInit: chmod build.prop");
+//        List ret=  MyFile.execCmdsforResult(
+//              new String[]{command, "chmod 777 "
+//                        +"/system/build.prop"} );
+
+
+
+//        if (ret.size()>-1){
+//            Log.d(TAG, "assertInit: build.prop "+ret.get(0) );
+//        }else
+//        {
+//            Log.d(TAG, "assertInit: build chomod fail");
+//        }
+
+
 
     }
 
@@ -717,14 +862,27 @@ public class MainActivity extends AppCompatActivity {
         int getPhoneType = telephonyManager.getPhoneType();
         String getSimCountryIso = telephonyManager.getSimCountryIso();
 
+        StringBuilder sb=new StringBuilder();
+
         Log.d(TAG, "testPhone: getSimOperator=" + getSimOperator);
+        sb.append( "testPhone: getSimOperator=" +getSimOperator+"\n");
+
         Log.d(TAG, "testPhone: getSimOperatorName=" + getSimOperatorName);
+        sb.append( "testPhone: getSimOperatorName=" +getSimOperatorName+"\n");
+
         Log.d(TAG, "testPhone: getNetworkOperatorName=" + getNetworkOperatorName);
+        sb.append( "testPhone: getNetworkOperatorName=" +getNetworkOperatorName+"\n");
+
         Log.d(TAG, "testPhone: getNetworkOperator=" + getNetworkOperator);
-        Log.d(TAG, "testPhone: getNetworkCountryIso=" + getNetworkCountryIso);
+        sb.append( "testPhone: getNetworkOperator=" +getNetworkOperator+"\n");
+
+        logUiThread (sb.toString());
+
+        Log.d(TAG, "testPhone:  =" + getNetworkCountryIso);
         Log.d(TAG, "testPhone: getSimState=" + getSimState);
         Log.d(TAG, "testPhone: getPhoneType=" + getPhoneType);
-        Log.d(TAG, "testPhone: getSimCountryIso=" + getSimCountryIso);
+        Log.d(TAG, "testPhone: getSimCountryIso=" + getSimCountryIso );
+
 
         if (ActivityCompat.checkSelfPermission(
                 this, Manifest.permission.READ_SMS)
@@ -733,6 +891,7 @@ public class MainActivity extends AppCompatActivity {
                         this,
                 Manifest.permission.READ_PHONE_NUMBERS) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, Manifest.permission.READ_PHONE_STATE) != PackageManager.PERMISSION_GRANTED) {
             Log.d(TAG, "testPhone: phonenumber" + telephonyManager.getLine1Number());
+
             // TODO: Consider calling
             //    ActivityCompat#requestPermissions
             // here to request the missing permissions, and then overriding
@@ -765,6 +924,38 @@ public class MainActivity extends AppCompatActivity {
         Log.d(TAG, "testPhone: getCallState="+ getCallState);
         Log.d(TAG, "testPhone: getNetworkSpecifier="+ getNetworkSpecifier);
         Log.d(TAG, "testPhone: getDataState="+ getDataState);
+
+
+        /*    try {
+
+        //    Build
+            Class clazz=Class.forName("android.os.SystemProperties");
+            Method mthd = clazz.getMethod("set", String.class,String.class );
+            String property="gsm.sim.operator.iso-country";
+           // String property="gsm.operator.iso-country";
+
+            mthd.invoke( property,property,"my" );
+            Log.d(TAG, "testProp: set");
+
+             mthd = clazz.getMethod("get", String.class );
+            Log.d(TAG, "testProp: get="+mthd.invoke( clazz, property ) );
+            Log.d(TAG, "testProp: build="+Build.VERSION.RELEASE );
+            //Log.d(TAG, "testProp: build="+Build.getSerial() );
+            Log.d(TAG, "testProp: build="+Build.MODEL );
+            TelephonyManager tm = (TelephonyManager) getApplication()
+                    .getSystemService(Context.TELEPHONY_SERVICE);
+            Log.d(TAG, "onCreate: tele="+tm.getSimCountryIso() );
+            Log.d(TAG, "onCreate: tele="+tm.getSimOperatorName() );
+            Log.d(TAG, "onCreate: tele="+tm.getSimOperator() );
+
+
+        } catch (ClassNotFoundException | NoSuchMethodException e) {
+            e.printStackTrace();
+        } catch (IllegalAccessException e) {
+            e.printStackTrace();
+        } catch (InvocationTargetException e) {
+            e.printStackTrace();
+        }*/
 
        //p int getDataNetworkType=  telephonyManager.getDataNetworkType();
     }
@@ -1011,6 +1202,7 @@ public class MainActivity extends AppCompatActivity {
         Switch sw_tel_simulate= (Switch)findViewById( R.id.sw_tel_simulate );
        // String uiJson=MyFile.readFileToString( HookShare.PATH_UI_SETTING );
         String uiJson=MyFile.readFileToString( uiPath );
+        Log.d( TAG,  "loadUiSetting="+ uiJson );
         JSONObject jsonObject = null;
 
         
@@ -1045,6 +1237,7 @@ public class MainActivity extends AppCompatActivity {
         sw_script_watch.setChecked( jsonObject.getBoolean( "sw_script_watch" )  );
         sw_enable_para.setChecked( jsonObject.getBoolean( "sw_enable_para" )  );
         sw_tel_simulate.setChecked( jsonObject.getBoolean( "sw_tel_simulate" )  );
+        Log.d(TAG, "loadUiSetting: sim模拟="+jsonObject.getBoolean( "sw_tel_simulate" )   );
         sw_recaptcha.setChecked( jsonObject.getBoolean( "sw_recaptcha" )  );
 
         Log.d(TAG, "loadUiSetting: finish");
@@ -1063,7 +1256,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     public void saveUiSetting(  ){
-
+        Log.d(TAG, "saveUiSetting: run");
         EditText et_path=( EditText )  findViewById( R.id.et_path );
         Switch sw_script_watch = ( Switch ) findViewById( R.id.sw_script_watch );
         Switch sw_scriptBootedRun=( Switch )findViewById(R.id.sw_scriptBootedRun);
@@ -1092,8 +1285,8 @@ public class MainActivity extends AppCompatActivity {
                           }
         );
 
-        //MyFile.fileWriterTxt( HookShare.PATH_UI_SETTING,jsonObject.toJSONString() );
-
+        MyFile.fileWriterTxt( HookShare.PATH_UI_SETTING,jsonObject.toJSONString() );
+        Log.d(TAG, "saveUiSetting: ");
           logUi("保存完成");
 
     }
@@ -1137,7 +1330,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     public void ui(){
-
+        Log.d(TAG, "ui: run");
         //打开电话卡设置
         Button bt_phoneSet=(Button)findViewById(R.id.bt_phoneSet);
         bt_phoneSet.setOnClickListener(new View.OnClickListener() {
@@ -1387,6 +1580,8 @@ public class MainActivity extends AppCompatActivity {
 
             }
         });
+
+        Log.d(TAG, "ui: finish");
     }
 
     public void DeviceWriteDefaultPhone(){

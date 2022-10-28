@@ -5,6 +5,8 @@ import android.text.TextUtils;
 import android.util.Base64;
 import android.util.Log;
 
+import com.example.xposedemo.Hook.HookShare;
+
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
@@ -66,6 +68,25 @@ public class MyFile {
 
     }
 
+
+    public static void crFileSetHighPermission( String path ){
+
+        File file=new File( path );
+        try {
+            if (!file.exists()){
+                file.createNewFile();
+            }
+
+            file.setReadable(true,false);
+            file.setWritable(true,false);
+            file.setExecutable(true,false);
+
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+
+    }
 
     /**
      * 执行cmd遍历文件名，需root
@@ -147,6 +168,21 @@ public class MyFile {
         return text;
     }
 
+    public static void chomod(String destFile){
+        try {
+
+            String command = "chmod 777 " + destFile;
+            Log.i("chomod", "command = " + command);
+            Runtime runtime = Runtime.getRuntime();
+            Process proc = runtime.exec(command);
+
+            Log.d(TAG, "chomod: finish");
+        } catch (IOException e) {
+            Log.d(TAG,"chmod fail!!!!");
+            e.printStackTrace();
+
+        }
+    }
 
     /**
      * 将图片转换成Base64编码的字符串

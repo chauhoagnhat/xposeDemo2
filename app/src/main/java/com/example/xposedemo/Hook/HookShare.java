@@ -45,6 +45,8 @@ public class HookShare {
     public final static String pathDeviceJsonData=pathDataRoot+"nk/deviceJson.txt";
     public final static String  pathPackagesData =pathDataRoot+"nk/packages.txt";
     public final static String  pathSelectedPackagesData =pathDataRoot+"nk/selectedPackages.txt";
+    public final static String  pathDataLog =pathDataRoot+"nk/log.txt";
+    public final static String  pathDataLog2 =pathDataRoot+"nk/log2.txt";
 
 
     private static final String TAG ="HookShare" ;
@@ -67,6 +69,8 @@ public class HookShare {
     public static final String PATH_DATABACK_JSON_DATA =pathDataRoot+"nk/PATH_DATABACK_JSON.txt";
     public static final String PATH_DATABACK_SELECTED_PATH_DATA =pathDataRoot+"nk/PATH_DATABACK_SELECTED_PATH.txt";
     public static final String PATH_DEVICE_PHONE_DATA =pathDataRoot+"nk/devicePhone.txt";
+    public static final String PATH_DEVICE_LANGUAGE_DATA =pathDataRoot+"nk/language.json";
+    public static final String PATH_LVER =pathDataRoot+"nk/lVer.json";
     //public static final String PATH_DEVICE_PHONE_DATA =pathDataRoot+"devicePhone.txt";
     public static final String PATH_UI_SETTING_DATA =pathDataRoot+"nk/ui.txt";
     public static final String PATH_SCRIPT_RUNNING_DATA =pathDataRoot+"nk/script.txt";
