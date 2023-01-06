@@ -83,7 +83,7 @@ configurations {
 
 dependencies {
 
-    implementation 'com.google.android.material:material:1.4.0'
+   implementation 'com.google.android.material:material:1.4.0'
     implementation 'androidx.navigation:navigation-fragment:2.3.5'
     implementation 'androidx.navigation:navigation-ui:2.3.5'
     implementation 'org.jetbrains:annotations-java5:15.0'
@@ -91,6 +91,7 @@ dependencies {
     implementation files('libs\\commons-io-2.6.jar')
    // implementation 'com.squareup.okhttp3:okhttp:4.4.1'
     implementation 'com.squareup.okhttp3:okhttp:4.9.3'
+    //implementation 'com.google.firebase:firebase-crashlytics-buildtools:2.5.2'
     //implementation fileTree(dir: 'libs', include: ['*.jar'])
     compileOnly fileTree(dir: 'libs', include: ['*.jar'])
     // https://mvnrepository.com/artifact/com.alibaba/fastjson

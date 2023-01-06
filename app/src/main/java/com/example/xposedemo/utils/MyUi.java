@@ -150,7 +150,7 @@ public class MyUi   {
     public static AlertDialog dialogSetMultiChoiceItems(Context activityContext, String title
             , int icon, List<String> listitemsNew, String pathJsonConfigO
             , String PositiveButtonText, String textSetNegativeButton, final DialogCallBack dialogCallBack,
-                                                       final int countTime) {
+                                                        final int countTime) {
 
         final String pathJsonConfig = pathJsonConfigO;
         String jsonTxtPackages =MyFile.readFileToString(pathJsonConfig);
@@ -179,7 +179,7 @@ public class MyUi   {
             List<String> selected=getSelectedJobjByPath( pathJsonConfig );
             if ( selected!=null ){
                 for (String str :
-                  listItems   ) {
+                        listItems   ) {
                     jsonObject.put( str,false );
                     if ( selected.contains( str ) ){
                         listSelected.add(true);
@@ -191,7 +191,7 @@ public class MyUi   {
             }else {
                 for (String str :
                         listItems   ) {
-                        listSelected.add(false);
+                    listSelected.add(false);
                 }
             }
 
@@ -284,8 +284,8 @@ public class MyUi   {
 
         };
 
-         //倒计时
-            TimerTask tt = new TimerTask(){
+        //倒计时
+        TimerTask tt = new TimerTask(){
             class TimeTmp{
                 private int time_;
                 public TimeTmp(int time_) {

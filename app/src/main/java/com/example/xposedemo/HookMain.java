@@ -1,23 +1,14 @@
 package com.example.xposedemo;
 
-import android.app.AndroidAppHelper;
-import android.app.Application;
-import android.content.Context;
 import android.util.Log;
 
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
-import com.example.xposedemo.Hook.BaseHook;
-import com.example.xposedemo.Hook.CPUHook;
-import com.example.xposedemo.Hook.ContextGet;
 import com.example.xposedemo.Hook.HookShare;
-import com.example.xposedemo.Hook.PackagesHook;
 import com.example.xposedemo.Hook.Phone;
 import com.example.xposedemo.Hook.SimpleBaseHook;
-import com.example.xposedemo.Hook.WIFIHook;
 import com.example.xposedemo.Hook.webViewHook;
 import com.example.xposedemo.utils.MyFile;
-import com.example.xposedemo.utils.Ut;
 
 import de.robv.android.xposed.IXposedHookLoadPackage;
 import de.robv.android.xposed.XC_MethodHook;

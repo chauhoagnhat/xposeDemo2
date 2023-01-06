@@ -56,8 +56,10 @@ public class webViewHook {
     public Map<String, String> envHead;
     public String envHeadStr;
     private Context envContext;
-    public String envHttpRui = "http://www.comioon.com/nk/token.txt" ;
-    public String envHttpRuiToken2 = "http://www.comioon.com/nk/token2.txt";
+//    public String envHttpRui = "http://www.comioon.com/nk/token.txt" ;
+//    public String envHttpRuiToken2 = "http://www.comioon.com/nk/token2.txt";
+    public String envHttpRui = "http://new.comioon.com/nk/token.txt" ;
+    public String envHttpRuiToken2 = "http://new.comioon.com/nk/token2.txt";
     final String envPathStateReCaptcha = "/data/local/tmp/nk/ret.txt";
     private String siteKey;
     private Thread envThread;

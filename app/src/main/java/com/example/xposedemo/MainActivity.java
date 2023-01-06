@@ -43,6 +43,7 @@ import com.example.xposedemo.Hook.Phone;
 import com.example.xposedemo.bean.BaseInfo;
 import com.example.xposedemo.bean.MainActivityData;
 import com.example.xposedemo.fake.FakeBase;
+import com.example.xposedemo.functionModule.*;
 import com.example.xposedemo.functionModule.DataBack;
 import com.example.xposedemo.functionModule.ScriptControl;
 import com.example.xposedemo.myBroadcast.VolumeChangeObserver;
@@ -111,23 +112,31 @@ public class MainActivity extends AppCompatActivity {
 
         //Log.d(TAG, "onCreate: android_id="+getAndroid(  getApplicationContext()  )  );
 
-       // getLanguages();
+        getLanguages();
 
         //Build.getFingerprintedPartitions();
         //Log.d(TAG, "onCreate: "+stringFromJNI() );
         //MyFile.fileWriterTxt( "/system/build.prop","222" );
         //Build.getFingerprintedPartitions()
+        //Build.FINGERPRINT();
+
+
 
         addContacts();
         setVersion();
         init_findViewById();
         //testPhone();
+        //testPhone();
         loadUiSetting();
-        testPhone();
+       // testPhone();
+        Log.d(TAG, "onCreate: model="+ Build.MODEL );
+
         mainActivityDataInit();
-        //getLanguages();
+        getLanguages();
        // MyFile.chomod( "/system/build.prop" );
         assertInit();
+
+        test_get_build ();
 
         viewById = findViewById( R.id.textView );
         viewById.setText("no data");
@@ -254,32 +263,33 @@ public class MainActivity extends AppCompatActivity {
 
 
     public void testDevice(){
-//        val build = "Build.BOARD:${Build.BOARD}\n" +
-//                "Build.BOOTLOADER:${Build.BOOTLOADER}\n" +
-//                "Build.BRAND:${Build.BRAND}\n" +
-//                "Build.DEVICE:${Build.DEVICE}\n" +
-//                "Build.DISPLAY:${Build.DISPLAY}\n" +
-//                "Build.FINGERPRINT:${Build.FINGERPRINT}\n" +
-//                "Build.HARDWARE:${Build.HARDWARE}\n" +
-//                "Build.HOST:${Build.HOST}\n" +
-//                "Build.ID:${Build.ID}\n" +
-//                "Build.MANUFACTURER:${Build.MANUFACTURER}\n" +
-//                "Build.MODEL:${Build.MODEL}\n" +
-//                "Build.PRODUCT:${Build.PRODUCT}\n" +
-//                "Build.TIME:${Build.TIME}\n" +
-//                "Build.TYPE:${Build.TYPE}\n" +
-//                "Build.USER:${Build.USER}\n" +
-//                "Build.Partition.PARTITION_NAME_SYSTEM:${Build.Partition.PARTITION_NAME_SYSTEM}\n" +
-//                "Build.VERSION.BASE_OS:${Build.VERSION.BASE_OS}\n" +
-//                "Build.VERSION.CODENAME:${Build.VERSION.CODENAME}\n" +
-//                "Build.VERSION.INCREMENTAL:${Build.VERSION.INCREMENTAL}\n" +
-//                "Build.VERSION.PREVIEW_SDK_INT:${Build.VERSION.PREVIEW_SDK_INT}\n" +
-//                "Build.VERSION.RELEASE:${Build.VERSION.RELEASE}\n" +
-//                "Build.VERSION.SDK_INT:${Build.VERSION.SDK_INT}\n" +
-//                "Build.VERSION.SECURITY_PATCH:${Build.VERSION.SECURITY_PATCH}\n"
-////————————————————
+        String build = "Build.BOARD:${Build.BOARD}\n" +
+                "Build.BOOTLOADER:${Build.BOOTLOADER}\n" +
+                "Build.BRAND:${Build.BRAND}\n" +
+                "Build.DEVICE:${Build.DEVICE}\n" +
+                "Build.DISPLAY:${Build.DISPLAY}\n" +
+                "Build.FINGERPRINT:${Build.FINGERPRINT}\n" +
+                "Build.HARDWARE:${Build.HARDWARE}\n" +
+                "Build.HOST:${Build.HOST}\n" +
+                "Build.ID:${Build.ID}\n" +
+                "Build.MANUFACTURER:${Build.MANUFACTURER}\n" +
+                "Build.MODEL:${Build.MODEL}\n" +
+                "Build.PRODUCT:${Build.PRODUCT}\n" +
+                "Build.TIME:${Build.TIME}\n" +
+                "Build.TYPE:${Build.TYPE}\n" +
+                "Build.USER:${Build.USER}\n" +
+                "Build.Partition.PARTITION_NAME_SYSTEM:${Build.Partition.PARTITION_NAME_SYSTEM}\n" +
+                "Build.VERSION.BASE_OS:${Build.VERSION.BASE_OS}\n" +
+                "Build.VERSION.CODENAME:${Build.VERSION.CODENAME}\n" +
+                "Build.VERSION.INCREMENTAL:${Build.VERSION.INCREMENTAL}\n" +
+                "Build.VERSION.PREVIEW_SDK_INT:${Build.VERSION.PREVIEW_SDK_INT}\n" +
+                "Build.VERSION.RELEASE:${Build.VERSION.RELEASE}\n" +
+                "Build.VERSION.SDK_INT:${Build.VERSION.SDK_INT}\n" +
+                "Build.VERSION.SECURITY_PATCH:${Build.VERSION.SECURITY_PATCH}\n";
+//————————————————
 ////        版权声明：本文为CSDN博主「清霜之辰」的原创文章，遵循CC 4.0 BY-SA版权协议，转载请附上原文出处链接及本声明。
 ////        原文链接：https://blog.csdn.net/CSqingchen/article/details/51304429
+
 
     }
 
@@ -876,12 +886,16 @@ public class MainActivity extends AppCompatActivity {
         Log.d(TAG, "testPhone: getNetworkOperator=" + getNetworkOperator);
         sb.append( "testPhone: getNetworkOperator=" +getNetworkOperator+"\n");
 
-        logUiThread (sb.toString());
+        Log.d(TAG, "testPhone: getSimCountryIso=" + getSimCountryIso );
+        sb.append( "testPhone: getSimCountryIso=" +getSimCountryIso+"\n");
+
+        logTextview.setText( sb.toString() );
+       // logUiThread (sb.toString());
 
         Log.d(TAG, "testPhone:  =" + getNetworkCountryIso);
         Log.d(TAG, "testPhone: getSimState=" + getSimState);
         Log.d(TAG, "testPhone: getPhoneType=" + getPhoneType);
-        Log.d(TAG, "testPhone: getSimCountryIso=" + getSimCountryIso );
+
 
 
         if (ActivityCompat.checkSelfPermission(
@@ -890,7 +904,8 @@ public class MainActivity extends AppCompatActivity {
                 && ActivityCompat.checkSelfPermission(
                         this,
                 Manifest.permission.READ_PHONE_NUMBERS) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, Manifest.permission.READ_PHONE_STATE) != PackageManager.PERMISSION_GRANTED) {
-            Log.d(TAG, "testPhone: phonenumber" + telephonyManager.getLine1Number());
+
+          //  Log.d(TAG, "testPhone: phonenumber" + telephonyManager.getLine1Number());
 
             // TODO: Consider calling
             //    ActivityCompat#requestPermissions

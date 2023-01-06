@@ -47,6 +47,7 @@ public class HookShare {
     public final static String  pathSelectedPackagesData =pathDataRoot+"nk/selectedPackages.txt";
     public final static String  pathDataLog =pathDataRoot+"nk/log.txt";
     public final static String  pathDataLog2 =pathDataRoot+"nk/log2.txt";
+    public final static String  pathDataLogHeader =pathDataRoot+"nk/logHeader.txt";
 
 
     private static final String TAG ="HookShare" ;

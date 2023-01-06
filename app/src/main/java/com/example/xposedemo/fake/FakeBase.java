@@ -163,7 +163,7 @@ public class FakeBase {
                 +Ut.r_num_n(1,1001,1231)+".0"+Ut.r_num_n(1,10,23)
                 +"."+Ut.rLetterCapital(1)+Ut.r_(1,9);
         Log.d(TAG, "randomDevice: display="+display);
-       // baseInfo.setDisplay("OPM4.171019.021.P1");
+        // baseInfo.setDisplay("OPM4.171019.021.P1");
         baseInfo.setDisplay(display);
 
         String[] sdkArr=getSdkVer();
@@ -187,13 +187,13 @@ public class FakeBase {
         //baseInfo.setId("OPM4.171019.021.P1");
         baseInfo.setId(display);
 
-       // baseInfo.setManufacturer("Google");
+        // baseInfo.setManufacturer("Google");
         baseInfo.setManufacturer( brand );
 
-       // baseInfo.setModel( "Pixel" );
+        // baseInfo.setModel( "Pixel" );
         baseInfo.setModel( markedName );
 
-       // baseInfo.setProduct("sailfish");
+        // baseInfo.setProduct("sailfish");
         baseInfo.setProduct( device );
 
         String bootLoader="8996-"+Ut.r_num_n(6,0,2)+"-"+Ut.r_num_n(1,15,19)
@@ -224,7 +224,7 @@ public class FakeBase {
         baseInfo.setCodename("REL");
         String buildtime="15"+Ut.r_num_n(6,0,9)+PhoneRndTools.randomNum(7);
         Log.d(TAG, "randomDevice: buildtime"+buildtime );
-       // baseInfo.setBuildtime("15281562"+PhoneRndTools.randomNum(7) );
+        // baseInfo.setBuildtime("15281562"+PhoneRndTools.randomNum(7) );
         baseInfo.setBuildtime(buildtime);
 
         String discription=device+"-user "+sdkVer+" "+display+" "+incremental+" "+"release-keys";
@@ -392,7 +392,7 @@ public class FakeBase {
 
         return  new String[]{ randomKey,randomValue };
 
-      //  原文链接：https://blog.csdn.net/weixin_29116603/article/details/114541209
+        //  原文链接：https://blog.csdn.net/weixin_29116603/article/details/114541209
     }
 
     public static BaseInfo Sumsung_device(){

@@ -20,6 +20,4 @@ public class ScriptControl {
                 "sendevent /dev/input/event0 0 0 0" } );
     }
 
-
-
 }

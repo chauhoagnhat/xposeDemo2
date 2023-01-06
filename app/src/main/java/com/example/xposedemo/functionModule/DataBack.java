@@ -129,8 +129,8 @@ public class DataBack {
         };
 
         threadWaitting();
-      curThread=  new Thread( runnable );
-      curThread.start();
+        curThread=  new Thread( runnable );
+        curThread.start();
         //thread.join();
 
     }
@@ -245,8 +245,8 @@ public class DataBack {
          */
 
         if (!new File( desSaveFilePathCommon ).exists() ){
-             logUi ( "没有目录,是否指定app？" );
-             MyFile.fileWriterTxt( HookShare.PATH_DATABACK_JSON,"" );
+            logUi ( "没有目录,是否指定app？" );
+            MyFile.fileWriterTxt( HookShare.PATH_DATABACK_JSON,"" );
             return;
         }
 
@@ -305,7 +305,7 @@ public class DataBack {
             public void run() {
                 //Looper.prepare();
                 saveAppData();
-               //dialogShowDataBack(2);
+                //dialogShowDataBack(2);
                 //Looper.loop();
             }
         };
@@ -340,15 +340,15 @@ public class DataBack {
             }
         });
 
-      String format=  "yyyy~MM~dd,HH.mm.ss";
-      String  timeStamp=MyDate.timeStamp();
-      //Log.d(TAG,"saveAppData+timeStap="+ timeStamp );
+        String format=  "yyyy~MM~dd,HH.mm.ss";
+        String  timeStamp=MyDate.timeStamp();
+        //Log.d(TAG,"saveAppData+timeStap="+ timeStamp );
         // Log.d(TAG,"saveAppData+data="+ MyDate. timeStamp2Date ( timeStamp ,null ) );
 
         desSaveFilePathFinal=
                 desSaveFilePathCommon+"/"+"name-"
-                +timeStamp+"-"
-                +MyDate.timeStamp2Date ( timeStamp ,format )
+                        +timeStamp+"-"
+                        +MyDate.timeStamp2Date ( timeStamp ,format )
         ;
 
         String appDataPath=desSaveFilePathFinal+"/"+functionPackageName;
