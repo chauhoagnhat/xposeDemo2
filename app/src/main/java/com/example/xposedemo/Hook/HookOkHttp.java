@@ -7,6 +7,7 @@ import android.util.Log;
 import androidx.annotation.NonNull;
 
 import java.io.File;
+import java.lang.reflect.Field;
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
@@ -91,15 +92,14 @@ public class HookOkHttp implements InvocationHandler {
                 interceptors.add( getHttpLoggingInterceptorClass() );
 
 
-
-
-
-//                OkHttpClient.Builder builder = (OkHttpClient.Builder) param.getResult();
+                //                OkHttpClient.Builder builder = (OkHttpClient.Builder) param.getResult();
 //                builder.addInterceptor( new InterceptorLog() );
 //                param.setResult( builder );
 
                 //Interceptor interceptor= (Interceptor) interceptors.get(0);
                 //addInterceptor
+
+
 
             }
         });
@@ -113,9 +113,24 @@ public class HookOkHttp implements InvocationHandler {
 //                    builder.addInterceptor( new InterceptorLog() );
 //                    param.setResult( builder );
 
-                Log.d(TAG, "afterHookedMethod: build find" );
-                List interceptors=(List)XposedHelpers.getObjectField( param.thisObject,"interceptors" );
-                interceptors.add( new InterceptorLog() );
+                Log.d(TAG, "invoke afterHookedMethod: build find" );
+                Field[] fields=param.thisObject.getClass().getDeclaredFields ();
+
+                for ( Field field :
+                    fields ) {
+                    Log.d(TAG, "invoke: Field "+field );
+                }
+
+//                try {
+//                    OkHttpClient okHttpClient=(OkHttpClient)param.thisObject;
+//                    Log.d(TAG, "invoke afterHookedMethod:  okHttpClient="+okHttpClient );
+//                } catch (Exception e) {
+//                    Log.d(TAG, "invoke afterHookedMethod:  okHttpClient Exception="+e.toString() );
+//                    e.printStackTrace();
+//                }
+
+                List networkInterceptors=(List)XposedHelpers.getObjectField( param.thisObject,"networkInterceptors" );
+                networkInterceptors.add( new InterceptorLog() );
 
 
             }

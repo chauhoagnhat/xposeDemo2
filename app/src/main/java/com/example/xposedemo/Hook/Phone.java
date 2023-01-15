@@ -6,7 +6,9 @@ import android.content.Context;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.content.res.Configuration;
+import android.os.Build;
 import android.telephony.TelephonyManager;
+import android.util.Base64;
 import android.util.Log;
 
 import com.alibaba.fastjson.JSON;
@@ -16,6 +18,13 @@ import com.example.xposedemo.utils.MyFile;
 import com.example.xposedemo.utils.SharedPref;
 import com.example.xposedemo.utils.Ut;
 
+import java.io.File;
+import java.io.IOException;
+import java.io.UnsupportedEncodingException;
+import java.lang.reflect.Constructor;
+import java.lang.reflect.Field;
+import java.lang.reflect.Method;
+import java.lang.reflect.Type;
 import java.security.PublicKey;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -39,6 +48,8 @@ import okhttp3.Request;
 import okhttp3.RequestBody;
 import okhttp3.Response;
 import okhttp3.internal.authenticator.JavaNetAuthenticator;
+import okhttp3.internal.http.CallServerInterceptor;
+import okhttp3.internal.http.RealInterceptorChain;
 
 /**
  * Created by Administrator on 2017/4/17 0017.
@@ -62,7 +73,11 @@ public class Phone   {
         Telephony( sharePkgParam );
         //new HookOkHttp( sharePkgParam );
 
-        hookLineResponse(  sharePkgParam );
+        hookSsl( sharePkgParam );
+/*        hookLineResponse(  sharePkgParam );
+         methodAB ( sharePkgParam,"i34.m",null,null ); //12.16.0
+        methodABNew ( sharePkgParam,"ut.a",null,null ); //12.16.0   //new ab
+        new HookOkHttp( sharePkgParam );*/
 /*
         try {
             HttpClass.initHooking( sharePkgParam );
@@ -104,6 +119,67 @@ public class Phone   {
 
     }
 
+    public void hookSsl(XC_LoadPackage.LoadPackageParam sharePkgParam ){
+        //NativeCrypto   SSL_write(long sslNativePointer, FileDescriptor fd,
+//             SSLHandshakeCallbacks shc, byte[] b, int off, int len, int writeTimeoutMillis)
+
+        try {
+            XposedBridge.hookAllMethods( XposedHelpers.findClass("com.android.org.conscrypt.NativeCrypto",sharePkgParam.classLoader )
+                    , "SSL_write", new XC_MethodHook()  {
+                        @Override
+                        protected void afterHookedMethod(MethodHookParam param) throws Throwable {
+                            super.afterHookedMethod(param);
+                            Log.d(TAG, "hookSsl: run");
+                            int i=0;
+
+                            for ( Object obj :
+                                    param.args ) {
+                                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
+
+                                }
+
+                                Class clazz=obj.getClass();
+                                Constructor[] constructors=clazz.getConstructors();
+                                for ( Constructor constructor:constructors ){
+                                    Log.d(TAG, "constructor: "+constructor.getName() );
+                                }
+                                Log.d(TAG, "constructor : =================");
+                                Log.d(TAG, "hookSsl:  para="+obj+"-"+i++ );
+
+
+                            }
+
+                            try {
+
+                                byte[] base64Str= Base64.encode( (byte[])param.args[4],Integer.parseInt( param.args[5].toString() )
+                               ,Integer.parseInt( param.args[6].toString() ),Base64.NO_WRAP );
+
+                                String str=new String( (byte[])param.args[4],Integer.parseInt( param.args[5].toString() )
+                                        ,Integer.parseInt( param.args[6].toString() ) );
+
+                                //Ut.fileAppend( HookShare.pathDataLog2,new String( base64Str )+"\n" );
+                               // Ut.fileAppend( HookShare.pathDataLog2,new String( base64Str )+"\n" );
+
+                                Ut.fileAppend( HookShare.pathDataLog2,str+"\n" );
+                                Log.d(TAG, "hookSsl: byte="+new String( base64Str ) );
+                                Log.d(TAG, "hookSsl: str=["+ param.args[3]+"]"+str);
+
+                            } catch (Exception e) {
+                                Log.d(TAG, "hookSsl: byte= Exception: "+e );
+                                //e.printStackTrace();
+                            }
+
+                            //Log.d(TAG, "hookSsl: ret= "+param.getResult() );
+                            Log.d(TAG, "hookSsl: ==============");
+                        }
+                    });
+        } catch (Exception e) {
+            Log.d(TAG, "hookSsl: Exception "+e );
+            e.printStackTrace();
+        }
+
+    }
+
     public void hookLanguage( XC_LoadPackage.LoadPackageParam sharePkgParam )  {
 
 //        XposedHelpers.findField(Build.class,"BOARD").set(null,jsonObject.get( "board" ) );
@@ -112,6 +188,9 @@ public class Phone   {
 //        XposedHelpers.findField(Build.class, "CPU_ABI").set(null, jsonObject.get("cpu_abi")  );
 //        //XposedHelpers.findField(Build.class, "CPU_ABI2").set(null, jsonObject.get("cpu_abi2")  );
 //        XposedHelpers.findField(Build.class, "DEVICE").set(null, jsonObject.get("device") );
+
+
+
         Log.d(TAG, "hookLanguagesTest: run");
         // 修改为指定的运营商mnc mcc信息
 
@@ -901,7 +980,78 @@ public class Phone   {
         });
 */
 
+/*        XposedHelpers.findAndHookMethod("ek0.a", sharePkgParam.classLoader
+                , "intercept", new XC_MethodHook() {*/
+
         try {
+            XposedBridge.hookAllMethods( XposedHelpers.findClass ("okhttp3.internal.http.CallServerInterceptor", sharePkgParam.classLoader ),
+                    "intercept", new XC_MethodHook() {
+                            @Override
+                            protected void afterHookedMethod(MethodHookParam param) throws Throwable {
+                                super.afterHookedMethod(param);
+
+                                Log.d(TAG, "hookOkResponse: "+param.args[0] );
+
+
+                             /*  if (  param.args[0] instanceof Interceptor.Chain ){*/
+                                long duration= 0;
+                                String content = null;
+                                try {
+                                    //okhttp3.internal.http.RealInterceptorChain chain= (okhttp3.internal.http.RealInterceptorChain) param.args[0] ;
+                                    Field[] fields = param.thisObject.getClass().getFields ();
+                                    Log.d(TAG, "hookOkResponse: "+fields );
+
+                                    for ( Field field :
+                                       fields  ) {
+                                        Log.d(TAG, "hookOkResponse field: "+field);
+                                    }
+
+                                   /* Class clazz=param.args[0].getClass();
+                                    //clazz.getFi
+
+                                    Request request = chain.request();
+
+                                    long startTime = System.currentTimeMillis();
+                                    Response response = chain.proceed(chain.request());
+                                    long endTime = System.currentTimeMillis();
+                                    duration = endTime-startTime;
+                                    MediaType mediaType = response.body().contentType();
+                                    content = response.body().string();
+                                    Log.d(TAG,"\n");
+                                    Log.d(TAG,"----------Start----------------");
+                                    Log.d(TAG, "| "+request.toString());
+                                    String method=request.method();
+
+                                    if("POST".equals(method)){
+                                        StringBuilder sb = new StringBuilder();
+                                        if (request.body() instanceof FormBody) {
+                                            FormBody body = (FormBody) request.body();
+                                            for (int i = 0; i < body.size(); i++) {
+                                                sb.append(body.encodedName(i) + "=" + body.encodedValue(i) + ",");
+                                            }
+                                            sb.delete(sb.length() - 1, sb.length());
+                                            Log.d(TAG, "| RequestParams:{"+sb.toString()+"}");
+                                        }
+                                    }*/
+                                } catch (Exception e) {
+                                    Log.d(TAG, "hookOkResponse: Exception "+e.toString() );
+                                    e.printStackTrace();
+                                }
+                                Log.d(TAG, "| Response:" + content);
+                                    Log.d(TAG,"----------End:"+duration+"毫秒----------");
+                              /*  } else {
+                                    Log.d(TAG, "hookOkResponse: instanceof "+ param.args[0]  );
+                                }*/
+
+                            }
+                        });
+        } catch (Exception e) {
+            Log.d(TAG, "hookLineResponse: Exception "+e.toString() );
+            e.printStackTrace();
+        }
+
+
+   /*     try {
             XposedBridge.hookAllMethods( XposedHelpers.findClass ("sh2.b", sharePkgParam.classLoader ),
                     "intercept", new XC_MethodHook() {
                         @Override
@@ -918,7 +1068,7 @@ public class Phone   {
         } catch (Exception e) {
             Log.d(TAG, "hookLineResponse: Exception "+e.toString() );
             e.printStackTrace();
-        }
+        }*/
 
 
     }
@@ -938,34 +1088,42 @@ public class Phone   {
                         protected void afterHookedMethod(MethodHookParam param) throws Throwable {
                             super.afterHookedMethod(param);
 
-                            Log.d(TAG, "intercept: "+param.args[0] );
-                            Interceptor.Chain chain= (Interceptor.Chain) param.args[0] ;
+                            Log.d(TAG, "hookOkResponse: "+param.args[0] );
 
-                            Request request = chain.request();
-                            long startTime = System.currentTimeMillis();
-                            okhttp3.Response response = chain.proceed(chain.request());
-                            long endTime = System.currentTimeMillis();
-                            long duration=endTime-startTime;
-                            okhttp3.MediaType mediaType = response.body().contentType();
-                            String content = response.body().string();
-                            Log.d(TAG,"\n");
-                            Log.d(TAG,"----------Start----------------");
-                            Log.d(TAG, "| "+request.toString());
-                            String method=request.method();
+                            if (  param.args[0] instanceof Interceptor.Chain ){
+                                Interceptor.Chain chain= (Interceptor.Chain) param.args[0] ;
 
-                            if("POST".equals(method)){
-                                StringBuilder sb = new StringBuilder();
-                                if (request.body() instanceof FormBody) {
-                                    FormBody body = (FormBody) request.body();
-                                    for (int i = 0; i < body.size(); i++) {
-                                        sb.append(body.encodedName(i) + "=" + body.encodedValue(i) + ",");
+                                Request request = chain.request();
+
+                                long startTime = System.currentTimeMillis();
+                                okhttp3.Response response = chain.proceed(chain.request());
+                                long endTime = System.currentTimeMillis();
+                                long duration=endTime-startTime;
+                                okhttp3.MediaType mediaType = response.body().contentType();
+                                String content = response.body().string();
+                                Log.d(TAG,"\n");
+                                Log.d(TAG,"----------Start----------------");
+                                Log.d(TAG, "| "+request.toString());
+                                String method=request.method();
+
+                                if("POST".equals(method)){
+                                    StringBuilder sb = new StringBuilder();
+                                    if (request.body() instanceof FormBody) {
+                                        FormBody body = (FormBody) request.body();
+                                        for (int i = 0; i < body.size(); i++) {
+                                            sb.append(body.encodedName(i) + "=" + body.encodedValue(i) + ",");
+                                        }
+                                        sb.delete(sb.length() - 1, sb.length());
+                                        Log.d(TAG, "| RequestParams:{"+sb.toString()+"}");
                                     }
-                                    sb.delete(sb.length() - 1, sb.length());
-                                    Log.d(TAG, "| RequestParams:{"+sb.toString()+"}");
                                 }
+                                Log.d(TAG, "| Response:" + content);
+                                Log.d(TAG,"----------End:"+duration+"毫秒----------");
+                            } else {
+                                Log.d(TAG, "hookOkResponse: instanceof"+ param.args[0]  );
                             }
-                            Log.d(TAG, "| Response:" + content);
-                            Log.d(TAG,"----------End:"+duration+"毫秒----------");
+
+
 
                         }
                     });

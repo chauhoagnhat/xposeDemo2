@@ -67,6 +67,8 @@ import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import okhttp3.OkHttpClient;
+
 
 public class MainActivity extends AppCompatActivity {
 
@@ -120,6 +122,7 @@ public class MainActivity extends AppCompatActivity {
         //Build.getFingerprintedPartitions()
         //Build.FINGERPRINT();
 
+        OkHttpClient okHttpClient=Okhttp.getNewOkHttpClient();
 
 
         addContacts();
