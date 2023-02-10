@@ -34,9 +34,9 @@ public class Okhttp {
     public static OkHttpClient getOkHttpClient() {
         if (okHttpClient==null){
             okHttpClient=new OkHttpClient.Builder()
-                    .retryOnConnectionFailure(true)
-                    .readTimeout(timeout,TimeUnit.SECONDS)
-                    .writeTimeout(timeout,TimeUnit.SECONDS)
+                    .retryOnConnectionFailure( true )
+                    .readTimeout( timeout,TimeUnit.SECONDS )
+                    .writeTimeout( timeout,TimeUnit.SECONDS )
                     .build();
         }
         return okHttpClient;

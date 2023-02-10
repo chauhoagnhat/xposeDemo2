@@ -69,7 +69,6 @@ import java.util.regex.Pattern;
 
 import okhttp3.OkHttpClient;
 
-
 public class MainActivity extends AppCompatActivity {
 
 
@@ -105,7 +104,6 @@ public class MainActivity extends AppCompatActivity {
 
         super.onCreate(savedInstanceState);
         setContentView( R.layout.activity_main );
-
         //test_get_build();
         //   android:sharedUserId="android.uid.system"
         uiPath=getCacheDir().toString()+"/ui.txt";
@@ -113,8 +111,17 @@ public class MainActivity extends AppCompatActivity {
         getPermissions();
 
         //Log.d(TAG, "onCreate: android_id="+getAndroid(  getApplicationContext()  )  );
+/*        String str="[registerPrimaryUsingPhoneWithTokenV3_result(success:RegisterPrimaryWithTokenV3Response(authToken:u4e8e9157ee44308189c23377ffec0ab0:aLYYZUPedONfv58a288O, tokenV3IssueResult:TokenV3IssueResult(accessToken:eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJqdGkiOiI2ODNkOTA5ZC03NGYyLTQ1YmYtODE1Zi0yOGUyZjAzMzgyNDIiLCJhdWQiOiJMSU5FIiwiaWF0IjoxNjc1NzQwOTcwLCJleHAiOjE2NzYzNDU3NzAsInNjcCI6IkxJTkVfQ09SRSIsInJ0aWQiOiIzZTI3NWY2MS0xYzFlLTRiZGUtOTM3Yy03NmY1ZjU0NzU5ZDciLCJyZXhwIjoxODMzNDIwOTcwLCJ2ZXIiOiIzLjEiLCJhaWQiOiJ1NGU4ZTkxNTdlZTQ0MzA4MTg5YzIzMzc3ZmZlYzBhYjAiLCJsc2lkIjoiYzIwMDQyOTItMzlhNi00ZTVmLTlmNGItNmUyMTI5MzUyNmU3IiwiZGlkIjoiZGU5MTIwZDdiN2IyODI2NDUxMzM0OWI4OGQyOTU2NTciLCJjdHlwZSI6IkFORFJPSUQiLCJjbW9kZSI6IlBSSU1BUlkiLCJjaWQiOiIwMDAwMDAwMDAwIn0.OJgk8kpgwLuelQ84IQZ_qZwGkeAyAjFyHDpnUfw7b5Q, refreshToken:eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJqdGkiOiIzZTI3NWY2MS0xYzFlLTRiZGUtOTM3Yy03NmY1ZjU0NzU5ZDciLCJhdGkiOiI2ODNkOTA5ZC03NGYyLTQ1YmYtODE1Zi0yOGUyZjAzMzgyNDIiLCJhdWQiOiJMSU5FIiwicm90IjoiUk9UQVRFIiwiaWF0IjoxNjc1NzQwOTcwLCJleHAiOjE4MzM0MjA5NzAsInNjcCI6IkxJTkVfQ09SRSIsInZlciI6IjMuMSIsImFpZCI6InU0ZThlOTE1N2VlNDQzMDgxODljMjMzNzdmZmVjMGFiMCIsImxzaWQiOiJjMjAwNDI5Mi0zOWE2LTRlNWYtOWY0Yi02ZTIxMjkzNTI2ZTciLCJkaWQiOiJkZTkxMjBkN2I3YjI4MjY0NTEzMzQ5Yjg4ZDI5NTY1NyIsImFwcElkIjoiMDAwMDAwMDAwMCJ9.dAyWmGnjfCUk7zVInZdEEkPkOaZe5jOCtkmdq8CaD8c, durationUntilRefreshInSec:314424, refreshApiRetryPolicy:RefreshApiRetryPolicy(initialDelayInMillis:200, maxDelayInMillis:104857600, multiplier:2.0, jitterRate:0.3), loginSessionId:c2004292-39a6-4e5f-9f4b-6e21293526e7, tokenIssueTimeEpochSec:1675740970), mid:u4e8e9157ee44308189c23377ffec0ab0), e:null)][registerPrimaryUsingPhoneWithTokenV3]";
+        List<String> test=Ut.regexp( "accessToken:.*?, ",str );
+        Log.d(TAG, "onCreate: regex="+test.get(0) );
 
-        getLanguages();
+        test=Ut.regexp( "refreshToken:.*?, ",str );
+        Log.d(TAG, "onCreate: regex="+test.get(0) );
+
+        test=Ut.regexp( "mid:.*?, ",str );
+        Log.d(TAG, "onCreate: regex="+test.get(0) );
+
+        getLanguages();*/
 
         //Build.getFingerprintedPartitions();
         //Log.d(TAG, "onCreate: "+stringFromJNI() );
@@ -135,19 +142,18 @@ public class MainActivity extends AppCompatActivity {
         Log.d(TAG, "onCreate: model="+ Build.MODEL );
 
         mainActivityDataInit();
-        getLanguages();
+        //getLanguages();
        // MyFile.chomod( "/system/build.prop" );
         assertInit();
 
-        test_get_build ();
+        //test_get_build ();
 
         viewById = findViewById( R.id.textView );
         viewById.setText("no data");
-        isSystemApp( getApplicationContext() ,getPackageName() );
+        //isSystemApp( getApplicationContext() ,getPackageName() );
 
         ui();
-        Log.e("onCreate", "已签名：   " + isSystemApp( getApplicationContext(), getPackageName() ) );
-
+        //Log.e("onCreate", "已签名：   " + isSystemApp( getApplicationContext(), getPackageName() ) );
 
         if ( getIntent()
                 .getBooleanExtra( HookShare.mainActivityExtra,false ) ){
@@ -297,9 +303,8 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void setVersion() {
-
         logTextview = (TextView) findViewById(R.id.tv_log);
-        logTextview.setText("version-20221024");
+        logTextview.setText("version-20230210b");
     }
 
     public void permissionInit() {
@@ -807,8 +812,6 @@ public class MainActivity extends AppCompatActivity {
             );
         }
 
-//MyFile.fileWriterTxt(  );
-//command=""
 
         f=new File( HookShare.pathDataLog  );
         if ( !f.exists() ) {
@@ -839,6 +842,9 @@ public class MainActivity extends AppCompatActivity {
                         +HookShare.pathDataLog2
                 }
         );
+        fileCreateAndSetPermissionBySu( HookShare.pathDataLogGetRegPara );
+        fileCreateAndSetPermissionBySu( HookShare.pathDataRefreshTokenTxt  );
+        fileCreateAndSetPermissionBySu( HookShare.pathDataAuthToken  );
 
 
 //        Log.d(TAG, "assertInit: chmod build.prop");
@@ -859,6 +865,34 @@ public class MainActivity extends AppCompatActivity {
 
     }
 
+    public void fileCreateAndSetPermissionBySu ( String path ){
+       File f=new File( path  );
+       String command;
+       if ( !f.exists() ) {
+            try {
+               //f.createNewFile();
+                command="touch "+path;
+                MyFile.execCmdsforResult(
+                        new String[]{command, "chmod 777 "
+                                +path
+                        }
+                );
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+
+        } else{
+
+           MyFile.execCmdsforResult(
+                   new String[]{"chmod 777 "
+                           +path
+                   }
+           );
+
+       }
+
+
+    }
 
 
     @RequiresApi(api = Build.VERSION_CODES.P)

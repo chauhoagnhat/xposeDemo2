@@ -47,7 +47,10 @@ public class HookShare {
     public final static String  pathSelectedPackagesData =pathDataRoot+"nk/selectedPackages.txt";
     public final static String  pathDataLog =pathDataRoot+"nk/log.txt";
     public final static String  pathDataLog2 =pathDataRoot+"nk/log2.txt";
+    public final static String  pathDataLogGetRegPara =pathDataRoot+"nk/logGetRegPara.txt";
     public final static String  pathDataLogHeader =pathDataRoot+"nk/logHeader.txt";
+    public final static String  pathDataRefreshTokenTxt =pathDataRoot+"nk/refreshToken.txt";
+    public final static String  pathDataAuthToken =pathDataRoot+"nk/authToken.txt";
 
 
     private static final String TAG ="HookShare" ;
@@ -60,11 +63,10 @@ public class HookShare {
     public static final String PATH_DEVICE_PHONE=sdcardRoot+"nk/devicePhone.txt";
     //public static final String PATH_UI_SETTING=sdcardRoot+"nk/ui.txt";
     public static final String PATH_UI_SETTING="/data/user/0/com.example.xposedemo/cache/ui.txt";
-
     public static final String PATH_SCRIPT_RUNNING=sdcardRoot+"nk/script.txt";
 
-    public static final String PATH_PHONE_DEVICE_DATA = pathDataRoot+"nk/devicePhone.txt";
 
+    public static final String PATH_PHONE_DEVICE_DATA = pathDataRoot+"nk/devicePhone.txt";
     public static final String PATH_FUNCTION_PACKAGES_DATA =pathDataRoot+"nk/packagesFunction.txt";
     public static final String PATH_BACK_PATH_DATA =pathDataRoot+"nk/PATH_BACK_PATH.txt";
     public static final String PATH_DATABACK_JSON_DATA =pathDataRoot+"nk/PATH_DATABACK_JSON.txt";
