@@ -72,6 +72,7 @@ public class Activity_packageShow extends AppCompatActivity implements AdapterVi
                 JSONObject jsonObject= JSON.parseObject(jsonTxt);
 
                 String key=data.get( position ).getPackageName();
+
                 if ( jsonObject.getBoolean(key) ){
 
                     Log.d(TAG, "onItemClick: unselected");

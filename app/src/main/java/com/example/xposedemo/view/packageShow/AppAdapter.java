@@ -114,20 +114,20 @@ public class AppAdapter extends BaseAdapter {
         runTimes++;
 
         //if (runTimes< data.size() ){
-            //runTimes++;
-            jobjSelectedPackages = HookShare.returnSelectedPackages( pathPackageJsonTxt );
-            if (jobjSelectedPackages!=null){
-                if ( jobjSelectedPackages.containsKey( packageName ) ){
-                    textView.setTextColor ( Color.WHITE );
-                    convertView.setBackgroundColor(Color.BLUE);
-                    //checkBox.setChecked(true);
-                }else{
-                    //checkBox.setChecked(false);
-                    textView.setTextColor ( Color.BLACK );
-                    convertView.setBackgroundColor(Color.WHITE);
-                }
-          //  }
-      }
+        //runTimes++;
+        jobjSelectedPackages = HookShare.returnSelectedPackages( pathPackageJsonTxt );
+        if (jobjSelectedPackages!=null){
+            if ( jobjSelectedPackages.containsKey( packageName ) ){
+                textView.setTextColor ( Color.WHITE );
+                convertView.setBackgroundColor(Color.BLUE);
+                //checkBox.setChecked(true);
+            }else{
+                //checkBox.setChecked(false);
+                textView.setTextColor ( Color.BLACK );
+                convertView.setBackgroundColor(Color.WHITE);
+            }
+            //  }
+        }
 
         //返回convertView
         return convertView;
