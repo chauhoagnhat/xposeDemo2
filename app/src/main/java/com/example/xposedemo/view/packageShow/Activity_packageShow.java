@@ -4,6 +4,7 @@ import androidx.appcompat.app.AppCompatActivity;
 
 import android.annotation.SuppressLint;
 import android.content.Intent;
+import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
 import android.graphics.Color;
@@ -33,6 +34,8 @@ public class Activity_packageShow extends AppCompatActivity implements AdapterVi
     private List<AppInfo> data;
     private AppAdapter adapter;
     public String pathExtra;
+
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
